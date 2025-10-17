@@ -1,0 +1,11 @@
+/home/pine/projects/flashcards/project/Flippit.Api.DAL.Common/bin/Debug/net9.0/Flippit.Api.DAL.Common.deps.json
+/home/pine/projects/flashcards/project/Flippit.Api.DAL.Common/bin/Debug/net9.0/Flippit.Api.DAL.Common.dll
+/home/pine/projects/flashcards/project/Flippit.Api.DAL.Common/bin/Debug/net9.0/Flippit.Api.DAL.Common.pdb
+/home/pine/projects/flashcards/project/Flippit.Api.DAL.Common/obj/Debug/net9.0/Flippit.Api.DAL.Common.GeneratedMSBuildEditorConfig.editorconfig
+/home/pine/projects/flashcards/project/Flippit.Api.DAL.Common/obj/Debug/net9.0/Flippit.Api.DAL.Common.AssemblyInfoInputs.cache
+/home/pine/projects/flashcards/project/Flippit.Api.DAL.Common/obj/Debug/net9.0/Flippit.Api.DAL.Common.AssemblyInfo.cs
+/home/pine/projects/flashcards/project/Flippit.Api.DAL.Common/obj/Debug/net9.0/Flippit.Api.DAL.Common.csproj.CoreCompileInputs.cache
+/home/pine/projects/flashcards/project/Flippit.Api.DAL.Common/obj/Debug/net9.0/Flippit.Api.DAL.Common.dll
+/home/pine/projects/flashcards/project/Flippit.Api.DAL.Common/obj/Debug/net9.0/refint/Flippit.Api.DAL.Common.dll
+/home/pine/projects/flashcards/project/Flippit.Api.DAL.Common/obj/Debug/net9.0/Flippit.Api.DAL.Common.pdb
+/home/pine/projects/flashcards/project/Flippit.Api.DAL.Common/obj/Debug/net9.0/ref/Flippit.Api.DAL.Common.dll
