@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace Flippit.Common.Models.Collection
 {
-    internal class CollectionListModel
+    public record CollectionListModel : IWithId
     {
+        public Guid Id { get; init; }
+        public required string Name { get; set; }
     }
 }
