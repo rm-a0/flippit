@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Flippit.Api.App")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e412e14accba98ce1f422892d0585601851e3190")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d89d50cac507eb5998647c51e220c06499b99edb")]
 [assembly: System.Reflection.AssemblyProductAttribute("Flippit.Api.App")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Flippit.Api.App")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
