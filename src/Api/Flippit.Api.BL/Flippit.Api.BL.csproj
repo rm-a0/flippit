@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\Common\Flippit.Common.Models\Flippit.Common.Models.csproj" />
+    <ProjectReference Include="..\Flippit.Api.DAL.Common\Flippit.Api.DAL.Common.csproj" />
+  </ItemGroup>
+
 </Project>

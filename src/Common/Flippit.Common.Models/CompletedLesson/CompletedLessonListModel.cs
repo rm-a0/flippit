@@ -11,5 +11,7 @@ namespace Flippit.Common.Models.CompletedLesson
         public Guid Id { get; init; }
         public required string AnswersJson { get; set; }
         public required string StatisticsJson { get; set; }
+        public required Guid CollectionId { get; set; }
+
     }
 }
