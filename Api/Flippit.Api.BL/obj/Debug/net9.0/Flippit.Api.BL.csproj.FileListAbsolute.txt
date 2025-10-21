@@ -1,0 +1,11 @@
+/home/pine/projects/flashcards/project/Flippit.Api.BL/bin/Debug/net9.0/Flippit.Api.BL.deps.json
+/home/pine/projects/flashcards/project/Flippit.Api.BL/bin/Debug/net9.0/Flippit.Api.BL.dll
+/home/pine/projects/flashcards/project/Flippit.Api.BL/bin/Debug/net9.0/Flippit.Api.BL.pdb
+/home/pine/projects/flashcards/project/Flippit.Api.BL/obj/Debug/net9.0/Flippit.Api.BL.GeneratedMSBuildEditorConfig.editorconfig
+/home/pine/projects/flashcards/project/Flippit.Api.BL/obj/Debug/net9.0/Flippit.Api.BL.AssemblyInfoInputs.cache
+/home/pine/projects/flashcards/project/Flippit.Api.BL/obj/Debug/net9.0/Flippit.Api.BL.AssemblyInfo.cs
+/home/pine/projects/flashcards/project/Flippit.Api.BL/obj/Debug/net9.0/Flippit.Api.BL.csproj.CoreCompileInputs.cache
+/home/pine/projects/flashcards/project/Flippit.Api.BL/obj/Debug/net9.0/Flippit.Api.BL.dll
+/home/pine/projects/flashcards/project/Flippit.Api.BL/obj/Debug/net9.0/refint/Flippit.Api.BL.dll
+/home/pine/projects/flashcards/project/Flippit.Api.BL/obj/Debug/net9.0/Flippit.Api.BL.pdb
+/home/pine/projects/flashcards/project/Flippit.Api.BL/obj/Debug/net9.0/ref/Flippit.Api.BL.dll
