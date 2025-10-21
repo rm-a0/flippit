@@ -1,5 +1,5 @@
-using 
-using Flippit.Api.DAL.Common.Entities.Interfaces;
+﻿using Flippit.Api.DAL.Common.Entities.Interfaces;
+using Flippit.Common.Enums;
 
 namespace Flippit.Api.DAL.Common.Entities;
 
