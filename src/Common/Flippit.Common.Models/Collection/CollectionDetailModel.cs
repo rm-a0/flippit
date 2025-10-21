@@ -15,7 +15,6 @@ namespace Flippit.Common.Models.Collection
         public required Guid CreatorId { get; set; }
         public required DateTime StartTime { get; set; }
         public required DateTime EndTime { get; set; }
-        public IList<CardDetailModel> Cards { get; set; } = new List<CardDetailModel>();
     }
 
     public class CollectionDetailModelValidator : AbstractValidator<CollectionDetailModel>
@@ -26,8 +25,6 @@ namespace Flippit.Common.Models.Collection
                 .NotEmpty()
                 .WithMessage("Name field is required");
 
-            RuleForEach(x => x.Cards)
-                .SetValidator(new CardDetailModelValidator());
         }
     }
 }
