@@ -1,0 +1,6 @@
+@Flippit.Api.App_HostAddress = http://localhost:5242
+
+GET {{Flippit.Api.App_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
