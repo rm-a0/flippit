@@ -55,6 +55,16 @@ namespace Flippit.Api.DAL.Memory.Repositories
             return _completedLessons.Where(lesson => lesson.UserId == guidSearch || lesson.CollectionId == guidSearch);
         }
 
+        public IEnumerable<CompletedLessonEntity> SearchByCreatorId(Guid creatorId)
+        {
+            return _completedLessons.Where(l => l.UserId == creatorId);
+        }
+
+        public IEnumerable<CompletedLessonEntity> SearchByCollectionId(Guid collectionId)
+        {
+            return _completedLessons.Where(l => l.CollectionId == collectionId);
+        }
+
         public Guid Insert(CompletedLessonEntity entity)
         {
             _completedLessons.Add(entity);

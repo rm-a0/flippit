@@ -54,6 +54,11 @@ namespace Flippit.Api.DAL.Memory.Repositories
             return _collections.Where(c => c.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase));
         }
 
+        public IEnumerable<CollectionEntity> SearchByCreatorId(Guid creatorId)
+        {
+            return _collections.Where(c => c.CreatorId == creatorId);
+        }
+
         public Guid Insert(CollectionEntity entity)
         {
             _collections.Add(entity);
