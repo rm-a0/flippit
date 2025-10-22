@@ -2,6 +2,7 @@ using Flippit.Api.DAL.Common.Entities;
 using Flippit.Common.Enums;
 using System;
 using System.Collections.Generic;
+using System.Text.Json;
 
 namespace Flippit.Api.DAL.Memory
 {
@@ -26,9 +27,16 @@ namespace Flippit.Api.DAL.Memory
             new("a7b89012-3456-7890-abcd-7890123456ab")
         };
 
+        private readonly IList<Guid> completedLessonGuids = new List<Guid>
+        {
+            new("123e4567-e89b-12d3-a456-426614174000"),
+            new("223e4567-e89b-12d3-a456-426614174001")
+        };
+
         public IList<CardEntity> Cards { get; } = new List<CardEntity>();
         public IList<UserEntity> Users { get; } = new List<UserEntity>();
         public IList<CollectionEntity> Collections { get; } = new List<CollectionEntity>();
+        public IList<CompletedLessonEntity> CompletedLessons { get; } = new List<CompletedLessonEntity>();
 
         public Storage(bool seedData = true)
         {
@@ -37,6 +45,7 @@ namespace Flippit.Api.DAL.Memory
                 SeedUsers();
                 SeedCards();
                 SeedCollections();
+                SeedCompletedLessons();
             }
         }
 
@@ -115,6 +124,38 @@ namespace Flippit.Api.DAL.Memory
                 StartTime = DateTime.UtcNow,
                 EndTime = DateTime.UtcNow.AddDays(14),
                 CreatorId = userGuids[1]
+            });
+        }
+
+        private void SeedCompletedLessons()
+        {
+            var answers1 = new Dictionary<Guid, bool>
+            {
+                { cardGuids[0], true },
+                { cardGuids[1], false }
+            };
+            var stats1 = new { CorrectCount = 1, TotalCount = 2, Accuracy = 0.5 };
+            CompletedLessons.Add(new CompletedLessonEntity
+            {
+                Id = completedLessonGuids[0],
+                AnswersJson = JsonSerializer.Serialize(answers1),
+                StatisticsJson = JsonSerializer.Serialize(stats1),
+                UserId = userGuids[0],
+                CollectionId = collectionGuids[0]
+            });
+
+            var answers2 = new Dictionary<Guid, bool>
+            {
+                { cardGuids[2], true }
+            };
+            var stats2 = new { CorrectCount = 1, TotalCount = 1, Accuracy = 1.0 };
+            CompletedLessons.Add(new CompletedLessonEntity
+            {
+                Id = completedLessonGuids[1],
+                AnswersJson = JsonSerializer.Serialize(answers2),
+                StatisticsJson = JsonSerializer.Serialize(stats2),
+                UserId = userGuids[1],
+                CollectionId = collectionGuids[1]
             });
         }
     }

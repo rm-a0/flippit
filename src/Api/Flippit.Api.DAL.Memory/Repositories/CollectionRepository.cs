@@ -1,0 +1,95 @@
+// Flippit.Api.DAL.Memory.Repositories/CollectionRepository.cs
+using Flippit.Api.DAL.Common.Entities;
+using Flippit.Api.DAL.Common.Mappers;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace Flippit.Api.DAL.Memory.Repositories
+{
+    public class CollectionRepository
+    {
+        private readonly IList<CollectionEntity> _collections;
+        private readonly CollectionMapper _collectionMapper;
+
+        public CollectionRepository(Storage storage, CollectionMapper collectionMapper)
+        {
+            _collections = storage.Collections;
+            _collectionMapper = collectionMapper;
+        }
+
+        public IList<CollectionEntity> GetAll(string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10)
+        {
+            var collections = _collections.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(filter))
+            {
+                collections = collections.Where(c => c.Name.Contains(filter, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.IsNullOrWhiteSpace(sortBy))
+            {
+                collections = sortBy.ToLower() switch
+                {
+                    "name" => collections.OrderBy(c => c.Name),
+                    "id" => collections.OrderBy(c => c.Id),
+                    _ => collections
+                };
+            }
+
+            collections = collections.Skip((page - 1) * pageSize).Take(pageSize);
+            return collections.ToList();
+        }
+
+        public CollectionEntity? GetById(Guid id)
+        {
+            return _collections.SingleOrDefault(c => c.Id == id);
+        }
+
+        public IEnumerable<CollectionEntity> Search(string searchText)
+        {
+            if (string.IsNullOrWhiteSpace(searchText))
+                return _collections;
+
+            return _collections.Where(c => c.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase));
+        }
+
+        public Guid Insert(CollectionEntity entity)
+        {
+            var newCollection = new CollectionEntity
+            {
+                Id = Guid.NewGuid(),
+                Name = entity.Name,
+                CreatorId = entity.CreatorId,
+                StartTime = entity.StartTime,
+                EndTime = entity.EndTime
+            };
+            _collections.Add(newCollection);
+            return newCollection.Id;
+        }
+
+        public Guid? Update(CollectionEntity collectionUpdated)
+        {
+            var collectionExisting = _collections.SingleOrDefault(c => c.Id == collectionUpdated.Id);
+            if (collectionExisting == null)
+                return null;
+
+            _collectionMapper.UpdateEntity(collectionUpdated, collectionExisting);
+            return collectionExisting.Id;
+        }
+
+        public void Remove(Guid id)
+        {
+            var collectionToRemove = _collections.SingleOrDefault(c => c.Id == id);
+            if (collectionToRemove != null)
+            {
+                _collections.Remove(collectionToRemove);
+            }
+        }
+
+        public bool Exists(Guid id)
+        {
+            return _collections.Any(c => c.Id == id);
+        }
+    }
+}
