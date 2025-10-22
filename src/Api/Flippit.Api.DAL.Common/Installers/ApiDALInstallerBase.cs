@@ -8,9 +8,10 @@ namespace Flippit.Api.DAL.Common.Installers
     {
         public virtual void Install(IServiceCollection serviceCollection)
         {
-            serviceCollection.AddSingleton<CardMapper>();
-            serviceCollection.AddSingleton<CollectionMapper>();
-            serviceCollection.AddSingleton<CompletedLessonMapper>();
+            // AddSingleton -> AddScoped (supports potential future DB integration, safe if mappers hold state)
+            serviceCollection.AddScoped<CardMapper>();
+            serviceCollection.AddScoped<CollectionMapper>();
+            serviceCollection.AddScoped<CompletedLessonMapper>();
             serviceCollection.AddSingleton<UserMapper>();
         }
     }

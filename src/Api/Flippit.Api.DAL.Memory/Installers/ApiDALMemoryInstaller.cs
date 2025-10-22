@@ -17,7 +17,8 @@ namespace Flippit.Api.DAL.Memory.Installers
                 selector.FromAssemblyOf<ApiDALMemoryInstaller>()
                         .AddClasses(classes => classes.AssignableTo(typeof(IApiRepository<>)))
                             .AsMatchingInterface()
-                            .WithScopedLifetime()); // changed Transient -> Scoped
+                            // Transient -> Scoped (avoids Transient overhead and Singleton thread-safety risks, one instance per HTTP request)
+                            .WithScopedLifetime()); 
         }
     }
 }

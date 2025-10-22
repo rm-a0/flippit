@@ -12,7 +12,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Common\Flippit.Common\Flippit.Common.csproj" />
-    <ProjectReference Include="..\..\Common\Flippit.Common\Flippit.Common.csproj" />
   </ItemGroup>
 
 </Project>
