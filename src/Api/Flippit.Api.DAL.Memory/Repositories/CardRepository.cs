@@ -57,19 +57,8 @@ namespace Flippit.Api.DAL.Memory.Repositories
 
         public Guid Insert(CardEntity entity)
         {
-            var newCard = new CardEntity
-            {
-                Id = Guid.NewGuid(),
-                QuestionType = entity.QuestionType,
-                AnswerType = entity.AnswerType,
-                Question = entity.Question,
-                Answer = entity.Answer,
-                Description = entity.Description,
-                CreatorId = entity.CreatorId,
-                CollectionId = entity.CollectionId
-            };
-            _cards.Add(newCard);
-            return newCard.Id;
+            _cards.Add(entity);
+            return entity.Id;
         }
 
         public Guid? Update(CardEntity cardUpdated)

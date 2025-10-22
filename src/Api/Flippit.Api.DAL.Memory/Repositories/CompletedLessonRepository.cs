@@ -57,16 +57,8 @@ namespace Flippit.Api.DAL.Memory.Repositories
 
         public Guid Insert(CompletedLessonEntity entity)
         {
-            var newLesson = new CompletedLessonEntity
-            {
-                Id = Guid.NewGuid(),
-                AnswersJson = entity.AnswersJson,
-                StatisticsJson = entity.StatisticsJson,
-                UserId = entity.UserId,
-                CollectionId = entity.CollectionId
-            };
-            _completedLessons.Add(newLesson);
-            return newLesson.Id;
+            _completedLessons.Add(entity);
+            return entity.Id;
         }
 
         public Guid? Update(CompletedLessonEntity lessonUpdated)

@@ -56,16 +56,8 @@ namespace Flippit.Api.DAL.Memory.Repositories
 
         public Guid Insert(CollectionEntity entity)
         {
-            var newCollection = new CollectionEntity
-            {
-                Id = Guid.NewGuid(),
-                Name = entity.Name,
-                CreatorId = entity.CreatorId,
-                StartTime = entity.StartTime,
-                EndTime = entity.EndTime
-            };
-            _collections.Add(newCollection);
-            return newCollection.Id;
+            _collections.Add(entity);
+            return entity.Id;
         }
 
         public Guid? Update(CollectionEntity collectionUpdated)

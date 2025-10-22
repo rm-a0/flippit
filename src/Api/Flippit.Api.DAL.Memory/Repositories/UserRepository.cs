@@ -55,15 +55,8 @@ namespace Flippit.Api.DAL.Memory.Repositories
 
         public Guid Insert(UserEntity entity)
         {
-            var newUser = new UserEntity
-            {
-                Id = Guid.NewGuid(),
-                Name = entity.Name,
-                photoUrl = entity.photoUrl,
-                Role = entity.Role
-            };
-            _users.Add(newUser);
-            return newUser.Id;
+            _users.Add(entity);
+            return entity.Id;
         }
 
         public Guid? Update(UserEntity userUpdated)
