@@ -1,13 +1,15 @@
 // Flippit.Api.DAL.Memory.Repositories/CollectionRepository.cs
 using Flippit.Api.DAL.Common.Entities;
 using Flippit.Api.DAL.Common.Mappers;
+using Flippit.Api.DAL.Common.Repositories;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Flippit.Api.DAL.Memory.Repositories
 {
-    public class CollectionRepository
+    public class CollectionRepository : ICollectionRepository
     {
         private readonly IList<CollectionEntity> _collections;
         private readonly CollectionMapper _collectionMapper;

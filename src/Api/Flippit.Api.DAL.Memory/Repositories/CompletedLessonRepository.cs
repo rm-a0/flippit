@@ -1,13 +1,14 @@
 // Flippit.Api.DAL.Memory.Repositories/CompletedLessonRepository.cs
 using Flippit.Api.DAL.Common.Entities;
 using Flippit.Api.DAL.Common.Mappers;
+using Flippit.Api.DAL.Common.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Flippit.Api.DAL.Memory.Repositories
 {
-    public class CompletedLessonRepository
+    public class CompletedLessonRepository : ICompletedLessonRepository
     {
         private readonly IList<CompletedLessonEntity> _completedLessons;
         private readonly CompletedLessonMapper _completedLessonMapper;

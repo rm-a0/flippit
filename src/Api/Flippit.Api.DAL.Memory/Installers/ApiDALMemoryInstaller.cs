@@ -1,22 +1,23 @@
-using Flippit.Api.DAL.Common.Mappers;
-using Flippit.Api.DAL.Memory.Repositories;
+using Flippit.Api.DAL.Common.Installers;
+using Flippit.Api.DAL.Common.Repositories;
+using Flippit.Common.Installers;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Flippit.Api.DAL.Memory.Installers
 {
-    public class ApiDALMemoryInstaller
+    public class ApiDALMemoryInstaller : ApiDALInstallerBase
     {
-        public void Install(IServiceCollection serviceCollection)
+        public override void Install(IServiceCollection serviceCollection)
         {
+            base.Install(serviceCollection);
+
             serviceCollection.AddSingleton<Storage>();
-            serviceCollection.AddTransient<CardRepository>();
-            serviceCollection.AddTransient<UserRepository>();
-            serviceCollection.AddTransient<CollectionRepository>();
-            serviceCollection.AddTransient<CompletedLessonRepository>();
-            serviceCollection.AddTransient<CardMapper>();
-            serviceCollection.AddTransient<UserMapper>();
-            serviceCollection.AddTransient<CollectionMapper>();
-            serviceCollection.AddTransient<CompletedLessonMapper>();
+
+            serviceCollection.Scan(selector =>
+                selector.FromAssemblyOf<ApiDALMemoryInstaller>()
+                        .AddClasses(classes => classes.AssignableTo(typeof(IApiRepository<>)))
+                            .AsMatchingInterface()
+                            .WithScopedLifetime()); // changed Transient -> Scoped
         }
     }
 }

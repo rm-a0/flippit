@@ -14,7 +14,7 @@ namespace Flippit.Api.BL.Mappers
     {
         public partial CardEntity ModelToEntity(CardDetailModel model);
         public partial CardDetailModel ToDetailModel(CardEntity entity);
-        public partial IList<CardListModel> ToLostModels(IEnumerable<CardEntity> entities);
+        public partial IList<CardListModel> ToListModels(IEnumerable<CardEntity> entities);
         public partial CardListModel ToListModel(CardEntity entity);
     }
 }

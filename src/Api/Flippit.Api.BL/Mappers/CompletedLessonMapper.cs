@@ -15,7 +15,7 @@ namespace Flippit.Api.BL.Mappers
     {
         public partial CompletedLessonEntity ModelToEntity(CompletedLessonDetailModel model);
         public partial CompletedLessonDetailModel ToDetailModel(CompletedLessonEntity entity);
-        public partial IList<CompletedLessonListModel> ToLostModels(IEnumerable<CompletedLessonEntity> entities);
+        public partial IList<CompletedLessonListModel> ToListModels(IEnumerable<CompletedLessonEntity> entities);
 
         [MapperIgnoreSource(nameof(CompletedLessonEntity.UserId))]
         public partial CompletedLessonListModel ToListModel(CompletedLessonEntity entity);

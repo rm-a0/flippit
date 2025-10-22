@@ -1,12 +1,13 @@
 using Flippit.Api.DAL.Common.Entities;
 using Flippit.Api.DAL.Common.Mappers;
+using Flippit.Api.DAL.Common.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Flippit.Api.DAL.Memory.Repositories
 {
-    public class CardRepository
+    public class CardRepository : ICardRepository
     {
         private readonly IList<CardEntity> _cards;
         private readonly CardMapper _cardMapper;

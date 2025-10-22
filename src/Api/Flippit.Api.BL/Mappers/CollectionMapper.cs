@@ -15,7 +15,7 @@ namespace Flippit.Api.BL.Mappers
     {
         public partial CollectionEntity ModelToEntity(CollectionDetailModel model);
         public partial CollectionDetailModel ToDetailModel(CollectionEntity entity);
-        public partial IList<CollectionListModel> ToLostModels(IEnumerable<CollectionEntity> entities);
+        public partial IList<CollectionListModel> ToListModels(IEnumerable<CollectionEntity> entities);
 
         [MapperIgnoreSource(nameof(CollectionEntity.CreatorId))]
         [MapperIgnoreSource(nameof(CollectionEntity.StartTime))]
