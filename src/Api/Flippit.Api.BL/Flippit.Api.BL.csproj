@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Common\Flippit.Common.Models\Flippit.Common.Models.csproj" />
+    <ProjectReference Include="..\..\Common\Flippit.Common.BL\Flippit.Common.BL.csproj" />
     <ProjectReference Include="..\Flippit.Api.DAL.Common\Flippit.Api.DAL.Common.csproj" />
   </ItemGroup>
 
