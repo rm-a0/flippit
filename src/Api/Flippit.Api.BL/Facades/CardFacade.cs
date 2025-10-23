@@ -21,6 +21,11 @@ namespace Flippit.Api.BL.Facades
 
         public IList<CardListModel> GetAll(string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10)
         {
+            if (page < 1)
+                throw new ArgumentException("Page number must be greater than or equal to 1.", nameof(page));
+            if (pageSize < 1)
+                throw new ArgumentException("Page size must be greater than or equal to 1.", nameof(pageSize));
+
             var entities = _repository.GetAll(filter, sortBy, page, pageSize);
             return _mapper.ToListModels(entities);
         }
@@ -53,6 +58,8 @@ namespace Flippit.Api.BL.Facades
         {
             if (cardModel == null)
                 throw new ArgumentNullException(nameof(cardModel));
+            if (string.IsNullOrWhiteSpace(cardModel.Question))
+                throw new ArgumentException("Card question cannot be empty.", nameof(cardModel.Question));
 
             var entity = _mapper.ModelToEntity(cardModel);
             return _repository.Exists(entity.Id) ? _repository.Update(entity) ?? entity.Id : _repository.Insert(entity);

@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Flippit.Common.BL.Facades;
-using Flippit.Common.Models;
-using Flippit.Common.Models.Card;
 using Flippit.Common.Models.Collection;
 
 namespace Flippit.Api.BL.Facades
