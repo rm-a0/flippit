@@ -91,6 +91,12 @@ void UseUserEndpoints(RouteGroupBuilder routeGroupBuilder)
             : TypedResults.NotFound($"User with ID {id} was not found.")
     );
 
+    userEndpoints.MapGet("/{id:guid}/collections", (ICollectionFacade collectionFacade, Guid id) =>
+    {
+        var collections = collectionFacade.SearchByCreatorId(id);
+        return TypedResults.Ok(collections);
+    });
+
     userEndpoints.MapPost("", async Task<Results<Ok<Guid>, ValidationProblem>> ([FromBody] UserDetailModel model, IUserFacade userFacade, IValidator<UserDetailModel> validator) => {
         var validationErrors = await ValidateModelAsync(model, validator);
         if (validationErrors != null)
@@ -197,6 +203,12 @@ void UseCollectionEndpoints(RouteGroupBuilder routeGroupBuilder)
     {
         var collections = collectionFacade.GetAll(filter, sortBy, page, pageSize);
         return TypedResults.Ok(collections);
+    });
+
+    collectionsEndPoints.MapGet("/{id:guid}/cards", (ICardFacade collectionFacade, Guid id) =>
+    {
+        var cards = collectionFacade.SearchByCollectionId(id);
+        return TypedResults.Ok(cards);
     });
 
     collectionsEndPoints.MapPost("", async Task<Results<Ok<Guid>, ValidationProblem>> (ICollectionFacade collectionFacade, CollectionDetailModel model, IValidator<CollectionDetailModel> validator) =>
