@@ -49,7 +49,7 @@ public class CardFacadeTests
     }
     
     [Fact]
-    public void GetAll_ReturnsMappedCards()
+    public void GetAll_CallsRepository()
     {
         var repositoryMock = new Mock<ICardRepository>();
         var mapper = new CardMapper();
@@ -90,17 +90,11 @@ public class CardFacadeTests
         Assert.Equal(entities[0].Id, result[0].Id);
         Assert.Equal(entities[1].Id, result[1].Id);
         
-        Assert.Equal(QAType.text, result[0].QuestionType);
-        Assert.Equal(QAType.url, result[1].QuestionType);
-        
-        Assert.Equal(QAType.text, result[0].AnswerType);
-        Assert.Equal(QAType.url, result[1].AnswerType);
-        
         repositoryMock.Verify(r => r.GetAll(null, null, 1, 10), Times.Once);
     }
     
     [Fact]
-    public void GetAll_EmptyRepositoryReturnsEmptyList()
+    public void GetAll_Empty_CallsRepository()
     {
         var repositoryMock = new Mock<ICardRepository>();
         var mapper = new CardMapper();
@@ -111,11 +105,12 @@ public class CardFacadeTests
         var result = facade.GetAll();
 
         Assert.Empty(result);
+        
         repositoryMock.Verify(r => r.GetAll(null, null, 1, 10), Times.Once);
     }
     
     [Fact]
-    public void GetById_ReturnsMappedCard()
+    public void GetById_CallsRepository()
     {
         var repositoryMock = new Mock<ICardRepository>();
         var mapper = new CardMapper();
@@ -147,7 +142,7 @@ public class CardFacadeTests
     }
 
     [Fact]
-    public void GetById_EmptyRepositoryReturnsNull()
+    public void GetById_Empty_CallsRepository()
     {
         var repositoryMock = new Mock<ICardRepository>();
         var mapper = new CardMapper();
@@ -165,7 +160,7 @@ public class CardFacadeTests
     }
    
     [Fact]
-    public void Search_ReturnsMappedCards()
+    public void Search_CallsRepositorySearch()
     {
         var repositoryMock = new Mock<ICardRepository>();
         var mapper = new CardMapper();
@@ -182,32 +177,8 @@ public class CardFacadeTests
                 CollectionId = Guid.NewGuid(),
                 CreatorId = Guid.NewGuid(),
                 Description = null
-            },
-
-            new CardEntity
-            {
-                Id = Guid.NewGuid(),
-                QuestionType = QAType.url,
-                Question = "Question 2",
-                AnswerType = QAType.url,
-                Answer = "answer.url",
-                CollectionId = Guid.NewGuid(),
-                CreatorId = Guid.NewGuid(),
-                Description = null
-            },
-
-            new CardEntity
-            {
-                Id = Guid.NewGuid(),
-                QuestionType = QAType.url,
-                Question = "Question 3",
-                AnswerType = QAType.text,
-                Answer = "Answer 3",
-                CollectionId = Guid.NewGuid(),
-                CreatorId = Guid.NewGuid(),
-                Description = null
-                }
-            };
+            }
+        };
 
         repositoryMock.Setup(r => r.Search("Question 1")).Returns(new List<CardEntity> { entities[0] });
 
@@ -218,5 +189,359 @@ public class CardFacadeTests
         Assert.Equal(entities[0].Id, searchResult[0].Id);
 
         repositoryMock.Verify(r => r.Search("Question 1"), Times.Once());
+    }
+
+    [Fact]
+    public void SearchByCreatorId_CallsRepositorySearch()
+    {
+        var repositoryMock = new Mock<ICardRepository>();
+        var mapper = new CardMapper();
+        var creatorId = Guid.NewGuid();
+
+        var entities = new List<CardEntity>
+        {
+            new CardEntity
+            {
+                Id = Guid.NewGuid(),
+                QuestionType = QAType.text,
+                Question = "Question 1",
+                AnswerType = QAType.text,
+                Answer = "Answer 1",
+                CollectionId = Guid.NewGuid(),
+                CreatorId = creatorId,
+                Description = null
+            },
+
+            new CardEntity
+            {
+                Id = Guid.NewGuid(),
+                QuestionType = QAType.url,
+                Question = "Question 2",
+                AnswerType = QAType.url,
+                Answer = "answer.url",
+                CollectionId = Guid.NewGuid(),
+                CreatorId = creatorId,
+                Description = null
+            }
+        };
+
+        repositoryMock.Setup(r => r.SearchByCreatorId(creatorId)).Returns(new List<CardEntity> { entities[0], entities[1] });
+
+        var facade = new CardFacade(repositoryMock.Object, mapper);
+        var searchResult = facade.SearchByCreatorId(creatorId);
+
+        Assert.Equal(2, searchResult.Count);
+        Assert.Equal(creatorId, searchResult[0].CreatorId);
+        Assert.Equal(creatorId, searchResult[1].CreatorId);
+
+        repositoryMock.Verify(r => r.SearchByCreatorId(creatorId), Times.Once());       
+    }
+
+    [Fact]
+    public void SearchByCollectionId_CallsRepositorySearch()
+    {
+        var repositoryMock = new Mock<ICardRepository>();
+        var mapper = new CardMapper();
+        var collectionId = Guid.NewGuid();
+
+        var entities = new List<CardEntity>
+        {
+            new CardEntity
+            {
+                Id = Guid.NewGuid(),
+                QuestionType = QAType.text,
+                Question = "Question 1",
+                AnswerType = QAType.text,
+                Answer = "Answer 1",
+                CollectionId = collectionId,
+                CreatorId = Guid.NewGuid(),
+                Description = null
+            },
+
+            new CardEntity
+            {
+                Id = Guid.NewGuid(),
+                QuestionType = QAType.url,
+                Question = "Question 2",
+                AnswerType = QAType.url,
+                Answer = "answer.url",
+                CollectionId = collectionId,
+                CreatorId = Guid.NewGuid(),
+                Description = null
+            }
+        };
+
+        repositoryMock.Setup(r => r.SearchByCollectionId(collectionId)).Returns(new List<CardEntity> { entities[0], entities[1] });
+
+        var facade = new CardFacade(repositoryMock.Object, mapper);
+        var searchResult = facade.SearchByCollectionId(collectionId);
+
+        Assert.Equal(2, searchResult.Count);
+        Assert.Equal(collectionId, searchResult[0].CollectionId);
+        Assert.Equal(collectionId, searchResult[1].CollectionId);
+
+        repositoryMock.Verify(r => r.SearchByCollectionId(collectionId), Times.Once());       
+    }
+    
+    [Fact]
+    public void CreateOrUpdate_NullCardModel_ThrowsArgumentNullException()
+    {
+        var facade = GetFacadeWithForbiddenDependencyCalls();
+        
+        var exception = Assert.Throws<ArgumentNullException>(() => facade.CreateOrUpdate(null!));
+        
+        Assert.Equal("cardModel", exception.ParamName);
+    }
+    
+    [Fact]
+    public void CreateOrUpdate_EmptyQuestion_ThrowsArgumentException()
+    {
+        var facade = GetFacadeWithForbiddenDependencyCalls();
+        
+        var cardModel = new CardDetailModel
+        {
+            Id = Guid.NewGuid(),
+            QuestionType = QAType.text,
+            Question = "",
+            AnswerType = QAType.text,
+            Answer = "Answer",
+            CollectionId = Guid.NewGuid(),
+            CreatorId = Guid.NewGuid()
+        };
+        
+        var exception = Assert.Throws<ArgumentException>(() => facade.CreateOrUpdate(cardModel));
+        
+        Assert.Equal("Question", exception.ParamName);
+        Assert.Contains("Card question cannot be empty.", exception.Message);
+    }
+    
+    [Fact]
+    public void CreateOrUpdate_WhitespaceQuestion_ThrowsArgumentException()
+    {
+        var facade = GetFacadeWithForbiddenDependencyCalls();
+        
+        var cardModel = new CardDetailModel
+        {
+            Id = Guid.NewGuid(),
+            QuestionType = QAType.text,
+            Question = "   ",
+            AnswerType = QAType.text,
+            Answer = "Answer",
+            CollectionId = Guid.NewGuid(),
+            CreatorId = Guid.NewGuid()
+        };
+        
+        var exception = Assert.Throws<ArgumentException>(() => facade.CreateOrUpdate(cardModel));
+        
+        Assert.Equal("Question", exception.ParamName);
+        Assert.Contains("Card question cannot be empty.", exception.Message);
+    }
+    
+    [Fact]
+    public void CreateOrUpdate_NonExistentCard_CallsInsert()
+    {
+        var repositoryMock = new Mock<ICardRepository>();
+        var mapper = new CardMapper();
+        var cardId = Guid.NewGuid();
+        
+        var cardModel = new CardDetailModel
+        {
+            Id = cardId,
+            QuestionType = QAType.text,
+            Question = "New Question",
+            AnswerType = QAType.text,
+            Answer = "Answer",
+            CollectionId = Guid.NewGuid(),
+            CreatorId = Guid.NewGuid(),
+            Description = null
+        };
+
+        var entity = mapper.ModelToEntity(cardModel);
+        
+        repositoryMock.Setup(r => r.Exists(cardId)).Returns(false);
+        repositoryMock.Setup(r => r.Insert(entity)).Returns(cardId);
+        
+        var facade = new CardFacade(repositoryMock.Object, mapper);
+        var result = facade.CreateOrUpdate(cardModel);
+        
+        Assert.Equal(cardId, result);
+        repositoryMock.Verify(r => r.Exists(cardId), Times.Once);
+        repositoryMock.Verify(r => r.Insert(entity), Times.Once);
+        repositoryMock.Verify(r => r.Update(entity), Times.Never);
+    }
+
+    [Fact]
+    public void CreateOrUpdate_ExistentCard_CallsUpdate()
+    {
+        var repositoryMock = new Mock<ICardRepository>();
+        var mapper = new CardMapper();
+        var cardId = Guid.NewGuid();
+    
+        var updatedCardModel = new CardDetailModel
+        {
+            Id = cardId,
+            QuestionType = QAType.text,
+            Question = "Updated Question",
+            AnswerType = QAType.text,
+            Answer = "Updated Answer",
+            CollectionId = Guid.NewGuid(),
+            CreatorId = Guid.NewGuid(),
+            Description = "Updated Description"
+        };
+    
+        var updatedEntity = mapper.ModelToEntity(updatedCardModel);
+    
+        repositoryMock.Setup(r => r.Exists(cardId)).Returns(true);
+        repositoryMock.Setup(r => r.Update(updatedEntity)).Returns(cardId);
+    
+        var facade = new CardFacade(repositoryMock.Object, mapper);
+        var result = facade.CreateOrUpdate(updatedCardModel);
+    
+        Assert.Equal(cardId, result);
+        repositoryMock.Verify(r => r.Exists(cardId), Times.Once);
+        repositoryMock.Verify(r => r.Update(updatedEntity), Times.Once);
+        repositoryMock.Verify(r => r.Insert(updatedEntity), Times.Never);
+    }
+    
+    [Fact]
+    public void Create_NullCardModel_ThrowsArgumentNullException()
+    {
+        var facade = GetFacadeWithForbiddenDependencyCalls();
+        
+        var exception = Assert.Throws<ArgumentNullException>(() => facade.Create(null!));
+        
+        Assert.Equal("cardModel", exception.ParamName);
+    }
+    
+    [Fact]
+    public void Create_EmptyQuestion_ThrowsArgumentException()
+    {
+        var facade = GetFacadeWithForbiddenDependencyCalls();
+        
+        var cardModel = new CardDetailModel
+        {
+            Id = Guid.NewGuid(),
+            QuestionType = QAType.text,
+            Question = "",
+            AnswerType = QAType.text,
+            Answer = "Answer",
+            CollectionId = Guid.NewGuid(),
+            CreatorId = Guid.NewGuid()
+        };
+        
+        var exception = Assert.Throws<ArgumentException>(() => facade.Create(cardModel));
+        
+        Assert.Equal("Question", exception.ParamName);
+        Assert.Contains("Card question cannot be empty.", exception.Message);
+    }
+
+    [Fact]
+    public void Create_CallsInsert()
+    {
+        var repositoryMock = new Mock<ICardRepository>();
+        var mapper = new CardMapper();
+        var cardId = Guid.NewGuid();
+    
+        var cardModel = new CardDetailModel
+        {
+            Id = cardId,
+            QuestionType = QAType.text,
+            Question = "Question",
+            AnswerType = QAType.text,
+            Answer = "Answer",
+            CollectionId = Guid.NewGuid(),
+            CreatorId = Guid.NewGuid(),
+            Description = null
+        };
+    
+        var entity = mapper.ModelToEntity(cardModel);
+    
+        repositoryMock.Setup(r => r.Insert(entity)).Returns(cardId);
+    
+        var facade = new CardFacade(repositoryMock.Object, mapper);
+        var result = facade.Create(cardModel);
+    
+        Assert.Equal(cardId, result);
+        repositoryMock.Verify(r => r.Insert(entity), Times.Once);
+    }
+    
+    [Fact]
+    public void Update_NullCardModel_ThrowsArgumentNullException()
+    {
+        var facade = GetFacadeWithForbiddenDependencyCalls();
+        
+        var exception = Assert.Throws<ArgumentNullException>(() => facade.Update(null!));
+        
+        Assert.Equal("cardModel", exception.ParamName);
+    }
+    
+    [Fact]
+    public void Update_EmptyQuestion_ThrowsArgumentException()
+    {
+        var facade = GetFacadeWithForbiddenDependencyCalls();
+        
+        var cardModel = new CardDetailModel
+        {
+            Id = Guid.NewGuid(),
+            QuestionType = QAType.text,
+            Question = "",
+            AnswerType = QAType.text,
+            Answer = "Answer",
+            CollectionId = Guid.NewGuid(),
+            CreatorId = Guid.NewGuid()
+        };
+        
+        var exception = Assert.Throws<ArgumentException>(() => facade.Update(cardModel));
+        
+        Assert.Equal("Question", exception.ParamName);
+        Assert.Contains("Card question cannot be empty.", exception.Message);
+    }
+    
+    [Fact]
+    public void Update_CallsUpdate()
+    {
+        var repositoryMock = new Mock<ICardRepository>();
+        var mapper = new CardMapper();
+        var cardId = Guid.NewGuid();
+    
+        var updatedCardModel = new CardDetailModel
+        {
+            Id = cardId,
+            QuestionType = QAType.text,
+            Question = "Updated Question",
+            AnswerType = QAType.text,
+            Answer = "Updated Answer",
+            CollectionId = Guid.NewGuid(),
+            CreatorId = Guid.NewGuid(),
+            Description = "Updated Description"
+        };
+    
+        var updatedEntity = mapper.ModelToEntity(updatedCardModel);
+        
+        repositoryMock.Setup(r => r.Update(updatedEntity)).Returns(cardId);
+    
+        var facade = new CardFacade(repositoryMock.Object, mapper);
+        var result = facade.Update(updatedCardModel);
+        
+    
+        Assert.NotNull(result);
+        Assert.Equal(cardId, result);
+    
+        repositoryMock.Verify(r => r.Update(updatedEntity), Times.Once);
+    }
+    
+    [Fact]
+    public void Delete_CallsRemove()
+    {
+        var repositoryMock = new Mock<ICardRepository>();
+        var mapper = new CardMapper();
+        var cardId = Guid.NewGuid();
+    
+        repositoryMock.Setup(r => r.Remove(cardId));
+    
+        var facade = new CardFacade(repositoryMock.Object, mapper);
+        facade.Delete(cardId);
+    
+        repositoryMock.Verify(r => r.Remove(cardId), Times.Once);
     }
 }

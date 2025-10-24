@@ -40,9 +40,6 @@ namespace Flippit.Api.BL.Facades
         {
             var entities = _repository.Search(searchText);
             return _mapper.ToListModels(entities);
-
-           // var entities = GetAll(searchText);
-           // return entities;
         }
 
         public IList<CardListModel> SearchByCreatorId(Guid creatorId)
