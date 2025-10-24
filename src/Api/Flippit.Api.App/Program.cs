@@ -66,6 +66,8 @@ void UseEndpoints(WebApplication application)
 
     UseUserEndpoints(endpointsBase);
     UseCardEndpoints(endpointsBase);
+    UseCollectionEndpoints(endpointsBase);
+    UseCompletedLessonEndpoints(endpointsBase);
 }
 
 void UseUserEndpoints(RouteGroupBuilder routeGroupBuilder)
@@ -177,25 +179,119 @@ void UseCardEndpoints(RouteGroupBuilder routeGroupBuilder)
        =>
        cardFacade.GetById(id) is { } card
            ? TypedResults.Ok(card)
-           : TypedResults.NotFound($"User with ID {id} was not found.")
+           : TypedResults.NotFound($"Card with ID {id} was not found.")
     );
 
-    cardEndPoints.MapDelete("/{id:guid}", (ICardFacade CardFacade, Guid id) =>
+    cardEndPoints.MapDelete("/{id:guid}", (ICardFacade cardFacade, Guid id) =>
     {
-        CardFacade.Delete(id);
+        cardFacade.Delete(id);
     });
 
 }
 void UseCollectionEndpoints(RouteGroupBuilder routeGroupBuilder)
 {
+    var collectionsEndPoints = routeGroupBuilder.MapGroup("collections")
+        .WithTags("collections");
 
+    collectionsEndPoints.MapGet("", (ICollectionFacade collectionFacade, [FromQuery] string? filter = null, [FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? sortBy = null) =>
+    {
+        var collections = collectionFacade.GetAll(filter, sortBy, page, pageSize);
+        return TypedResults.Ok(collections);
+    });
+
+    collectionsEndPoints.MapPost("", async Task<Results<Ok<Guid>, ValidationProblem>> (ICollectionFacade collectionFacade, CollectionDetailModel model, IValidator<CollectionDetailModel> validator) =>
+    {
+        var validationErrors = await ValidateModelAsync(model, validator);
+        if (validationErrors != null)
+        {
+            return TypedResults.ValidationProblem(validationErrors);
+        }
+        var id = collectionFacade.Create(model);
+        return TypedResults.Ok(id);
+    });
+
+    collectionsEndPoints.MapPut("", async Task<Results<Ok<Guid?>, ValidationProblem>> (ICollectionFacade collectionFacade, CollectionDetailModel model, IValidator<CollectionDetailModel> validator) =>
+    {
+        var validationErrors = await ValidateModelAsync(model, validator);
+        if (validationErrors != null)
+        {
+            return TypedResults.ValidationProblem(validationErrors);
+        }
+        var id = collectionFacade.Update(model);
+        return TypedResults.Ok(id);
+    });
+
+    collectionsEndPoints.MapPost("upsert", async Task<Results<Ok<Guid>, ValidationProblem>> (ICollectionFacade collectionFacade, CollectionDetailModel model, IValidator<CollectionDetailModel> validator) =>
+    {
+        var validationErrors = await ValidateModelAsync(model, validator);
+        if (validationErrors != null)
+        {
+            return TypedResults.ValidationProblem(validationErrors);
+        }
+        var id = collectionFacade.CreateOrUpdate(model);
+        return TypedResults.Ok(id);
+    });
+
+    collectionsEndPoints.MapGet("/{id:guid}",
+       Results<Ok<CollectionDetailModel>, NotFound<string>> (
+           Guid id,
+           [FromServices] ICollectionFacade collectionFacade
+       )
+       =>
+       collectionFacade.GetById(id) is { } card
+           ? TypedResults.Ok(card)
+           : TypedResults.NotFound($"Collection with ID {id} was not found.")
+    );
+
+    collectionsEndPoints.MapDelete("/{id:guid}", (ICollectionFacade collectionFacade, Guid id) =>
+    {
+        collectionFacade.Delete(id);
+    });
 }
 void UseCompletedLessonEndpoints(RouteGroupBuilder routeGroupBuilder)
 {
+    var completedLessonsEndpoints = routeGroupBuilder.MapGroup("completedLessons")
+        .WithTags("completedLessons");
 
+    completedLessonsEndpoints.MapGet("", (ICompletedLessonFacade facade, [FromQuery] int pageSize = 10, [FromQuery] int page = 1, [FromQuery] string? filter = null, [FromQuery] string? sortBy = null) =>
+    {
+        var lessons = facade.GetAll(filter, sortBy, page, pageSize);
+        return TypedResults.Ok(lessons);
+    });
+
+    completedLessonsEndpoints.MapDelete("{id:guid}", (ICompletedLessonFacade facade, Guid id) =>
+    {
+        facade.Delete(id);
+    });
+
+    completedLessonsEndpoints.MapPost("", (ICompletedLessonFacade facade, CompletedLessonDetailModel model) =>
+    {
+        var id = facade.Create(model);
+        return TypedResults.Ok(id);
+    });
+
+    completedLessonsEndpoints.MapPut("", (ICompletedLessonFacade facade, CompletedLessonDetailModel model) =>
+    {
+        var id = facade.Update(model);
+        return TypedResults.Ok(id);
+    });
+
+    completedLessonsEndpoints.MapPost("upsert", (ICompletedLessonFacade facade, CompletedLessonDetailModel model) =>
+    {
+        var id = facade.Create(model);
+        return TypedResults.Ok(id);
+
+    });
+
+    completedLessonsEndpoints.MapGet("{id:guid}", (ICompletedLessonFacade facade, Guid id) =>
+    {
+        var lesson = facade.GetById(id);
+        return TypedResults.Ok(lesson);
+    });
 }
 
-async Task<Dictionary<string, string[]>?> ValidateModelAsync<T>(T model, IValidator<T> validator)
+
+    async Task<Dictionary<string, string[]>?> ValidateModelAsync<T>(T model, IValidator<T> validator)
 {
     var validationResult = await validator.ValidateAsync(model);
 
