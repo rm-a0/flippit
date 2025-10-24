@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.DependencyInjection;
+using static System.Net.Mime.MediaTypeNames;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,17 +41,23 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.PropertyNameCaseInsensitive = true;
 });
 
-builder.Services.AddOpenApi();
-builder.Services.AddSwaggerGen();
+//builder.Services.AddOpenApi();
+//builder.Services.AddSwaggerGen();
+ConfigureOpenApiDocuments(builder.Services);
 
 var app = builder.Build();
 
+
+
 if (app.Environment.IsDevelopment())
 {
-    //app.MapOpenApi();
-    app.UseSwagger();
-    //app.UseOpenApi();
-    app.UseSwaggerUI();
+    ////app.MapOpenApi();
+    //app.UseSwagger();
+    ////app.UseOpenApi();
+    //app.UseSwaggerUI();
+    app.UseOpenApi();
+    app.UseSwaggerUi();
+
 }
 
 app.UseHttpsRedirection();
@@ -58,6 +65,15 @@ app.UseHttpsRedirection();
 UseEndpoints(app);
 
 app.Run();
+
+void ConfigureOpenApiDocuments(IServiceCollection serviceCollection)
+{
+    serviceCollection.AddEndpointsApiExplorer();
+    serviceCollection.AddOpenApiDocument(config =>
+    {
+        config.Title = "Flippit";
+    });
+}
 
 void UseEndpoints(WebApplication application)
 {
