@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Globalization;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Flippit.Api.BL.Facades;
 using Flippit.Api.BL.Installers;
@@ -11,6 +12,7 @@ using Flippit.Common.Models.User;
 using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -63,6 +65,7 @@ void UseEndpoints(WebApplication application)
         .WithOpenApi();
 
     UseUserEndpoints(endpointsBase);
+    UseCardEndpoints(endpointsBase);
 }
 
 void UseUserEndpoints(RouteGroupBuilder routeGroupBuilder)
@@ -106,7 +109,7 @@ void UseUserEndpoints(RouteGroupBuilder routeGroupBuilder)
         return TypedResults.Ok(id);
     });
 
-    userEndpoints.MapPut("upsert", async Task<Results<Ok<Guid>, ValidationProblem>> ([FromBody] UserDetailModel model, IUserFacade userFacade, IValidator<UserDetailModel> validator) => {
+    userEndpoints.MapPost("upsert", async Task<Results<Ok<Guid>, ValidationProblem>> ([FromBody] UserDetailModel model, IUserFacade userFacade, IValidator<UserDetailModel> validator) => {
         var validationErrors = await ValidateModelAsync(model, validator);
         if (validationErrors != null)
         {
@@ -124,6 +127,63 @@ void UseUserEndpoints(RouteGroupBuilder routeGroupBuilder)
 }
 void UseCardEndpoints(RouteGroupBuilder routeGroupBuilder)
 {
+    var cardEndPoints = routeGroupBuilder.MapGroup("cards")
+        .WithTags("cards");
+
+    cardEndPoints.MapGet("", (ICardFacade cardFacade, [FromQuery] string? filter = null, [FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? sortBy = null) =>
+    {
+        var cards = cardFacade.GetAll(filter, sortBy, page, pageSize);
+        return TypedResults.Ok(cards);
+    });
+
+    cardEndPoints.MapPost("", async Task<Results<Ok<Guid>, ValidationProblem>> (ICardFacade CardFacade, CardDetailModel model, IValidator<CardDetailModel> validator) =>
+    {
+        var validationErrors = await ValidateModelAsync(model, validator);
+        if (validationErrors != null)
+        {
+            return TypedResults.ValidationProblem(validationErrors);
+        }
+        var id = CardFacade.Create(model);
+        return TypedResults.Ok(id);
+    });
+
+    cardEndPoints.MapPut("", async Task<Results<Ok<Guid?>, ValidationProblem>> (ICardFacade CardFacade, CardDetailModel model, IValidator<CardDetailModel> validator) =>
+    {
+        var validationErrors = await ValidateModelAsync(model, validator);
+        if (validationErrors != null)
+        {
+            return TypedResults.ValidationProblem(validationErrors);
+        }
+        var id = CardFacade.Update(model);
+        return TypedResults.Ok(id);
+    });
+
+    cardEndPoints.MapPost("upsert", async Task<Results<Ok<Guid>, ValidationProblem>> (ICardFacade CardFacade, CardDetailModel model, IValidator<CardDetailModel> validator) =>
+    {
+        var validationErrors = await ValidateModelAsync(model, validator);
+        if (validationErrors != null)
+        {
+            return TypedResults.ValidationProblem(validationErrors);
+        }
+        var id = CardFacade.CreateOrUpdate(model);
+        return TypedResults.Ok(id);
+    });
+
+    cardEndPoints.MapGet("/{id:guid}",
+       Results<Ok<CardDetailModel>, NotFound<string>> (
+           Guid id,
+           [FromServices] ICardFacade cardFacade
+       )
+       =>
+       cardFacade.GetById(id) is { } card
+           ? TypedResults.Ok(card)
+           : TypedResults.NotFound($"User with ID {id} was not found.")
+    );
+
+    cardEndPoints.MapDelete("/{id:guid}", (ICardFacade CardFacade, Guid id) =>
+    {
+        CardFacade.Delete(id);
+    });
 
 }
 void UseCollectionEndpoints(RouteGroupBuilder routeGroupBuilder)
