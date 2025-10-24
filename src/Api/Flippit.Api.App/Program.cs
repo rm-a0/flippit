@@ -97,6 +97,19 @@ void UseUserEndpoints(RouteGroupBuilder routeGroupBuilder)
         return TypedResults.Ok(collections);
     });
 
+    userEndpoints.MapGet("/{userId:guid}/collections/{colId:guid}/CompletedLessons", (ICompletedLessonFacade facade, Guid userId, Guid colId) =>
+    {
+        var AllCompletedLessons = facade.SearchByCreatorId(userId);
+        var CollectionCompletedLessons = AllCompletedLessons.Where(m => m.CollectionId == colId);
+        return TypedResults.Ok(CollectionCompletedLessons);
+    });
+
+    userEndpoints.MapGet("/{userId:guid}/CompletedLessons", (ICompletedLessonFacade facade, Guid userId) =>
+    {
+        var AllCompletedLessons = facade.SearchByCreatorId(userId);
+        return TypedResults.Ok(AllCompletedLessons);
+    });
+
     userEndpoints.MapPost("", async Task<Results<Ok<Guid>, ValidationProblem>> ([FromBody] UserDetailModel model, IUserFacade userFacade, IValidator<UserDetailModel> validator) => {
         var validationErrors = await ValidateModelAsync(model, validator);
         if (validationErrors != null)
@@ -209,6 +222,12 @@ void UseCollectionEndpoints(RouteGroupBuilder routeGroupBuilder)
     {
         var cards = collectionFacade.SearchByCollectionId(id);
         return TypedResults.Ok(cards);
+    });
+
+    collectionsEndPoints.MapGet("/{id:guid}/CompletedLessons", (ICompletedLessonFacade facade, Guid id) =>
+    {
+        var AllCompletedLessons = facade.SearchByCollectionId(id);
+        return TypedResults.Ok(AllCompletedLessons);
     });
 
     collectionsEndPoints.MapPost("", async Task<Results<Ok<Guid>, ValidationProblem>> (ICollectionFacade collectionFacade, CollectionDetailModel model, IValidator<CollectionDetailModel> validator) =>
