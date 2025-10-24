@@ -170,7 +170,7 @@ public class CardFacadeTests
         var repositoryMock = new Mock<ICardRepository>();
         var mapper = new CardMapper();
 
-            var entities = new List<CardEntity>
+        var entities = new List<CardEntity>
         {
             new CardEntity
             {
