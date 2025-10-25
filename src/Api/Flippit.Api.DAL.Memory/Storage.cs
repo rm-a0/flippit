@@ -55,7 +55,7 @@ namespace Flippit.Api.DAL.Memory
             {
                 Id = userGuids[0],
                 Name = "John Doe",
-                photoUrl = "https://example.com/john.jpg",
+                PhotoUrl = "https://example.com/john.jpg",
                 Role = Role.user
             });
 
@@ -63,7 +63,7 @@ namespace Flippit.Api.DAL.Memory
             {
                 Id = userGuids[1],
                 Name = "Admin Jane",
-                photoUrl = "https://example.com/jane.jpg",
+                PhotoUrl = "https://example.com/jane.jpg",
                 Role = Role.admin
             });
         }

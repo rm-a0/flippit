@@ -7,6 +7,6 @@ public record UserEntity : IEntity
 {
     public required Guid Id { get; init; }
     public required string Name { get; set; }
-    public string? photoUrl { get; set; }
+    public string? PhotoUrl { get; set; }
     public Role Role { get; set; }
 }
