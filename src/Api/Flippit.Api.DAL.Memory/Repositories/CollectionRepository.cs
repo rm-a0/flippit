@@ -2,6 +2,7 @@
 using Flippit.Api.DAL.Common.Entities;
 using Flippit.Api.DAL.Common.Mappers;
 using Flippit.Api.DAL.Common.Repositories;
+using Flippit.Api.DAL.Common.Extensions;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -22,25 +23,9 @@ namespace Flippit.Api.DAL.Memory.Repositories
 
         public IList<CollectionEntity> GetAll(string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10)
         {
-            var collections = _collections.AsQueryable();
-
-            if (!string.IsNullOrWhiteSpace(filter))
-            {
-                collections = collections.Where(c => c.Name.Contains(filter, StringComparison.OrdinalIgnoreCase));
-            }
-
-            if (!string.IsNullOrWhiteSpace(sortBy))
-            {
-                collections = sortBy.ToLower() switch
-                {
-                    "name" => collections.OrderBy(c => c.Name),
-                    "id" => collections.OrderBy(c => c.Id),
-                    _ => collections
-                };
-            }
-
-            collections = collections.Skip((page - 1) * pageSize).Take(pageSize);
-            return collections.ToList();
+            return _collections.AsQueryable()
+                               .ApplyFilterSortAndPage(filter, sortBy, page, pageSize)
+                               .ToList();
         }
 
         public CollectionEntity? GetById(Guid id)
@@ -56,9 +41,13 @@ namespace Flippit.Api.DAL.Memory.Repositories
             return _collections.Where(c => c.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase));
         }
 
-        public IEnumerable<CollectionEntity> SearchByCreatorId(Guid creatorId)
+        public IEnumerable<CollectionEntity> SearchByCreatorId(Guid creatorId, string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10)
         {
-            return _collections.Where(c => c.CreatorId == creatorId);
+            return _collections
+                .Where(c => c.CreatorId == creatorId)
+                .AsQueryable()
+                .ApplyFilterSortAndPage(filter, sortBy, page, pageSize)
+                .ToList();
         }
 
         public Guid Insert(CollectionEntity entity)

@@ -1,6 +1,7 @@
 using Flippit.Api.DAL.Common.Entities;
 using Flippit.Api.DAL.Common.Mappers;
 using Flippit.Api.DAL.Common.Repositories;
+using Flippit.Api.DAL.Common.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,26 +21,9 @@ namespace Flippit.Api.DAL.Memory.Repositories
 
         public IList<CardEntity> GetAll(string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10)
         {
-            var cards = _cards.AsQueryable();
-
-            if (!string.IsNullOrWhiteSpace(filter))
-            {
-                cards = cards.Where(c => c.Question.Contains(filter, StringComparison.OrdinalIgnoreCase) ||
-                                        (c.Description != null && c.Description.Contains(filter, StringComparison.OrdinalIgnoreCase)));
-            }
-
-            if (!string.IsNullOrWhiteSpace(sortBy))
-            {
-                cards = sortBy.ToLower() switch
-                {
-                    "question" => cards.OrderBy(c => c.Question),
-                    "id" => cards.OrderBy(c => c.Id),
-                    _ => cards
-                };
-            }
-
-            cards = cards.Skip((page - 1) * pageSize).Take(pageSize);
-            return cards.ToList();
+            return _cards.AsQueryable()
+                         .ApplyFilterSortAndPage(filter, sortBy, page, pageSize)
+                         .ToList();
         }
 
         public CardEntity? GetById(Guid id)
@@ -56,14 +40,22 @@ namespace Flippit.Api.DAL.Memory.Repositories
                                     (c.Description != null && c.Description.Contains(searchText, StringComparison.OrdinalIgnoreCase)));
         }
 
-        public IEnumerable<CardEntity> SearchByCreatorId(Guid creatorId)
+        public IEnumerable<CardEntity> SearchByCreatorId(Guid creatorId, string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10)
         {
-            return _cards.Where(c => c.CreatorId == creatorId);
+            return _cards
+                .Where(c => c.CreatorId == creatorId)
+                .AsQueryable()
+                .ApplyFilterSortAndPage(filter, sortBy, page, pageSize)
+                .ToList();
         }
 
-        public IEnumerable<CardEntity> SearchByCollectionId(Guid collectionId)
+        public IEnumerable<CardEntity> SearchByCollectionId(Guid collectionId, string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10)
         {
-            return _cards.Where(c => c.CollectionId == collectionId);
+            return _cards
+                .Where(c => c.CollectionId == collectionId)
+                .AsQueryable()
+                .ApplyFilterSortAndPage(filter, sortBy, page, pageSize)
+                .ToList();
         }
 
         public Guid Insert(CardEntity entity)
