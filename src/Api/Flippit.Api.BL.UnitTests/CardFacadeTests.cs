@@ -225,7 +225,7 @@ public class CardFacadeTests
             }
         };
 
-        repositoryMock.Setup(r => r.SearchByCreatorId(creatorId)).Returns(new List<CardEntity> { entities[0], entities[1] });
+        repositoryMock.Setup(r => r.SearchByCreatorId(creatorId, null, null, 1, 10)).Returns(new List<CardEntity> { entities[0], entities[1] });
 
         var facade = new CardFacade(repositoryMock.Object, mapper);
         var searchResult = facade.SearchByCreatorId(creatorId);
@@ -234,7 +234,7 @@ public class CardFacadeTests
         Assert.Equal(creatorId, searchResult[0].CreatorId);
         Assert.Equal(creatorId, searchResult[1].CreatorId);
 
-        repositoryMock.Verify(r => r.SearchByCreatorId(creatorId), Times.Once());       
+        repositoryMock.Verify(r => r.SearchByCreatorId(creatorId, null, null, 1, 10), Times.Once());       
     }
 
     [Fact]
@@ -271,7 +271,7 @@ public class CardFacadeTests
             }
         };
 
-        repositoryMock.Setup(r => r.SearchByCollectionId(collectionId)).Returns(new List<CardEntity> { entities[0], entities[1] });
+        repositoryMock.Setup(r => r.SearchByCollectionId(collectionId, null, null, 1, 10)).Returns(new List<CardEntity> { entities[0], entities[1] });
 
         var facade = new CardFacade(repositoryMock.Object, mapper);
         var searchResult = facade.SearchByCollectionId(collectionId);
@@ -280,7 +280,7 @@ public class CardFacadeTests
         Assert.Equal(collectionId, searchResult[0].CollectionId);
         Assert.Equal(collectionId, searchResult[1].CollectionId);
 
-        repositoryMock.Verify(r => r.SearchByCollectionId(collectionId), Times.Once());       
+        repositoryMock.Verify(r => r.SearchByCollectionId(collectionId, null, null, 1, 10), Times.Once());       
     }
     
     [Fact]
