@@ -41,15 +41,15 @@ namespace Flippit.Api.BL.Facades
             return _mapper.ToListModels(entities);
         }
 
-        public IList<CompletedLessonListModel> SearchByCreatorId(Guid creatorId)
+        public IList<CompletedLessonListModel> SearchByCreatorId(Guid creatorId, string? sortBy = null, int page = 1, int pageSize = 10)
         {
-            var entities = _repository.SearchByCreatorId(creatorId);
+            var entities = _repository.SearchByCreatorId(creatorId, sortBy, page, pageSize);
             return _mapper.ToListModels(entities);
         }
 
-        public IList<CompletedLessonListModel> SearchByCollectionId(Guid collectionId)
+        public IList<CompletedLessonListModel> SearchByCollectionId(Guid collectionId, string? sortBy = null, int page = 1, int pageSize = 10)
         {
-            var entities = _repository.SearchByCollectionId(collectionId);
+            var entities = _repository.SearchByCollectionId(collectionId, sortBy, page, pageSize);
             return _mapper.ToListModels(entities);
         }
 
