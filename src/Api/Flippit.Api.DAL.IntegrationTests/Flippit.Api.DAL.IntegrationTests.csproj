@@ -18,4 +18,9 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Flippit.Api.DAL.Common\Flippit.Api.DAL.Common.csproj" />
+    <ProjectReference Include="..\Flippit.Api.DAL.Memory\Flippit.Api.DAL.Memory.csproj" />
+  </ItemGroup>
+
 </Project>
