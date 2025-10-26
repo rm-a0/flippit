@@ -344,11 +344,4 @@ void UseCompletedLessonEndpoints(RouteGroupBuilder routeGroupBuilder)
         );
 }
 
-
-
-
-
-
-
-
-
+public partial class Program { }
