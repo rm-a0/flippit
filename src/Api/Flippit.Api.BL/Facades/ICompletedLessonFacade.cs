@@ -10,8 +10,8 @@ namespace Flippit.Api.BL.Facades
         IList<CompletedLessonListModel> GetAll(string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10);
         CompletedLessonDetailModel? GetById(Guid id);
         IList<CompletedLessonListModel> Search(string searchText);
-        IList<CompletedLessonListModel> SearchByCreatorId(Guid creatorId);
-        IList<CompletedLessonListModel> SearchByCollectionId(Guid collectionId);
+        IList<CompletedLessonListModel> SearchByCreatorId(Guid creatorId, string? sortBy = null, int page = 1, int pageSize = 10);
+        IList<CompletedLessonListModel> SearchByCollectionId(Guid collectionId, string? sortBy = null, int page = 1, int pageSize = 10);
         Guid CreateOrUpdate(CompletedLessonDetailModel completedLessonModel);
         Guid Create(CompletedLessonDetailModel completedLessonModel);
         Guid? Update(CompletedLessonDetailModel completedLessonModel);

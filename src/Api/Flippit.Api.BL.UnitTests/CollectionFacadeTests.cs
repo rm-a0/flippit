@@ -202,7 +202,7 @@ public class CollectionFacadeTests
             }
         };
 
-        repositoryMock.Setup(r => r.SearchByCreatorId(creatorId)).Returns(new List<CollectionEntity> { entities[0], entities[1] });
+        repositoryMock.Setup(r => r.SearchByCreatorId(creatorId, null, null, 1, 10)).Returns(new List<CollectionEntity> { entities[0], entities[1] });
 
         var facade = new CollectionFacade(repositoryMock.Object, mapper);
         var searchResult = facade.SearchByCreatorId(creatorId);
@@ -211,7 +211,7 @@ public class CollectionFacadeTests
         Assert.Equal(entities[0].Id, searchResult[0].Id);
         Assert.Equal(entities[1].Id, searchResult[1].Id);
 
-        repositoryMock.Verify(r => r.SearchByCreatorId(creatorId), Times.Once());       
+        repositoryMock.Verify(r => r.SearchByCreatorId(creatorId, null, null, 1, 10), Times.Once());       
     }
     
     [Fact]

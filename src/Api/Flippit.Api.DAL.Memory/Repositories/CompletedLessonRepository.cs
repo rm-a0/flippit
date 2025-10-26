@@ -2,6 +2,7 @@
 using Flippit.Api.DAL.Common.Entities;
 using Flippit.Api.DAL.Common.Mappers;
 using Flippit.Api.DAL.Common.Repositories;
+using Flippit.Api.DAL.Common.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,19 +29,8 @@ namespace Flippit.Api.DAL.Memory.Repositories
                 lessons = lessons.Where(l => l.UserId == guidFilter || l.CollectionId == guidFilter);
             }
 
-            if (!string.IsNullOrWhiteSpace(sortBy))
-            {
-                lessons = sortBy.ToLower() switch
-                {
-                    "id" => lessons.OrderBy(l => l.Id),
-                    "userid" => lessons.OrderBy(l => l.UserId),
-                    "collectionid" => lessons.OrderBy(l => l.CollectionId),
-                    _ => lessons
-                };
-            }
-
-            lessons = lessons.Skip((page - 1) * pageSize).Take(pageSize);
-            return lessons.ToList();
+            return lessons.ApplySortAndPage(sortBy, page, pageSize)
+                          .ToList();
         }
 
         public CompletedLessonEntity? GetById(Guid id)
@@ -56,14 +46,22 @@ namespace Flippit.Api.DAL.Memory.Repositories
             return _completedLessons.Where(lesson => lesson.UserId == guidSearch || lesson.CollectionId == guidSearch);
         }
 
-        public IEnumerable<CompletedLessonEntity> SearchByCreatorId(Guid creatorId)
+        public IEnumerable<CompletedLessonEntity> SearchByCreatorId(Guid creatorId, string? sortBy = null, int page = 1, int pageSize = 10)
         {
-            return _completedLessons.Where(l => l.UserId == creatorId);
+            return _completedLessons
+                .Where(l => l.UserId == creatorId)
+                .AsQueryable()
+                .ApplySortAndPage(sortBy, page, pageSize)
+                .ToList();
         }
 
-        public IEnumerable<CompletedLessonEntity> SearchByCollectionId(Guid collectionId)
+        public IEnumerable<CompletedLessonEntity> SearchByCollectionId(Guid collectionId, string? sortBy = null, int page = 1, int pageSize = 10)
         {
-            return _completedLessons.Where(l => l.CollectionId == collectionId);
+            return _completedLessons
+                .Where(l => l.CollectionId == collectionId)
+                .AsQueryable()
+                .ApplySortAndPage(sortBy, page, pageSize)
+                .ToList();
         }
 
         public Guid Insert(CompletedLessonEntity entity)
