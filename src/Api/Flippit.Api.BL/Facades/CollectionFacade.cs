@@ -41,9 +41,9 @@ namespace Flippit.Api.BL.Facades
             return _mapper.ToListModels(entities);
         }
 
-        public IList<CollectionListModel> SearchByCreatorId(Guid creatorId)
+        public IList<CollectionListModel> SearchByCreatorId(Guid creatorId, string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10)
         {
-            var entities = _repository.SearchByCreatorId(creatorId);
+            var entities = _repository.SearchByCreatorId(creatorId, filter, sortBy, page, pageSize);
             return _mapper.ToListModels(entities);
         }
 
