@@ -30,8 +30,8 @@ namespace Flippit.Common.Models.User
                 .WithMessage("Name cannot exceed 50 characters");
 
             RuleFor(x => x.Role)
-                .NotEmpty()
-                .WithMessage("Role field is required")
+                //.NotEmpty()
+                //.WithMessage("Role field is required")
                 .IsInEnum()
                 .WithMessage("Role must be a valid value");
         }
