@@ -202,14 +202,14 @@ public class CompletedLessonFacadeTests
             }
         };
 
-        repositoryMock.Setup(r => r.SearchByCreatorId(userId)).Returns(new List<CompletedLessonEntity> { entities[0], entities[1] });
+        repositoryMock.Setup(r => r.SearchByCreatorId(userId, null, 1, 10)).Returns(new List<CompletedLessonEntity> { entities[0], entities[1] });
 
         var facade = new CompletedLessonFacade(repositoryMock.Object, mapper);
         var searchResult = facade.SearchByCreatorId(userId);
 
         Assert.Equal(2, searchResult.Count);
 
-        repositoryMock.Verify(r => r.SearchByCreatorId(userId), Times.Once());       
+        repositoryMock.Verify(r => r.SearchByCreatorId(userId, null, 1, 10), Times.Once());       
     }
 
     [Fact]
@@ -239,7 +239,7 @@ public class CompletedLessonFacadeTests
             }
         };
 
-        repositoryMock.Setup(r => r.SearchByCollectionId(collectionId)).Returns(new List<CompletedLessonEntity> { entities[0], entities[1] });
+        repositoryMock.Setup(r => r.SearchByCollectionId(collectionId, null, 1, 10)).Returns(new List<CompletedLessonEntity> { entities[0], entities[1] });
 
         var facade = new CompletedLessonFacade(repositoryMock.Object, mapper);
         var searchResult = facade.SearchByCollectionId(collectionId);
@@ -248,7 +248,7 @@ public class CompletedLessonFacadeTests
         Assert.Equal(collectionId, searchResult[0].CollectionId);
         Assert.Equal(collectionId, searchResult[1].CollectionId);
 
-        repositoryMock.Verify(r => r.SearchByCollectionId(collectionId), Times.Once());       
+        repositoryMock.Verify(r => r.SearchByCollectionId(collectionId, null, 1, 10), Times.Once());       
     }
     
     [Fact]
