@@ -25,6 +25,7 @@ public class InMemoryTestDataProvider : ITestDataProvider
         collectionMapper = new CollectionMapper();
         completedLessonMapper = new CompletedLessonMapper();
         userMapper = new UserMapper();
+        storage = new Storage(false);
         ResetStorage();
     }
     
