@@ -69,8 +69,6 @@ public class CardRepositoryTests : IClassFixture<InMemoryTestDataProvider>
         Assert.Contains(result, c => c.Id == database.CardGuids[0]);
         Assert.Contains(result, c => c.Id == database.CardGuids[1]);
         Assert.Contains(result, c => c.Id == database.CardGuids[2]);
-        
-        //Assert.Equal(3, result.Count());
     }
     
     [Fact]
