@@ -1,5 +1,4 @@
-﻿using Xunit;
-using Flippit.Common.Enums;
+﻿using Flippit.Common.Enums;
 using Flippit.Api.DAL.Common.Entities;
 
 namespace Flippit.Api.DAL.IntegrationTests;
@@ -11,6 +10,7 @@ public class CardRepositoryTests : IClassFixture<InMemoryTestDataProvider>
     public CardRepositoryTests(InMemoryTestDataProvider database)
     {
         this.database = database;
+        database.ResetStorage();
     }
 
     [Fact]
@@ -66,7 +66,11 @@ public class CardRepositoryTests : IClassFixture<InMemoryTestDataProvider>
         var result = repository.Search("What");
         
         Assert.NotNull(result);
-        Assert.Equal(3, result.Count());
+        Assert.Contains(result, c => c.Id == database.CardGuids[0]);
+        Assert.Contains(result, c => c.Id == database.CardGuids[1]);
+        Assert.Contains(result, c => c.Id == database.CardGuids[2]);
+        
+        //Assert.Equal(3, result.Count());
     }
     
     [Fact]

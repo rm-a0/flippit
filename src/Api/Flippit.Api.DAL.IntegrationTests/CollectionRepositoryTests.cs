@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices.JavaScript;
 using Xunit;
 using Flippit.Api.DAL.Common.Entities;
+using Flippit.Api.DAL.Memory;
 
 namespace Flippit.Api.DAL.IntegrationTests;
 
@@ -11,6 +12,7 @@ public class CollectionRepositoryTests : IClassFixture<InMemoryTestDataProvider>
     public CollectionRepositoryTests(InMemoryTestDataProvider database)
     {
         this.database = database;
+        database.ResetStorage();
     }
 
     [Fact]

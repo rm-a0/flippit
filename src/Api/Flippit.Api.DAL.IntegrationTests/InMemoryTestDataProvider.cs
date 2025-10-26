@@ -13,26 +13,25 @@ namespace Flippit.Api.DAL.IntegrationTests;
 
 public class InMemoryTestDataProvider : ITestDataProvider
 {
-    private readonly Lazy<Storage> inMemoryStorage;
     private readonly CardMapper cardMapper;
     private readonly CollectionMapper collectionMapper;
     private readonly CompletedLessonMapper completedLessonMapper;
     private readonly UserMapper userMapper;
+    private Storage storage;
 
     public InMemoryTestDataProvider()
     {
-        inMemoryStorage = new Lazy<Storage>(CreateInMemoryStorage);
         cardMapper = new CardMapper();
         collectionMapper = new CollectionMapper();
         completedLessonMapper = new CompletedLessonMapper();
         userMapper = new UserMapper();
+        ResetStorage();
     }
-
-    private Storage CreateInMemoryStorage()
+    
+    public void ResetStorage()
     {
-        var storage = new Storage(false);
+        storage = new Storage(false);
         SeedStorage(storage);
-        return storage;
     }
     
     public IList<Guid> CardGuids { get; } = new List<Guid>
@@ -125,9 +124,9 @@ public class InMemoryTestDataProvider : ITestDataProvider
         {
             Id = CompletedLessonGuids[0],
             AnswersJson =  "Answer",
-            StatisticsJson = "Statistics",
+            StatisticsJson = "Search me",
             UserId = UserGuids[0],
-            CollectionId = CollectionGuids[0],
+            CollectionId = CollectionGuids[0]
         });
         storage.CompletedLessons.Add(new CompletedLessonEntity
         {
@@ -135,7 +134,7 @@ public class InMemoryTestDataProvider : ITestDataProvider
             AnswersJson =  "Answer",
             StatisticsJson = "Statistics",
             UserId = UserGuids[1],
-            CollectionId = CollectionGuids[1],
+            CollectionId = CollectionGuids[1]
         });
     }
 
@@ -148,45 +147,45 @@ public class InMemoryTestDataProvider : ITestDataProvider
 
     public CardEntity? GetCardDirectly(Guid id)
     {
-        var card = inMemoryStorage.Value.Cards.SingleOrDefault(c => c.Id == id);
+        var card = storage.Cards.SingleOrDefault(c => c.Id == id);
         return DeepClone(card);
     }
 
     public CollectionEntity? GetCollectionDirectly(Guid id)
     {
-        var collection = inMemoryStorage.Value.Collections.SingleOrDefault(c => c.Id == id);
+        var collection = storage.Collections.SingleOrDefault(c => c.Id == id);
         return DeepClone(collection);
     }
 
     public CompletedLessonEntity? GetCompletedLessonDirectly(Guid id)
     {
-        var completedLesson = inMemoryStorage.Value.CompletedLessons.SingleOrDefault(cl => cl.Id == id);
+        var completedLesson = storage.CompletedLessons.SingleOrDefault(cl => cl.Id == id);
         return DeepClone(completedLesson);
     }
 
     public UserEntity? GetUserDirectly(Guid id)
     {
-        var user = inMemoryStorage.Value.Users.SingleOrDefault(u => u.Id == id);
+        var user = storage.Users.SingleOrDefault(u => u.Id == id);
         return DeepClone(user);
     }
 
     public ICardRepository GetCardRepository()
     {
-        return new CardRepository(inMemoryStorage.Value, cardMapper);
+        return new CardRepository(storage, cardMapper);
     }
 
     public ICollectionRepository GetCollectionRepository()
     {
-        return new CollectionRepository(inMemoryStorage.Value, collectionMapper);
+        return new CollectionRepository(storage, collectionMapper);
     }
 
     public ICompletedLessonRepository GetCompletedLessonRepository()
     {
-        return new CompletedLessonRepository(inMemoryStorage.Value, completedLessonMapper);
+        return new CompletedLessonRepository(storage, completedLessonMapper);
     }
 
     public IUserRepository GetUserRepository()
     {
-        return new UserRepository(inMemoryStorage.Value, userMapper);
+        return new UserRepository(storage, userMapper);
     }
 }
