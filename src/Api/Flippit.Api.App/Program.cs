@@ -41,8 +41,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.PropertyNameCaseInsensitive = true;
 });
 
-//builder.Services.AddOpenApi();
-//builder.Services.AddSwaggerGen();
+
 ConfigureOpenApiDocuments(builder.Services);
 
 var app = builder.Build();
@@ -51,10 +50,7 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    ////app.MapOpenApi();
-    //app.UseSwagger();
-    ////app.UseOpenApi();
-    //app.UseSwaggerUI();
+
     app.UseOpenApi();
     app.UseSwaggerUi();
 
@@ -107,22 +103,15 @@ void UseUserEndpoints(RouteGroupBuilder routeGroupBuilder)
             : TypedResults.NotFound($"User with ID {id} was not found.")
     );
 
-    userEndpoints.MapGet("/{id:guid}/collections", (ICollectionFacade collectionFacade, Guid id) =>
+    userEndpoints.MapGet("/{id:guid}/collections", (ICollectionFacade collectionFacade, Guid id, [FromQuery] string ? filter = null, [FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string ? sortBy = null) =>
     {
-        var collections = collectionFacade.SearchByCreatorId(id);
+        var collections = collectionFacade.SearchByCreatorId(id, filter, sortBy, page, pageSize);
         return TypedResults.Ok(collections);
     });
 
-    userEndpoints.MapGet("/{userId:guid}/collections/{colId:guid}/CompletedLessons", (ICompletedLessonFacade facade, Guid userId, Guid colId) =>
+    userEndpoints.MapGet("/{userId:guid}/CompletedLessons", (ICompletedLessonFacade facade, Guid userId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? sortBy = null) =>
     {
-        var AllCompletedLessons = facade.SearchByCreatorId(userId);
-        var CollectionCompletedLessons = AllCompletedLessons.Where(m => m.CollectionId == colId);
-        return TypedResults.Ok(CollectionCompletedLessons);
-    });
-
-    userEndpoints.MapGet("/{userId:guid}/CompletedLessons", (ICompletedLessonFacade facade, Guid userId) =>
-    {
-        var AllCompletedLessons = facade.SearchByCreatorId(userId);
+        var AllCompletedLessons = facade.SearchByCreatorId(userId, sortBy, page, pageSize);
         return TypedResults.Ok(AllCompletedLessons);
     });
 
@@ -234,15 +223,15 @@ void UseCollectionEndpoints(RouteGroupBuilder routeGroupBuilder)
         return TypedResults.Ok(collections);
     });
 
-    collectionsEndPoints.MapGet("/{id:guid}/cards", (ICardFacade collectionFacade, Guid id) =>
+    collectionsEndPoints.MapGet("/{id:guid}/cards", (ICardFacade collectionFacade, Guid id, [FromQuery] string? filter = null, [FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? sortBy = null) =>
     {
-        var cards = collectionFacade.SearchByCollectionId(id);
+        var cards = collectionFacade.SearchByCollectionId(id, filter, sortBy, page, pageSize);
         return TypedResults.Ok(cards);
     });
 
-    collectionsEndPoints.MapGet("/{id:guid}/CompletedLessons", (ICompletedLessonFacade facade, Guid id) =>
+    collectionsEndPoints.MapGet("/{id:guid}/CompletedLessons", (ICompletedLessonFacade facade, Guid id, [FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? sortBy = null) =>
     {
-        var AllCompletedLessons = facade.SearchByCollectionId(id);
+        var AllCompletedLessons = facade.SearchByCollectionId(id, sortBy, page, pageSize);
         return TypedResults.Ok(AllCompletedLessons);
     });
 
