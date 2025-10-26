@@ -76,7 +76,7 @@ public class InMemoryTestDataProvider : ITestDataProvider
         storage.Collections.Add(new CollectionEntity
         {
             Id = CollectionGuids[0],
-            Name = "Test Collection 1",
+            Name = "Search me",
             CreatorId = UserGuids[0],
             StartTime = DateTime.Now,
             EndTime = DateTime.Now
