@@ -15,11 +15,17 @@ namespace Flippit.Api.App.EndToEndTests
     {
         private readonly FlippitApiApplicationFactory application;
         private readonly Lazy<HttpClient> client;
+        private readonly JsonSerializerOptions jsonOptions;
 
         public CollectionControllerTests()
         {
             application = new FlippitApiApplicationFactory();
             client = new Lazy<HttpClient>(application.CreateClient());
+            jsonOptions = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: false) }
+            };
         }
 
         [Fact]
@@ -79,28 +85,22 @@ namespace Flippit.Api.App.EndToEndTests
                 CollectionId = collectionGuid
             };
 
-            var options = new JsonSerializerOptions
-            {
-                Converters = { new JsonStringEnumConverter() },
-                PropertyNameCaseInsensitive = true
-            };
-
-            var json = JsonSerializer.Serialize(firstCard, options);
+            var json = JsonSerializer.Serialize(firstCard, jsonOptions);
 
 
-            var card1Response = await client.Value.PostAsJsonAsync("/api/cards", firstCard, options);
+            var card1Response = await client.Value.PostAsJsonAsync("/api/cards", firstCard, jsonOptions);
             card1Response.EnsureSuccessStatusCode();
 
-            var card2Response = await client.Value.PostAsJsonAsync("/api/cards", firstCard, options);
+            var card2Response = await client.Value.PostAsJsonAsync("/api/cards", firstCard, jsonOptions);
             card2Response.EnsureSuccessStatusCode();
 
             var response = await client.Value.GetAsync($"/api/collections/{collectionGuid}/cards");
 
             response.EnsureSuccessStatusCode();
 
-            var cards = await response.Content.ReadFromJsonAsync<ICollection<CardListModel>>(options);
-            Assert.NotEmpty(cards);
-            Assert.Equal(2, cards.Count);
+            var cards = await response.Content.ReadFromJsonAsync<ICollection<CardListModel>>(jsonOptions);
+            Assert.NotEmpty(cards!);
+            Assert.Equal(2, cards!.Count);
         }
 
         public async ValueTask DisposeAsync()

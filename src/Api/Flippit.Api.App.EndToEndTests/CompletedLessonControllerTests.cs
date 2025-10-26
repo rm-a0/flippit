@@ -60,8 +60,8 @@ namespace Flippit.Api.App.EndToEndTests
             response.EnsureSuccessStatusCode();
 
             var userCompletedLessons = await response.Content.ReadFromJsonAsync<IEnumerable<CompletedLessonListModel>>();
-            Assert.NotEmpty(userCompletedLessons);
-            Assert.Equal(1, userCompletedLessons.Count());
+            Assert.NotEmpty(userCompletedLessons!);
+            Assert.Single(userCompletedLessons!);
         }
 
         [Fact]
@@ -99,8 +99,8 @@ namespace Flippit.Api.App.EndToEndTests
             response.EnsureSuccessStatusCode();
 
             var userCompletedLessons = await response.Content.ReadFromJsonAsync<IEnumerable<CompletedLessonListModel>>();
-            Assert.NotEmpty(userCompletedLessons);
-            Assert.Equal(1, userCompletedLessons.Count());
+            Assert.NotEmpty(userCompletedLessons!);
+            Assert.Single(userCompletedLessons!);
         }
         public async ValueTask DisposeAsync()
         {
