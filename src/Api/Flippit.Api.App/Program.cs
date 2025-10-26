@@ -327,7 +327,7 @@ void UseCompletedLessonEndpoints(RouteGroupBuilder routeGroupBuilder)
 }
 
 
-    async Task<Dictionary<string, string[]>?> ValidateModelAsync<T>(T model, IValidator<T> validator)
+async Task<Dictionary<string, string[]>?> ValidateModelAsync<T>(T model, IValidator<T> validator)
 {
     var validationResult = await validator.ValidateAsync(model);
 
@@ -342,6 +342,10 @@ void UseCompletedLessonEndpoints(RouteGroupBuilder routeGroupBuilder)
             g => g.Key,
             g => g.Select(e => e.ErrorMessage).ToArray()
         );
+}
+
+public partial class Program
+{
 }
 
 

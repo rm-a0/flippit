@@ -16,6 +16,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Common\Flippit.Common.Models\Flippit.Common.Models.csproj" />
+    <ProjectReference Include="..\Flippit.Api.App\Flippit.Api.App.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
 
