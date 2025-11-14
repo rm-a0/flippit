@@ -53,18 +53,21 @@ namespace Flippit.Api.BL.Facades
 
         public Guid CreateOrUpdate(CardDetailModel cardModel)
         {
+            ValidateCardModel(cardModel);
             var entity = _mapper.ModelToEntity(cardModel);
             return _repository.Exists(entity.Id) ? _repository.Update(entity) ?? entity.Id : _repository.Insert(entity);
         }
 
         public Guid Create(CardDetailModel cardModel)
         {
+            ValidateCardModel(cardModel);
             var entity = _mapper.ModelToEntity(cardModel);
             return _repository.Insert(entity);
         }
 
         public Guid? Update(CardDetailModel cardModel)
         {
+            ValidateCardModel(cardModel);
             var entity = _mapper.ModelToEntity(cardModel);
             return _repository.Update(entity);
         }
@@ -72,6 +75,15 @@ namespace Flippit.Api.BL.Facades
         public void Delete(Guid id)
         {
             _repository.Remove(id);
+        }
+
+        private static void ValidateCardModel(CardDetailModel cardModel)
+        {
+            if (cardModel == null)
+                throw new ArgumentNullException(nameof(cardModel));
+
+            if (string.IsNullOrWhiteSpace(cardModel.Question))
+                throw new ArgumentException("Card question cannot be empty.", nameof(cardModel.Question));
         }
     }
 }

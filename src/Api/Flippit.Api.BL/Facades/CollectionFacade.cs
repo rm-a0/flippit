@@ -46,18 +46,21 @@ namespace Flippit.Api.BL.Facades
 
         public Guid CreateOrUpdate(CollectionDetailModel collectionModel)
         {
+            ValidateCollectionModel(collectionModel);
             var entity = _mapper.ModelToEntity(collectionModel);
             return _repository.Exists(entity.Id) ? _repository.Update(entity) ?? entity.Id : _repository.Insert(entity);
         }
 
         public Guid Create(CollectionDetailModel collectionModel)
         {
+            ValidateCollectionModel(collectionModel);
             var entity = _mapper.ModelToEntity(collectionModel);
             return _repository.Insert(entity);
         }
 
         public Guid? Update(CollectionDetailModel collectionModel)
         {
+            ValidateCollectionModel(collectionModel);
             var entity = _mapper.ModelToEntity(collectionModel);
             return _repository.Update(entity);
         }
@@ -65,6 +68,15 @@ namespace Flippit.Api.BL.Facades
         public void Delete(Guid id)
         {
             _repository.Remove(id);
+        }
+
+        private static void ValidateCollectionModel(CollectionDetailModel collectionModel)
+        {
+            if (collectionModel == null)
+                throw new ArgumentNullException(nameof(collectionModel));
+
+            if (string.IsNullOrWhiteSpace(collectionModel.Name))
+                throw new ArgumentException("Collection name cannot be empty.", nameof(collectionModel.Name));
         }
     }
 }

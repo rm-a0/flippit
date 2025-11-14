@@ -52,18 +52,21 @@ namespace Flippit.Api.BL.Facades
 
         public Guid CreateOrUpdate(CompletedLessonDetailModel lessonModel)
         {
+            ValidateCompletedLessonDetailModel(lessonModel);
             var entity = _mapper.ModelToEntity(lessonModel);
             return _repository.Exists(entity.Id) ? _repository.Update(entity) ?? entity.Id : _repository.Insert(entity);
         }
 
         public Guid Create(CompletedLessonDetailModel lessonModel)
         {
+            ValidateCompletedLessonDetailModel(lessonModel);
             var entity = _mapper.ModelToEntity(lessonModel);
             return _repository.Insert(entity);
         }
 
         public Guid? Update(CompletedLessonDetailModel lessonModel)
         {
+            ValidateCompletedLessonDetailModel(lessonModel);
             var entity = _mapper.ModelToEntity(lessonModel);
             return _repository.Update(entity);
         }
@@ -71,6 +74,17 @@ namespace Flippit.Api.BL.Facades
         public void Delete(Guid id)
         {
             _repository.Remove(id);
+        }
+
+        private static void ValidateCompletedLessonDetailModel(CompletedLessonDetailModel lessonModel)
+        {
+            if (lessonModel == null)
+                throw new ArgumentNullException(nameof(lessonModel));
+            if (lessonModel.UserId == Guid.Empty)
+                throw new ArgumentException("User ID cannot be empty.", nameof(lessonModel.UserId));
+
+            if (lessonModel.CollectionId == Guid.Empty)
+                throw new ArgumentException("Collection ID cannot be empty.", nameof(lessonModel.CollectionId));
         }
     }
 }
