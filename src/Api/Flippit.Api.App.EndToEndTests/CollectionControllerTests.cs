@@ -64,8 +64,8 @@ namespace Flippit.Api.App.EndToEndTests
             var firstCard = new CardDetailModel
             {
                 Id = Guid.NewGuid(),
-                QuestionType = Common.Enums.QAType.text,
-                AnswerType = Common.Enums.QAType.text,
+                QuestionType = Common.Enums.QAType.Text,
+                AnswerType = Common.Enums.QAType.Text,
                 Question = "TestQuestion",
                 Answer = "TestAnswer",
                 Description = "Test Card",
@@ -76,8 +76,8 @@ namespace Flippit.Api.App.EndToEndTests
             var secondCard = new CardDetailModel
             {
                 Id = Guid.NewGuid(),
-                QuestionType = Common.Enums.QAType.text,
-                AnswerType = Common.Enums.QAType.text,
+                QuestionType = Common.Enums.QAType.Text,
+                AnswerType = Common.Enums.QAType.Text,
                 Question = "TestQuestion",
                 Answer = "TestAnswer",
                 Description = "Test Card",

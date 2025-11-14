@@ -56,7 +56,7 @@ namespace Flippit.Api.DAL.Memory
                 Id = userGuids[0],
                 Name = "John Doe",
                 PhotoUrl = "https://example.com/john.jpg",
-                Role = Role.user
+                Role = Role.User
             });
 
             Users.Add(new UserEntity
@@ -64,7 +64,7 @@ namespace Flippit.Api.DAL.Memory
                 Id = userGuids[1],
                 Name = "Admin Jane",
                 PhotoUrl = "https://example.com/jane.jpg",
-                Role = Role.admin
+                Role = Role.Admin
             });
         }
 
@@ -73,8 +73,8 @@ namespace Flippit.Api.DAL.Memory
             Cards.Add(new CardEntity
             {
                 Id = cardGuids[0],
-                QuestionType = QAType.text,
-                AnswerType = QAType.text,
+                QuestionType = QAType.Text,
+                AnswerType = QAType.Text,
                 Question = "What is the capital of France?",
                 Answer = "Paris",
                 Description = "Basic geography question",
@@ -85,8 +85,8 @@ namespace Flippit.Api.DAL.Memory
             Cards.Add(new CardEntity
             {
                 Id = cardGuids[1],
-                QuestionType = QAType.url,
-                AnswerType = QAType.text,
+                QuestionType = QAType.Url,
+                AnswerType = QAType.Text,
                 Question = "https://example.com/eiffel.jpg",
                 Answer = "Eiffel Tower",
                 Description = "Landmark identification",
@@ -97,8 +97,8 @@ namespace Flippit.Api.DAL.Memory
             Cards.Add(new CardEntity
             {
                 Id = cardGuids[2],
-                QuestionType = QAType.text,
-                AnswerType = QAType.text,
+                QuestionType = QAType.Text,
+                AnswerType = QAType.Text,
                 Question = "What is 2 + 2?",
                 Answer = "4",
                 CreatorId = userGuids[1],

@@ -119,9 +119,9 @@ public class CardRepositoryTests : IClassFixture<InMemoryTestDataProvider>
         var newCard = new CardEntity
         {
             Id = newCardId,
-            QuestionType = QAType.text,
+            QuestionType = QAType.Text,
             Question = "Test Question",
-            AnswerType = QAType.text,
+            AnswerType = QAType.Text,
             Answer = "Test Answer",
             CollectionId = database.CollectionGuids[0],
             CreatorId = database.UserGuids[0]
@@ -146,9 +146,9 @@ public class CardRepositoryTests : IClassFixture<InMemoryTestDataProvider>
         var updatedCard = new CardEntity()
         {
             Id = cardId,
-            QuestionType = QAType.text,
+            QuestionType = QAType.Text,
             Question = "Updated question",
-            AnswerType = QAType.text,
+            AnswerType = QAType.Text,
             Answer = "Updated answer",
             CreatorId = database.UserGuids[0],
             CollectionId = database.CollectionGuids[0]
@@ -171,9 +171,9 @@ public class CardRepositoryTests : IClassFixture<InMemoryTestDataProvider>
         var newCard = new CardEntity
         {
             Id = cardId,
-            QuestionType = QAType.text,
+            QuestionType = QAType.Text,
             Question = "Inserted question",
-            AnswerType = QAType.text,
+            AnswerType = QAType.Text,
             Answer = "Inserted answer",
             CreatorId = database.UserGuids[0],
             CollectionId = database.CollectionGuids[0]

@@ -93,9 +93,9 @@ public class InMemoryTestDataProvider : ITestDataProvider
         storage.Cards.Add(new CardEntity
         {
             Id = CardGuids[0],
-            QuestionType = QAType.text,
+            QuestionType = QAType.Text,
             Question = "What is C#?",
-            AnswerType = QAType.text,
+            AnswerType = QAType.Text,
             Answer = "A programming language",
             CreatorId = UserGuids[0],
             CollectionId = CollectionGuids[0]
@@ -103,9 +103,9 @@ public class InMemoryTestDataProvider : ITestDataProvider
         storage.Cards.Add(new CardEntity
         {
             Id = CardGuids[1],
-            QuestionType = QAType.text,
+            QuestionType = QAType.Text,
             Question = "What is .NET?",
-            AnswerType = QAType.text,
+            AnswerType = QAType.Text,
             Answer = "A framework",
             CreatorId = UserGuids[1],
             CollectionId = CollectionGuids[0]
@@ -113,9 +113,9 @@ public class InMemoryTestDataProvider : ITestDataProvider
         storage.Cards.Add(new CardEntity
         {
             Id = CardGuids[2],
-            QuestionType = QAType.text,
+            QuestionType = QAType.Text,
             Question = "What is Entity Framework?",
-            AnswerType = QAType.text,
+            AnswerType = QAType.Text,
             Answer = "An ORM",
             CreatorId = UserGuids[1],
             CollectionId = CollectionGuids[1]

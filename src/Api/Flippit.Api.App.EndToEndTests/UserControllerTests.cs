@@ -91,7 +91,7 @@ namespace Flippit.Api.App.EndToEndTests
                 Id = Guid.NewGuid(),
                 Name = "Test User",
                 PhotoUrl = "http://example.com/photo.jpg",
-                Role = Role.user
+                Role = Role.User
             };
             var createResponse = await client.Value.PostAsJsonAsync("/api/users", newUser, jsonOptions);
             createResponse.EnsureSuccessStatusCode();
@@ -149,7 +149,7 @@ namespace Flippit.Api.App.EndToEndTests
                 Id = Guid.NewGuid(),
                 Name = "Test User",
                 PhotoUrl = "http://example.com/photo.jpg",
-                Role = Role.user
+                Role = Role.User
             };
 
             var response = await client.Value.PostAsJsonAsync("/api/users", newUser, jsonOptions);
@@ -168,7 +168,7 @@ namespace Flippit.Api.App.EndToEndTests
                 Id = Guid.NewGuid(),
                 Name = "Test User",
                 PhotoUrl = "http://example.com/photo.jpg",
-                Role = Role.user
+                Role = Role.User
             };
             var createResponse = await client.Value.PostAsJsonAsync("/api/users", newUser, jsonOptions);
             createResponse.EnsureSuccessStatusCode();
@@ -179,7 +179,7 @@ namespace Flippit.Api.App.EndToEndTests
                 Id = createdId,
                 Name = "Updated User",
                 PhotoUrl = "http://example.com/updated_photo.jpg",
-                Role = Role.user
+                Role = Role.User
             };
 
             var response = await client.Value.PutAsJsonAsync("/api/users", updatedUser, jsonOptions);
@@ -199,7 +199,7 @@ namespace Flippit.Api.App.EndToEndTests
                 Id = nonExistentId,
                 Name = "Non-Existent User",
                 PhotoUrl = "http://example.com/photo.jpg",
-                Role = Role.user
+                Role = Role.User
             };
 
             var response = await client.Value.PutAsJsonAsync("/api/users", updatedUser, jsonOptions);
@@ -218,7 +218,7 @@ namespace Flippit.Api.App.EndToEndTests
                 Id = userId,
                 Name = "",
                 PhotoUrl = "http://example.com/photo.jpg",
-                Role = Role.user
+                Role = Role.User
             };
 
             var response = await client.Value.PutAsJsonAsync("/api/users", invalidUser, jsonOptions);
@@ -234,7 +234,7 @@ namespace Flippit.Api.App.EndToEndTests
                 Id = Guid.NewGuid(),
                 Name = "New User",
                 PhotoUrl = "http://example.com/new_photo.jpg",
-                Role = Role.user
+                Role = Role.User
             };
 
             var response = await client.Value.PostAsJsonAsync("/api/users/upsert", newUser, jsonOptions);
@@ -254,7 +254,7 @@ namespace Flippit.Api.App.EndToEndTests
                 Id = existingUserId,
                 Name = "Updated Existing User",
                 PhotoUrl = "http://example.com/updated_photo.jpg",
-                Role = Role.user
+                Role = Role.User
             };
 
             var response = await client.Value.PostAsJsonAsync("/api/users/upsert", updatedUser, jsonOptions);

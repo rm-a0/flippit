@@ -59,9 +59,9 @@ public class CardFacadeTests
             new CardEntity
             {
                 Id = Guid.NewGuid(),
-                QuestionType = QAType.text,
+                QuestionType = QAType.Text,
                 Question = "Question 1",
-                AnswerType = QAType.text,
+                AnswerType = QAType.Text,
                 Answer = "Answer 1",
                 CollectionId = Guid.NewGuid(),
                 CreatorId = Guid.NewGuid(),
@@ -70,9 +70,9 @@ public class CardFacadeTests
             new CardEntity
             {
                 Id = Guid.NewGuid(),
-                QuestionType = QAType.url,
+                QuestionType = QAType.Url,
                 Question = "Question 2",
-                AnswerType = QAType.url,
+                AnswerType = QAType.Url,
                 Answer = "answer.url",
                 CollectionId = Guid.NewGuid(),
                 CreatorId = Guid.NewGuid(),
@@ -118,9 +118,9 @@ public class CardFacadeTests
         var entity = new CardEntity
         {
             Id = Guid.NewGuid(),
-            QuestionType = QAType.text,
+            QuestionType = QAType.Text,
             Question = "Sample Question",
-            AnswerType = QAType.text,
+            AnswerType = QAType.Text,
             Answer = "Sample Answer",
             CollectionId = Guid.NewGuid(),
             CreatorId = Guid.NewGuid(),
@@ -170,9 +170,9 @@ public class CardFacadeTests
             new CardEntity
             {
                 Id = Guid.NewGuid(),
-                QuestionType = QAType.text,
+                QuestionType = QAType.Text,
                 Question = "Question 1",
-                AnswerType = QAType.text,
+                AnswerType = QAType.Text,
                 Answer = "Answer 1",
                 CollectionId = Guid.NewGuid(),
                 CreatorId = Guid.NewGuid(),
@@ -203,9 +203,9 @@ public class CardFacadeTests
             new CardEntity
             {
                 Id = Guid.NewGuid(),
-                QuestionType = QAType.text,
+                QuestionType = QAType.Text,
                 Question = "Question 1",
-                AnswerType = QAType.text,
+                AnswerType = QAType.Text,
                 Answer = "Answer 1",
                 CollectionId = Guid.NewGuid(),
                 CreatorId = creatorId,
@@ -215,9 +215,9 @@ public class CardFacadeTests
             new CardEntity
             {
                 Id = Guid.NewGuid(),
-                QuestionType = QAType.url,
+                QuestionType = QAType.Url,
                 Question = "Question 2",
-                AnswerType = QAType.url,
+                AnswerType = QAType.Url,
                 Answer = "answer.url",
                 CollectionId = Guid.NewGuid(),
                 CreatorId = creatorId,
@@ -249,9 +249,9 @@ public class CardFacadeTests
             new CardEntity
             {
                 Id = Guid.NewGuid(),
-                QuestionType = QAType.text,
+                QuestionType = QAType.Text,
                 Question = "Question 1",
-                AnswerType = QAType.text,
+                AnswerType = QAType.Text,
                 Answer = "Answer 1",
                 CollectionId = collectionId,
                 CreatorId = Guid.NewGuid(),
@@ -261,9 +261,9 @@ public class CardFacadeTests
             new CardEntity
             {
                 Id = Guid.NewGuid(),
-                QuestionType = QAType.url,
+                QuestionType = QAType.Url,
                 Question = "Question 2",
-                AnswerType = QAType.url,
+                AnswerType = QAType.Url,
                 Answer = "answer.url",
                 CollectionId = collectionId,
                 CreatorId = Guid.NewGuid(),
@@ -301,9 +301,9 @@ public class CardFacadeTests
         var cardModel = new CardDetailModel
         {
             Id = Guid.NewGuid(),
-            QuestionType = QAType.text,
+            QuestionType = QAType.Text,
             Question = "",
-            AnswerType = QAType.text,
+            AnswerType = QAType.Text,
             Answer = "Answer",
             CollectionId = Guid.NewGuid(),
             CreatorId = Guid.NewGuid()
@@ -323,9 +323,9 @@ public class CardFacadeTests
         var cardModel = new CardDetailModel
         {
             Id = Guid.NewGuid(),
-            QuestionType = QAType.text,
+            QuestionType = QAType.Text,
             Question = "   ",
-            AnswerType = QAType.text,
+            AnswerType = QAType.Text,
             Answer = "Answer",
             CollectionId = Guid.NewGuid(),
             CreatorId = Guid.NewGuid()
@@ -347,9 +347,9 @@ public class CardFacadeTests
         var cardModel = new CardDetailModel
         {
             Id = cardId,
-            QuestionType = QAType.text,
+            QuestionType = QAType.Text,
             Question = "New Question",
-            AnswerType = QAType.text,
+            AnswerType = QAType.Text,
             Answer = "Answer",
             CollectionId = Guid.NewGuid(),
             CreatorId = Guid.NewGuid(),
@@ -380,9 +380,9 @@ public class CardFacadeTests
         var updatedCardModel = new CardDetailModel
         {
             Id = cardId,
-            QuestionType = QAType.text,
+            QuestionType = QAType.Text,
             Question = "Updated Question",
-            AnswerType = QAType.text,
+            AnswerType = QAType.Text,
             Answer = "Updated Answer",
             CollectionId = Guid.NewGuid(),
             CreatorId = Guid.NewGuid(),
@@ -421,9 +421,9 @@ public class CardFacadeTests
         var cardModel = new CardDetailModel
         {
             Id = Guid.NewGuid(),
-            QuestionType = QAType.text,
+            QuestionType = QAType.Text,
             Question = "",
-            AnswerType = QAType.text,
+            AnswerType = QAType.Text,
             Answer = "Answer",
             CollectionId = Guid.NewGuid(),
             CreatorId = Guid.NewGuid()
@@ -445,9 +445,9 @@ public class CardFacadeTests
         var cardModel = new CardDetailModel
         {
             Id = cardId,
-            QuestionType = QAType.text,
+            QuestionType = QAType.Text,
             Question = "Question",
-            AnswerType = QAType.text,
+            AnswerType = QAType.Text,
             Answer = "Answer",
             CollectionId = Guid.NewGuid(),
             CreatorId = Guid.NewGuid(),
@@ -483,9 +483,9 @@ public class CardFacadeTests
         var cardModel = new CardDetailModel
         {
             Id = Guid.NewGuid(),
-            QuestionType = QAType.text,
+            QuestionType = QAType.Text,
             Question = "",
-            AnswerType = QAType.text,
+            AnswerType = QAType.Text,
             Answer = "Answer",
             CollectionId = Guid.NewGuid(),
             CreatorId = Guid.NewGuid()
@@ -507,9 +507,9 @@ public class CardFacadeTests
         var updatedCardModel = new CardDetailModel
         {
             Id = cardId,
-            QuestionType = QAType.text,
+            QuestionType = QAType.Text,
             Question = "Updated Question",
-            AnswerType = QAType.text,
+            AnswerType = QAType.Text,
             Answer = "Updated Answer",
             CollectionId = Guid.NewGuid(),
             CreatorId = Guid.NewGuid(),

@@ -53,8 +53,8 @@ namespace Flippit.Api.App.EndToEndTests
             Assert.Equal(cardId, card.Id);
             Assert.Equal("What is the capital of France?", card.Question);
             Assert.Equal("Paris", card.Answer);
-            Assert.Equal(QAType.text, card.QuestionType);
-            Assert.Equal(QAType.text, card.AnswerType);
+            Assert.Equal(QAType.Text, card.QuestionType);
+            Assert.Equal(QAType.Text, card.AnswerType);
             Assert.Equal("Basic geography question", card.Description);
         }
 
@@ -74,8 +74,8 @@ namespace Flippit.Api.App.EndToEndTests
             var newCard = new CardDetailModel
             {
                 Id = Guid.NewGuid(),
-                QuestionType = QAType.text,
-                AnswerType = QAType.text,
+                QuestionType = QAType.Text,
+                AnswerType = QAType.Text,
                 Question = "What is the capital of Japan?",
                 Answer = "Tokyo",
                 Description = "Geography test",
@@ -117,8 +117,8 @@ namespace Flippit.Api.App.EndToEndTests
             var updatedCard = new CardDetailModel
             {
                 Id = cardId,
-                QuestionType = QAType.text,
-                AnswerType = QAType.text,
+                QuestionType = QAType.Text,
+                AnswerType = QAType.Text,
                 Question = "What is the capital of Brazil?",
                 Answer = "Brasilia",
                 Description = "Updated geography question",
@@ -139,8 +139,8 @@ namespace Flippit.Api.App.EndToEndTests
             var newCard = new CardDetailModel
             {
                 Id = Guid.NewGuid(),
-                QuestionType = QAType.text,
-                AnswerType = QAType.text,
+                QuestionType = QAType.Text,
+                AnswerType = QAType.Text,
                 Question = "What is the capital of Canada?",
                 Answer = "Ottawa",
                 Description = "Geography test",
@@ -204,8 +204,8 @@ namespace Flippit.Api.App.EndToEndTests
             var updatedCard = new CardDetailModel
             {
                 Id = existingCardId,
-                QuestionType = QAType.text,
-                AnswerType = QAType.text,
+                QuestionType = QAType.Text,
+                AnswerType = QAType.Text,
                 Question = "What is the capital of Italy?",
                 Answer = "Rome",
                 Description = "Updated geography test",
@@ -232,8 +232,8 @@ namespace Flippit.Api.App.EndToEndTests
             var updatedCard = new CardDetailModel
             {
                 Id = nonExistentId,
-                QuestionType = QAType.text,
-                AnswerType = QAType.text,
+                QuestionType = QAType.Text,
+                AnswerType = QAType.Text,
                 Question = "What is the capital of Brazil?",
                 Answer = "Brasilia",
                 Description = "Geography question",
