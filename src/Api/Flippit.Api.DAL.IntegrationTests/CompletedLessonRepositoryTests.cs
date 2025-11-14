@@ -1,182 +1,156 @@
-using Xunit;
 using Flippit.Api.DAL.Common.Entities;
+using Flippit.Api.DAL.Memory;
+using Xunit;
+using System;
+using System.Linq;
+using Flippit.Api.DAL.Common.Repositories;
 
 namespace Flippit.Api.DAL.IntegrationTests;
 
 public class CompletedLessonRepositoryTests : IClassFixture<InMemoryTestDataProvider>
 {
-    private readonly InMemoryTestDataProvider database;
+    private readonly InMemoryTestDataProvider _database;
+    private readonly ICompletedLessonRepository _repository;
 
     public CompletedLessonRepositoryTests(InMemoryTestDataProvider database)
     {
-        this.database = database;
-        database.ResetStorage();
+        _database = database;
+        _database.ResetStorage();
+        _repository = database.GetCompletedLessonRepository();
     }
 
     [Fact]
     public void GetById_ExistingCompletedLesson_ReturnsCompletedLesson()
     {
-        var repository = database.GetCompletedLessonRepository();
-        var completedLessonId = database.CompletedLessonGuids[0];
-
-        var completedLesson = database.GetCompletedLessonDirectly(completedLessonId);
-        var result = repository.GetById(completedLessonId);
+        var completedLessonId = _database.CompletedLessonGuids[0];
+        var completedLesson = _database.GetCompletedLessonDirectly(completedLessonId);
+        var result = _repository.GetById(completedLessonId);
 
         Assert.NotNull(result);
         Assert.Equal(completedLesson, result);
         Assert.Equal(completedLessonId, result.Id);
     }
-    
+
     [Fact]
     public void GetById_NonExistingCompletedLesson_ReturnsNull()
     {
-        var repository = database.GetCompletedLessonRepository();
-        var nonExistingId = Guid.Parse("00000000-0000-0000-0000-000000000000");
-        
-        var result = repository.GetById(nonExistingId);
-
+        var result = _repository.GetById(Guid.Empty);
         Assert.Null(result);
     }
 
     [Fact]
     public void GetAll_ReturnsAllCompletedLessons()
     {
-        var repository = database.GetCompletedLessonRepository();
-
-        var result = repository.GetAll();
-
+        var result = _repository.GetAll();
         Assert.Equal(2, result.Count);
     }
-    
+
     [Fact]
     public void GetAll_WithPagination_ReturnsPagedResults()
     {
-        var repository = database.GetCompletedLessonRepository();
-
-        var result = repository.GetAll(null, null, 1, 1);
-
+        var result = _repository.GetAll(null, null, 1, 1);
         Assert.Single(result);
     }
-    
+
     [Fact]
     public void Search_ReturnsCorrectCards()
     {
-        var repository = database.GetCompletedLessonRepository();
-        
-        var result = repository.Search("Search");
-        
-        Assert.NotNull(result);
-        Assert.Contains(result, l => l.Id == database.CompletedLessonGuids[0]);
+        var result = _repository.Search("Search");
+
+        Assert.Contains(result, l => l.Id == _database.CompletedLessonGuids[0]);
     }
-    
+
     [Fact]
     public void SearchByUserId_ReturnsCorrectCompletedLessons()
     {
-        var repository = database.GetCompletedLessonRepository();
-        var userId = database.UserGuids[0];
-        var wantedCompletedLessonId = database.CompletedLessonGuids[0];
-        
-        var result = repository.SearchByCreatorId(userId);
-        
-        Assert.NotNull(result);
-        Assert.Contains(result, l => l.Id == wantedCompletedLessonId);
+        var userId = _database.UserGuids[0];
+        var wantedCompletedLessonId = _database.CompletedLessonGuids[0];
+        var result = _repository.SearchByCreatorId(userId);
+
+    Assert.NotNull(result);
+    Assert.Contains(result, l => l.Id == wantedCompletedLessonId);
     }
-    
+
     [Fact]
     public void SearchByCollectionId_ReturnsCorrectCompletedLessons()
     {
-        var repository = database.GetCompletedLessonRepository();
-        var collectionId = database.CollectionGuids[0];
-        
-        var result = repository.SearchByCollectionId(collectionId);
-        
-        var wantedCompletedLessonId = database.CompletedLessonGuids[0];
-        
-        Assert.NotNull(result);
-        Assert.Contains(result, l => l.Id == wantedCompletedLessonId);
+        var collectionId = _database.CollectionGuids[0];
+        var result = _repository.SearchByCollectionId(collectionId);
+
+        Assert.Contains(result, l => l.Id == _database.CompletedLessonGuids[0]);
     }
 
     [Fact]
     public void Insert_CompletedLessonIsInserted()
     {
-        var repository = database.GetCompletedLessonRepository();
         var newCompletedLessonId = Guid.NewGuid();
-
         var newCompletedLesson = new CompletedLessonEntity
         {
             Id = newCompletedLessonId,
-            UserId = database.UserGuids[0],
-            CollectionId = database.CollectionGuids[0],
+            UserId = _database.UserGuids[0],
+            CollectionId = _database.CollectionGuids[0],
             AnswersJson = "Answers",
             StatisticsJson = "Statistics"
         };
 
-        repository.Insert(newCompletedLesson);
+        _repository.Insert(newCompletedLesson);
 
-        var result = database.GetCompletedLessonDirectly(newCompletedLessonId);
-        
+        var result = _database.GetCompletedLessonDirectly(newCompletedLessonId);
+
         Assert.NotNull(result);
-        Assert.Equal(result, newCompletedLesson);
+        Assert.Equal(newCompletedLessonId, result.Id);
+        Assert.Equal("Answers", result.AnswersJson);
+        Assert.Equal("Statistics", result.StatisticsJson);
     }
-    
+
     [Fact]
     public void Update_ExistingCompletedLesson_CompletedLessonIsUpdated()
     {
-        var repository = database.GetCompletedLessonRepository();
-        var completedLessonId = database.CompletedLessonGuids[0];
-        
-        var completedLesson = database.GetCompletedLessonDirectly(completedLessonId);
-        Assert.NotNull(completedLesson);
-        
+        var completedLessonId = _database.CompletedLessonGuids[0];
+        var original = _database.GetCompletedLessonDirectly(completedLessonId);
+        Assert.NotNull(original);
+
         var updatedCompletedLesson = new CompletedLessonEntity
         {
             Id = completedLessonId,
-            UserId = completedLesson.UserId,
-            CollectionId = completedLesson.CollectionId,
+            UserId = original.UserId,
+            CollectionId = original.CollectionId,
             AnswersJson = "Updated",
             StatisticsJson = "Updated"
         };
-        
-        repository.Update(updatedCompletedLesson);
-        
-        var result = database.GetCompletedLessonDirectly(completedLessonId);
+
+        _repository.Update(updatedCompletedLesson);
+
+        var result = _database.GetCompletedLessonDirectly(completedLessonId);
+
         Assert.NotNull(result);
+        Assert.Equal(completedLessonId, result.Id);
         Assert.Equal("Updated", result.AnswersJson);
         Assert.Equal("Updated", result.StatisticsJson);
     }
-    
+
     [Fact]
     public void Delete_ExistingCompletedLesson_CompletedLessonIsDeleted()
     {
-        var repository = database.GetCompletedLessonRepository();
-        var completedLessonToDeleteId = database.CompletedLessonGuids[0];
-        
-        repository.Remove(completedLessonToDeleteId);
-        
-        var result = database.GetCompletedLessonDirectly(completedLessonToDeleteId);
-        
+        var completedLessonToDeleteId = _database.CompletedLessonGuids[0];
+
+        _repository.Remove(completedLessonToDeleteId);
+
+        var result = _database.GetCompletedLessonDirectly(completedLessonToDeleteId);
         Assert.Null(result);
     }
-    
+
     [Fact]
     public void Exists_ExistingCompletedLesson_ReturnsTrue()
     {
-        var repository = database.GetCompletedLessonRepository();
-        var completedLessonId = database.CompletedLessonGuids[0];
-        
-        var result = repository.Exists(completedLessonId);
-        
+        var result = _repository.Exists(_database.CompletedLessonGuids[0]);
         Assert.True(result);
     }
-    
+
     [Fact]
     public void Exists_NonExistentCompletedLesson_ReturnsFalse()
     {
-        var repository = database.GetCompletedLessonRepository();
-        var completedLessonId = Guid.Parse("00000000-0000-0000-0000-000000000000");
-        
-        var result = repository.Exists(completedLessonId);
-        
+        var result = _repository.Exists(Guid.Empty);
         Assert.False(result);
     }
 }
