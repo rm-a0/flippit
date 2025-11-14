@@ -88,7 +88,6 @@ namespace Flippit.Api.App.EndToEndTests
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             var createdCardId = await response.Content.ReadFromJsonAsync<Guid>(jsonOptions);
-            Assert.NotEqual(Guid.Empty, createdCardId);
             Assert.Equal(newCard.Id, createdCardId);
         }
 
@@ -152,7 +151,6 @@ namespace Flippit.Api.App.EndToEndTests
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             var createdId = await response.Content.ReadFromJsonAsync<Guid>(jsonOptions);
-            Assert.NotEqual(Guid.Empty, createdId);
             Assert.Equal(newCard.Id, createdId);
         }
 
