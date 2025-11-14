@@ -70,9 +70,9 @@ public class CardFacadeTests
             new CardEntity
             {
                 Id = Guid.NewGuid(),
-                QuestionType = QAType.Url,
+                QuestionType = QAType.Pictures,
                 Question = "Question 2",
-                AnswerType = QAType.Url,
+                AnswerType = QAType.Pictures,
                 Answer = "answer.url",
                 CollectionId = Guid.NewGuid(),
                 CreatorId = Guid.NewGuid(),
@@ -215,9 +215,9 @@ public class CardFacadeTests
             new CardEntity
             {
                 Id = Guid.NewGuid(),
-                QuestionType = QAType.Url,
+                QuestionType = QAType.Pictures,
                 Question = "Question 2",
-                AnswerType = QAType.Url,
+                AnswerType = QAType.Pictures,
                 Answer = "answer.url",
                 CollectionId = Guid.NewGuid(),
                 CreatorId = creatorId,
@@ -261,9 +261,9 @@ public class CardFacadeTests
             new CardEntity
             {
                 Id = Guid.NewGuid(),
-                QuestionType = QAType.Url,
+                QuestionType = QAType.Pictures,
                 Question = "Question 2",
-                AnswerType = QAType.Url,
+                AnswerType = QAType.Pictures,
                 Answer = "answer.url",
                 CollectionId = collectionId,
                 CreatorId = Guid.NewGuid(),

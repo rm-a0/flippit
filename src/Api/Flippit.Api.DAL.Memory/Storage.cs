@@ -85,7 +85,7 @@ namespace Flippit.Api.DAL.Memory
             Cards.Add(new CardEntity
             {
                 Id = cardGuids[1],
-                QuestionType = QAType.Url,
+                QuestionType = QAType.Pictures,
                 AnswerType = QAType.Text,
                 Question = "https://example.com/eiffel.jpg",
                 Answer = "Eiffel Tower",
