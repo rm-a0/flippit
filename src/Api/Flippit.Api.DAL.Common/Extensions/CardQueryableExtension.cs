@@ -24,7 +24,9 @@ namespace Flippit.Api.DAL.Common.Extensions
                 query = sortBy.ToLower() switch
                 {
                     "question" => query.OrderBy(c => c.Question),
+                    "questionDesc" => query.OrderByDescending(c => c.Question),
                     "id" => query.OrderBy(c => c.Id),
+                    "idDesc" => query.OrderByDescending(c => c.Id),
                     _ => query
                 };
             }

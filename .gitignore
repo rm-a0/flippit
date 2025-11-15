@@ -263,3 +263,6 @@ __pycache__/
 .vscode
 
 appsettings.*.json
+
+# http
+*.http

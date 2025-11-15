@@ -70,16 +70,27 @@ namespace Flippit.Api.App.EndToEndTests
         }
 
         [Fact]
-        public async Task GetAllUsers_WithPagination_Returns_Paged_Result()
+        public async Task GetUsers_WithPaging_Returns_Correct_Page_Size()
         {
-            var page = 1;
-            var pageSize = 2;
+            int pageSize = 5;
+            for (int i = 0; i < pageSize + 2; i++)
+            {
+                var user = new UserDetailModel
+                {
+                    Id = Guid.NewGuid(),
+                    Name = $"User {i}",
+                    Role = Role.User
+                };
+                var response = await client.Value.PostAsJsonAsync("/api/users", user, jsonOptions);
+                response.EnsureSuccessStatusCode();
+            }
 
-            var response = await client.Value.GetAsync($"/api/users?page={page}&pageSize={pageSize}");
+            var getResponse = await client.Value.GetAsync($"/api/users?pageSize={pageSize}&page=1");
+            getResponse.EnsureSuccessStatusCode();
+            var users = await getResponse.Content.ReadFromJsonAsync<ICollection<UserListModel>>(jsonOptions);
 
-            response.EnsureSuccessStatusCode();
-            var users = await response.Content.ReadFromJsonAsync<ICollection<UserListModel>>(jsonOptions);
             Assert.NotNull(users);
+            Assert.NotEmpty(users);
             Assert.True(users.Count <= pageSize, "Returned users exceed page size");
         }
 
@@ -91,7 +102,7 @@ namespace Flippit.Api.App.EndToEndTests
                 Id = Guid.NewGuid(),
                 Name = "Test User",
                 PhotoUrl = "http://example.com/photo.jpg",
-                Role = Role.user
+                Role = Role.User
             };
             var createResponse = await client.Value.PostAsJsonAsync("/api/users", newUser, jsonOptions);
             createResponse.EnsureSuccessStatusCode();
@@ -149,7 +160,7 @@ namespace Flippit.Api.App.EndToEndTests
                 Id = Guid.NewGuid(),
                 Name = "Test User",
                 PhotoUrl = "http://example.com/photo.jpg",
-                Role = Role.user
+                Role = Role.User
             };
 
             var response = await client.Value.PostAsJsonAsync("/api/users", newUser, jsonOptions);
@@ -168,8 +179,9 @@ namespace Flippit.Api.App.EndToEndTests
                 Id = Guid.NewGuid(),
                 Name = "Test User",
                 PhotoUrl = "http://example.com/photo.jpg",
-                Role = Role.user
+                Role = Role.User
             };
+
             var createResponse = await client.Value.PostAsJsonAsync("/api/users", newUser, jsonOptions);
             createResponse.EnsureSuccessStatusCode();
             var createdId = await createResponse.Content.ReadFromJsonAsync<Guid>(jsonOptions);
@@ -179,14 +191,27 @@ namespace Flippit.Api.App.EndToEndTests
                 Id = createdId,
                 Name = "Updated User",
                 PhotoUrl = "http://example.com/updated_photo.jpg",
-                Role = Role.user
+                Role = Role.Admin
             };
 
             var response = await client.Value.PutAsJsonAsync("/api/users", updatedUser, jsonOptions);
-
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            response.EnsureSuccessStatusCode();
             var returnedId = await response.Content.ReadFromJsonAsync<Guid?>(jsonOptions);
             Assert.Equal(createdId, returnedId);
+
+            var getResponse = await client.Value.GetAsync($"/api/users/{createdId}");
+            getResponse.EnsureSuccessStatusCode();
+            var userFromApi = await getResponse.Content.ReadFromJsonAsync<UserDetailModel>(jsonOptions);
+
+            Assert.Equal("Updated User", userFromApi!.Name);
+            Assert.Equal("http://example.com/updated_photo.jpg", userFromApi.PhotoUrl);
+            Assert.Equal(Role.Admin, userFromApi.Role);
+
+            var allUsersResponse = await client.Value.GetAsync("/api/users");
+            allUsersResponse.EnsureSuccessStatusCode();
+            var allUsers = await allUsersResponse.Content.ReadFromJsonAsync<ICollection<UserListModel>>(jsonOptions);
+
+            Assert.Single(allUsers!, u => u.Id == createdId);
         }
 
 
@@ -199,7 +224,7 @@ namespace Flippit.Api.App.EndToEndTests
                 Id = nonExistentId,
                 Name = "Non-Existent User",
                 PhotoUrl = "http://example.com/photo.jpg",
-                Role = Role.user
+                Role = Role.User
             };
 
             var response = await client.Value.PutAsJsonAsync("/api/users", updatedUser, jsonOptions);
@@ -218,7 +243,7 @@ namespace Flippit.Api.App.EndToEndTests
                 Id = userId,
                 Name = "",
                 PhotoUrl = "http://example.com/photo.jpg",
-                Role = Role.user
+                Role = Role.User
             };
 
             var response = await client.Value.PutAsJsonAsync("/api/users", invalidUser, jsonOptions);
@@ -234,7 +259,7 @@ namespace Flippit.Api.App.EndToEndTests
                 Id = Guid.NewGuid(),
                 Name = "New User",
                 PhotoUrl = "http://example.com/new_photo.jpg",
-                Role = Role.user
+                Role = Role.User
             };
 
             var response = await client.Value.PostAsJsonAsync("/api/users/upsert", newUser, jsonOptions);
@@ -254,7 +279,7 @@ namespace Flippit.Api.App.EndToEndTests
                 Id = existingUserId,
                 Name = "Updated Existing User",
                 PhotoUrl = "http://example.com/updated_photo.jpg",
-                Role = Role.user
+                Role = Role.User
             };
 
             var response = await client.Value.PostAsJsonAsync("/api/users/upsert", updatedUser, jsonOptions);

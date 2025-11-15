@@ -8,7 +8,7 @@ namespace Flippit.Common.Enums
 {
     public enum QAType
     {
-        text,
-        url
+        Text,
+        Pictures
     }
 }

@@ -5,6 +5,7 @@ using Flippit.Api.DAL.Memory.Repositories;
 using Flippit.Api.BL.Mappers;
 using Flippit.Common.Models.Card;
 using Flippit.Api.DAL.Common.Repositories;
+using Flippit.Api.BL.Validators;
 
 namespace Flippit.Api.BL.Facades
 {
@@ -21,11 +22,7 @@ namespace Flippit.Api.BL.Facades
 
         public IList<CardListModel> GetAll(string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10)
         {
-            if (page < 1)
-                throw new ArgumentException("Page number must be greater than or equal to 1.", nameof(page));
-            if (pageSize < 1)
-                throw new ArgumentException("Page size must be greater than or equal to 1.", nameof(pageSize));
-
+            PaginationValidator.Validate(page, pageSize);
             var entities = _repository.GetAll(filter, sortBy, page, pageSize);
             return _mapper.ToListModels(entities);
         }
@@ -56,33 +53,21 @@ namespace Flippit.Api.BL.Facades
 
         public Guid CreateOrUpdate(CardDetailModel cardModel)
         {
-            if (cardModel == null)
-                throw new ArgumentNullException(nameof(cardModel));
-            if (string.IsNullOrWhiteSpace(cardModel.Question))
-                throw new ArgumentException("Card question cannot be empty.", nameof(cardModel.Question));
-
+            ValidateCardModel(cardModel);
             var entity = _mapper.ModelToEntity(cardModel);
             return _repository.Exists(entity.Id) ? _repository.Update(entity) ?? entity.Id : _repository.Insert(entity);
         }
 
         public Guid Create(CardDetailModel cardModel)
         {
-            if (cardModel == null)
-                throw new ArgumentNullException(nameof(cardModel));
-            if (string.IsNullOrWhiteSpace(cardModel.Question))
-                throw new ArgumentException("Card question cannot be empty.", nameof(cardModel.Question));
-
+            ValidateCardModel(cardModel);
             var entity = _mapper.ModelToEntity(cardModel);
             return _repository.Insert(entity);
         }
 
         public Guid? Update(CardDetailModel cardModel)
         {
-            if (cardModel == null)
-                throw new ArgumentNullException(nameof(cardModel));
-            if (string.IsNullOrWhiteSpace(cardModel.Question))
-                throw new ArgumentException("Card question cannot be empty.", nameof(cardModel.Question));
-
+            ValidateCardModel(cardModel);
             var entity = _mapper.ModelToEntity(cardModel);
             return _repository.Update(entity);
         }
@@ -90,6 +75,15 @@ namespace Flippit.Api.BL.Facades
         public void Delete(Guid id)
         {
             _repository.Remove(id);
+        }
+
+        private static void ValidateCardModel(CardDetailModel cardModel)
+        {
+            if (cardModel == null)
+                throw new ArgumentNullException(nameof(cardModel));
+
+            if (string.IsNullOrWhiteSpace(cardModel.Question))
+                throw new ArgumentException("Card question cannot be empty.", nameof(cardModel.Question));
         }
     }
 }

@@ -1,12 +1,13 @@
-using System.Linq;
 using Flippit.Api.DAL.Common.Entities;
+using System;
+using System.Linq;
 
 namespace Flippit.Api.DAL.Common.Extensions
 {
-    public static class CollectionQueryableExtensions
+    public static class UserQueryableExtensions
     {
-        public static IQueryable<CollectionEntity> ApplyFilterSortAndPage(
-            this IQueryable<CollectionEntity> query,
+        public static IQueryable<UserEntity> ApplyFilterSortAndPage(
+            this IQueryable<UserEntity> query,
             string? filter = null,
             string? sortBy = null,
             int page = 1,
@@ -14,17 +15,18 @@ namespace Flippit.Api.DAL.Common.Extensions
         {
             if (!string.IsNullOrWhiteSpace(filter))
             {
-                query = query.Where(c => c.Name.Contains(filter, StringComparison.OrdinalIgnoreCase));
+                query = query.Where(u =>
+                    u.Name.Contains(filter, StringComparison.OrdinalIgnoreCase));
             }
 
             if (!string.IsNullOrWhiteSpace(sortBy))
             {
                 query = sortBy.ToLower() switch
                 {
-                    "name" => query.OrderBy(c => c.Name),
-                    "nameDesc" => query.OrderByDescending(c => c.Name),
-                    "id" => query.OrderBy(c => c.Id),
-                    "idDesc" => query.OrderBy(c => c.Id),
+                    "name" => query.OrderBy(u => u.Name),
+                    "nameDesc" => query.OrderByDescending(u => u.Name),
+                    "id" => query.OrderBy(u => u.Id),
+                    "idDesc" => query.OrderByDescending(u => u.Id),
                     _ => query
                 };
             }
