@@ -66,9 +66,9 @@ namespace Flippit.Api.App.EndToEndTests
                 Id = Guid.NewGuid(),
                 QuestionType = Common.Enums.QAType.Text,
                 AnswerType = Common.Enums.QAType.Text,
-                Question = "TestQuestion",
-                Answer = "TestAnswer",
-                Description = "Test Card",
+                Question = "TestQuestion 1",
+                Answer = "TestAnswer 1",
+                Description = "Test Card 1",
                 CreatorId = Guid.Parse("d4e5f6a7-b890-1234-defa-4567890123de"),
                 CollectionId = collectionGuid
             };
@@ -78,29 +78,28 @@ namespace Flippit.Api.App.EndToEndTests
                 Id = Guid.NewGuid(),
                 QuestionType = Common.Enums.QAType.Text,
                 AnswerType = Common.Enums.QAType.Text,
-                Question = "TestQuestion",
-                Answer = "TestAnswer",
-                Description = "Test Card",
+                Question = "TestQuestion 2",
+                Answer = "TestAnswer 2",
+                Description = "Test Card 2",
                 CreatorId = Guid.Parse("d4e5f6a7-b890-1234-defa-4567890123de"),
                 CollectionId = collectionGuid
             };
 
-            var json = JsonSerializer.Serialize(firstCard, jsonOptions);
-
-
             var card1Response = await client.Value.PostAsJsonAsync("/api/cards", firstCard, jsonOptions);
             card1Response.EnsureSuccessStatusCode();
 
-            var card2Response = await client.Value.PostAsJsonAsync("/api/cards", firstCard, jsonOptions);
+            var card2Response = await client.Value.PostAsJsonAsync("/api/cards", secondCard, jsonOptions);
             card2Response.EnsureSuccessStatusCode();
 
             var response = await client.Value.GetAsync($"/api/collections/{collectionGuid}/cards");
-
             response.EnsureSuccessStatusCode();
-
             var cards = await response.Content.ReadFromJsonAsync<ICollection<CardListModel>>(jsonOptions);
+
             Assert.NotEmpty(cards!);
             Assert.Equal(2, cards!.Count);
+
+            Assert.Contains(cards!, c => c.Question == "TestQuestion 1" && c.Answer == "TestAnswer 1");
+            Assert.Contains(cards!, c => c.Question == "TestQuestion 2" && c.Answer == "TestAnswer 2");
         }
 
         public async ValueTask DisposeAsync()
