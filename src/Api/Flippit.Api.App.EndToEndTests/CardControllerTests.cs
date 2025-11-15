@@ -112,24 +112,63 @@ namespace Flippit.Api.App.EndToEndTests
         [Fact]
         public async Task UpdateCard_Returns_Updated_Card_Id()
         {
-            var cardId = Guid.Parse("a1b2c3d4-e5f6-7890-abcd-1234567890ab");
+            var cardId = Guid.NewGuid();
+            var creatorId = Guid.NewGuid();
+            var collectionId = Guid.NewGuid();
+
+            var initialCountResponse = await client.Value.GetAsync("/api/cards");
+            initialCountResponse.EnsureSuccessStatusCode();
+            var initialCount = (await initialCountResponse.Content.ReadFromJsonAsync<ICollection<CardListModel>>(jsonOptions))!.Count;
+
+            var originalCard = new CardDetailModel
+            {
+                Id = cardId,
+                QuestionType = QAType.Text,
+                AnswerType = QAType.Text,
+                Question = "Old Question",
+                Answer = "Old Answer",
+                Description = "Original",
+                CreatorId = creatorId,
+                CollectionId = collectionId
+            };
+
+            var createResponse = await client.Value.PostAsJsonAsync("/api/cards", originalCard, jsonOptions);
+            createResponse.EnsureSuccessStatusCode();
+
+            var afterCreateResponse = await client.Value.GetAsync("/api/cards");
+            afterCreateResponse.EnsureSuccessStatusCode();
+            var afterCreateCount = (await afterCreateResponse.Content.ReadFromJsonAsync<ICollection<CardListModel>>(jsonOptions))!.Count;
+            Assert.Equal(initialCount + 1, afterCreateCount);
+
             var updatedCard = new CardDetailModel
             {
                 Id = cardId,
                 QuestionType = QAType.Text,
                 AnswerType = QAType.Text,
-                Question = "What is the capital of Brazil?",
-                Answer = "Brasilia",
-                Description = "Updated geography question",
-                CreatorId = Guid.NewGuid(),
-                CollectionId = Guid.NewGuid()
+                Question = "New Question",
+                Answer = "New Answer",
+                Description = "Updated",
+                CreatorId = creatorId,
+                CollectionId = collectionId
             };
 
             var response = await client.Value.PutAsJsonAsync("/api/cards", updatedCard, jsonOptions);
-
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            response.EnsureSuccessStatusCode();
             var returnedId = await response.Content.ReadFromJsonAsync<Guid?>(jsonOptions);
             Assert.Equal(cardId, returnedId);
+
+            var finalCountResponse = await client.Value.GetAsync("/api/cards");
+            finalCountResponse.EnsureSuccessStatusCode();
+            var finalCount = (await finalCountResponse.Content.ReadFromJsonAsync<ICollection<CardListModel>>(jsonOptions))!.Count;
+
+            Assert.Equal(afterCreateCount, finalCount);
+
+            var getResponse = await client.Value.GetAsync($"/api/cards/{cardId}");
+            getResponse.EnsureSuccessStatusCode();
+            var cardFromApi = await getResponse.Content.ReadFromJsonAsync<CardDetailModel>(jsonOptions);
+
+            Assert.Equal("New Question", cardFromApi!.Question);
+            Assert.Equal("New Answer", cardFromApi.Answer);
         }
 
         [Fact]
