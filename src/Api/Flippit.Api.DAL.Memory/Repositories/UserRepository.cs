@@ -1,6 +1,7 @@
 using Flippit.Api.DAL.Common.Entities;
 using Flippit.Api.DAL.Common.Mappers;
 using Flippit.Api.DAL.Common.Repositories;
+using Flippit.Api.DAL.Common.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,25 +21,9 @@ namespace Flippit.Api.DAL.Memory.Repositories
 
         public IList<UserEntity> GetAll(string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10)
         {
-            var users = _users.AsQueryable();
-
-            if (!string.IsNullOrWhiteSpace(filter))
-            {
-                users = users.Where(u => u.Name.Contains(filter, StringComparison.OrdinalIgnoreCase));
-            }
-
-            if (!string.IsNullOrWhiteSpace(sortBy))
-            {
-                users = sortBy.ToLower() switch
-                {
-                    "name" => users.OrderBy(u => u.Name),
-                    "id" => users.OrderBy(u => u.Id),
-                    _ => users
-                };
-            }
-
-            users = users.Skip((page - 1) * pageSize).Take(pageSize);
-            return users.ToList();
+            return _users.AsQueryable()
+                         .ApplyFilterSortAndPage(filter, sortBy, page, pageSize)
+                         .ToList();
         }
 
         public UserEntity? GetById(Guid id)

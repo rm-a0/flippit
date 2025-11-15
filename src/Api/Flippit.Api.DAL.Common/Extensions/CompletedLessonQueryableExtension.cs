@@ -16,8 +16,11 @@ namespace Flippit.Api.DAL.Common.Extensions
                 query = sortBy.ToLower() switch
                 {
                     "id" => query.OrderBy(l => l.Id),
-                    "userid" => query.OrderBy(l => l.UserId),
-                    "collectionid" => query.OrderBy(l => l.CollectionId),
+                    "idDesc" => query.OrderByDescending(l => l.Id),
+                    "userId" => query.OrderBy(l => l.UserId),
+                    "userIdDesc" => query.OrderByDescending(l => l.UserId),
+                    "collectionId" => query.OrderBy(l => l.CollectionId),
+                    "collectionIdDesc" => query.OrderByDescending(l => l.CollectionId),
                     _ => query 
                 };
             }
