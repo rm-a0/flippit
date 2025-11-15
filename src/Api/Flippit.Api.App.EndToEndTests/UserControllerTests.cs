@@ -70,16 +70,27 @@ namespace Flippit.Api.App.EndToEndTests
         }
 
         [Fact]
-        public async Task GetAllUsers_WithPagination_Returns_Paged_Result()
+        public async Task GetUsers_WithPaging_Returns_Correct_Page_Size()
         {
-            var page = 1;
-            var pageSize = 2;
+            int pageSize = 5;
+            for (int i = 0; i < pageSize + 2; i++)
+            {
+                var user = new UserDetailModel
+                {
+                    Id = Guid.NewGuid(),
+                    Name = $"User {i}",
+                    Role = Role.User
+                };
+                var response = await client.Value.PostAsJsonAsync("/api/users", user, jsonOptions);
+                response.EnsureSuccessStatusCode();
+            }
 
-            var response = await client.Value.GetAsync($"/api/users?page={page}&pageSize={pageSize}");
+            var getResponse = await client.Value.GetAsync($"/api/users?pageSize={pageSize}&page=1");
+            getResponse.EnsureSuccessStatusCode();
+            var users = await getResponse.Content.ReadFromJsonAsync<ICollection<UserListModel>>(jsonOptions);
 
-            response.EnsureSuccessStatusCode();
-            var users = await response.Content.ReadFromJsonAsync<ICollection<UserListModel>>(jsonOptions);
             Assert.NotNull(users);
+            Assert.NotEmpty(users);
             Assert.True(users.Count <= pageSize, "Returned users exceed page size");
         }
 
