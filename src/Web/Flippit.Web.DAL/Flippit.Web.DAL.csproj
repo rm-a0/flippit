@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <RootNamespace>Flippit.Web.DAL</RootNamespace>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Microsoft.JSInterop" Version="9.0.9" />
+    <PackageReference Include="Scrutor" Version="7.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Common\Flippit.Common\Flippit.Common.csproj" />
+    <ProjectReference Include="..\..\Common\Flippit.Common.Models\Flippit.Common.Models.csproj" />
+  </ItemGroup>
+</Project>
