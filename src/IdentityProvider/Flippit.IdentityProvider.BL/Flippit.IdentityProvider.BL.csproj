@@ -6,4 +6,19 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Facades/Interfaces/" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Flippit.IdentityProvider.DAL\Flippit.IdentityProvider.DAL.csproj" />
+    <ProjectReference Include="..\..\Common\Flippit.Common.BL\Flippit.Common.BL.csproj" />
+    <ProjectReference Include="..\..\Common\Flippit.Common.Models\Flippit.Common.Models.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Riok.Mapperly" Version="3.0.0" OutputItemType="Analyzer" PrivateAssets="all" />
+    <PackageReference Include="Scrutor" Version="7.0.0" />
+  </ItemGroup>
+
 </Project>
