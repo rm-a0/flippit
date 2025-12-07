@@ -1,0 +1,146 @@
+[
+  {
+    "Id": 1,
+    "name": "Collection Name",
+    "user": {
+      "name": "Name Surname",
+      "photoUrl": "https://img.freepik.com/free-photo/portrait-white-man-isolated_53876-40306.jpg"
+
+    }
+  },
+  {
+    "Id": 2,
+    "name": "Collection Name",
+    "user": {
+      "name": "Name Surname",
+      "photoUrl": "https://img.freepik.com/free-photo/portrait-white-man-isolated_53876-40306.jpg"
+
+    }
+  },
+  {
+    "Id": 3,
+    "name": "Collection Name",
+    "user": {
+      "name": "Name Surname",
+      "photoUrl": "https://img.freepik.com/free-photo/portrait-white-man-isolated_53876-40306.jpg"
+
+    }
+  },
+  {
+    "Id": 4,
+    "name": "Collection Name",
+    "user": {
+      "name": "Name Surname",
+      "photoUrl": "https://img.freepik.com/free-photo/portrait-white-man-isolated_53876-40306.jpg"
+
+    }
+  },
+  {
+    "Id": 5,
+    "name": "Collection Name",
+    "user": {
+      "name": "Name Surname",
+      "photoUrl": "https://img.freepik.com/free-photo/portrait-white-man-isolated_53876-40306.jpg"
+
+    }
+  },
+  {
+    "Id": 6,
+    "name": "Collection Name",
+    "user": {
+      "name": "Name Surname",
+      "photoUrl": "https://img.freepik.com/free-photo/portrait-white-man-isolated_53876-40306.jpg"
+
+    }
+  },
+  {
+    "Id": 7,
+    "name": "Collection Name",
+    "user": {
+      "name": "Name Surname",
+      "photoUrl": "https://img.freepik.com/free-photo/portrait-white-man-isolated_53876-40306.jpg"
+
+    }
+  },
+  {
+    "Id": 8,
+    "name": "Collection Name",
+    "user": {
+      "name": "Name Surname",
+      "photoUrl": "https://img.freepik.com/free-photo/portrait-white-man-isolated_53876-40306.jpg"
+
+    }
+  },
+  {
+    "Id": 9,
+    "name": "Collection Name",
+    "user": {
+      "name": "Name Surname",
+      "photoUrl": "https://img.freepik.com/free-photo/portrait-white-man-isolated_53876-40306.jpg"
+
+    }
+  },
+  {
+    "Id": 10,
+    "name": "Collection Name",
+    "user": {
+      "name": "Name Surname",
+      "photoUrl": "https://img.freepik.com/free-photo/portrait-white-man-isolated_53876-40306.jpg"
+
+    }
+  },
+  {
+    "Id": 11,
+    "name": "Collection Name",
+    "user": {
+      "name": "Name Surname",
+      "photoUrl": "https://img.freepik.com/free-photo/portrait-white-man-isolated_53876-40306.jpg"
+
+    }
+  },
+  {
+    "Id": 12,
+    "name": "Collection Name",
+    "user": {
+      "name": "Name Surname",
+      "photoUrl": "https://img.freepik.com/free-photo/portrait-white-man-isolated_53876-40306.jpg"
+
+    }
+  },
+  {
+    "Id": 13,
+    "name": "Collection Name",
+    "user": {
+      "name": "Name Surname",
+      "photoUrl": "https://img.freepik.com/free-photo/portrait-white-man-isolated_53876-40306.jpg"
+
+    }
+  },
+  {
+    "Id": 14,
+    "name": "Collection Name",
+    "user": {
+      "name": "Name Surname",
+      "photoUrl": "https://img.freepik.com/free-photo/portrait-white-man-isolated_53876-40306.jpg"
+
+    }
+  },
+  {
+    "Id": 15,
+    "name": "Collection Name",
+    "user": {
+      "name": "Name Surname",
+      "photoUrl": "https://img.freepik.com/free-photo/portrait-white-man-isolated_53876-40306.jpg"
+
+    }
+  },
+  {
+    "Id": 16,
+    "name": "Collection Name",
+    "user": {
+      "name": "Name Surname",
+      "photoUrl": "https://img.freepik.com/free-photo/portrait-white-man-isolated_53876-40306.jpg"
+
+    }
+  }
+]

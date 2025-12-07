@@ -1,0 +1,98 @@
+﻿@page "/collections"
+@inject HttpClient Http
+
+<SearchHeader></SearchHeader>
+
+@{
+    if(!Loading)
+    {
+        if (visible != null)
+        {
+            <div class="mt-10 flex flex-col items-center gap-20">
+                <div class="w-mac flex flex-col gap-3">
+                    <h4 class="font-monserrat-b m-0 ml-2 text-2xl">Collections</h4>
+                    <div class="grid w-max grid-cols-4 gap-6">
+                        @{
+                            foreach (var col in visible)
+                            {
+                                <CollectionCard Id="col.Id" />
+                            }
+                        }
+                    </div>
+   
+                </div>
+                <button disabled="@(LoadMoreDisabled())" @onclick="LoadMore" class="dark-blue-border mb-10 h-10 w-30 rounded-xl border-2 bg-transparent disabled:cursor-not-allowed">
+                    <p class="font-ubuntu-sans-l dark-blue-text">Load more</p>
+                </button>
+            </div>
+        }
+        else
+        {
+            <div class="mt-20 flex flex-col items-center">
+                <h3 class="font-ubuntu-sans-l">There are no collections yet. </h3>
+                <a class="font-ubuntu-sans-l cursor-pointer text-blue-600 underline">Want to create one?</a>
+            </div>
+
+        }
+
+    }
+    else
+    {
+        <div class="mt-20 flex scale-40 flex-col items-center">
+            <img class="animate-spin" src="/icons/load.svg"/>
+        </div>
+    }
+
+}
+
+
+@code {
+    private Collection[]? collections;
+    private List<Collection>? collectionsList;
+    private List<Collection>? visible;
+    private int skip = 0;
+    private bool Loading = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Loading = true;
+        collections = await Http.GetFromJsonAsync<Collection[]>("sample-data/Collections.json");
+        if (collections != null)
+        {
+            collectionsList = collections.ToList();
+            visible = collectionsList.Skip(0).Take(8).ToList();
+            Console.WriteLine(skip);
+        }
+        Loading = false;
+
+    }
+
+    private bool LoadMoreDisabled()
+    {
+        return collectionsList.Count() <= (skip + 1) * 8;
+    }
+
+    private void LoadMore()
+    {
+        if((skip+1)*8 < collectionsList.Count())
+        {
+            skip++;
+            var newItems = collectionsList.Skip(skip*8).Take(8).ToList();
+            visible.AddRange(newItems);
+        }
+        
+    }
+
+    public class User
+    {
+        public string? Name { get; set; }
+        public string? PhotoUrl { get; set; }
+    }
+    public class Collection
+    {
+        public int Id { get; set; }
+        public string? Name { get; set; }
+        public User? User { get; set; }
+    }
+
+}

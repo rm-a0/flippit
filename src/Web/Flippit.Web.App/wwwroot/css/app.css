@@ -21,6 +21,17 @@
     font-style: normal;
 }
 
+.font-monserrat-b {
+    font-family: monserrat-b, sans-serif
+}
+
+.font-monserrat-m {
+    font-family: monserrat-m, sans-serif
+}
+
+.font-ubuntu-sans-l {
+    font-family: ubuntu-sans-l, sans-serif
+}
 
 .primary-blue-bg {
     background-color: #2541B2
@@ -36,4 +47,16 @@
 
 .green-bg {
     background-color: #25B281;
+}
+
+.light-blue-bg {
+    background-color: #F0F2F6;
+}
+
+.dark-blue-border {
+    border-color: #03256C;
+}
+
+.dark-blue-text {
+    color: #03256C;
 }

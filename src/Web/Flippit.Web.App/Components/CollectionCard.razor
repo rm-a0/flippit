@@ -1,0 +1,40 @@
+﻿<div class="flex w-56 max-w-56 flex-col gap-3 rounded-2xl bg-white p-4 drop-shadow">
+    <div class="flex flex-row items-center justify-between">
+        <h5 class="font-monserrat-m text-22 m-0">Collection Name @Id</h5>
+        <div class="scale-90 cursor-pointer">
+            <svg width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 1H16.9346" stroke="black" stroke-width="2" stroke-linecap="round" />
+                <path d="M1 6.44415H16.9346" stroke="black" stroke-width="2" stroke-linecap="round" />
+                <path d="M1 11.8883H16.9346" stroke="black" stroke-width="2" stroke-linecap="round" />
+            </svg>
+
+        </div>
+    </div>
+
+    <div class="flex flex-col text-[14px]">
+        <p class="font-ubuntu-sans-l m-0">Start date: 07.12.2025</p>
+        <p class="font-ubuntu-sans-l m-0">End date: 07.12.2025</p>
+    </div>
+
+    <div class="flex flex-row items-end justify-between">
+        <div class="flex flex-row">
+            <svg class="scale-80" width="27" height="25" viewBox="0 0 27 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="0.392334" y="5.60999" width="13.7759" height="20.2207" rx="2" transform="rotate(-22.2568 0.392334 5.60999)" stroke="#0D1117" stroke-width="2" stroke-linejoin="round" />
+                <path d="M16.7053 1.2644H18.6345C19.1868 1.2644 19.6345 1.71212 19.6345 2.2644V7.54127M23.1682 3.58917L24.8676 4.42338C25.3475 4.659 25.5572 5.23049 25.3436 5.72064L21.7734 13.9111" stroke="#0D1117" stroke-width="2" stroke-linecap="round" />
+            </svg>
+            <p class="font-ubuntu-sans-l m-0">18</p>
+        </div>
+        <div class="primary-blue-bg full flex size-10 cursor-pointer items-center justify-center rounded-full">
+            <svg class="scale-80" width="14" height="19" viewBox="0 0 14 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13.5482 8.23899L1.55822 0.172003C0.893959 -0.274922 0 0.201075 0 1.00169V17.1357C0 17.9363 0.89396 18.4123 1.55822 17.9654L13.5482 9.89837C14.1373 9.50206 14.1373 8.6353 13.5482 8.23899Z" fill="#F0F2F6" />
+            </svg>
+
+        </div>
+    </div>
+    
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; } = 0;
+}
