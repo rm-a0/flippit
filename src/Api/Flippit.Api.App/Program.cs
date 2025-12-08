@@ -4,12 +4,14 @@ using System.Text.Json.Serialization;
 using Flippit.Api.BL.Facades;
 using Flippit.Api.BL.Installers;
 using Flippit.Api.BL.Mappers;
+using Flippit.Api.BL.Services;
 using Flippit.Api.DAL.Memory.Installers;
 using Flippit.Common.Models.Card;
 using Flippit.Common.Models.Collection;
 using Flippit.Common.Models.CompletedLesson;
 using Flippit.Common.Models.User;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -27,6 +29,10 @@ builder.Services.AddSingleton<CardMapper>();
 builder.Services.AddSingleton<CollectionMapper>();
 builder.Services.AddSingleton<CompletedLessonMapper>();
 
+// Register CurrentUserService and dependencies
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+
 var BLInstaller = new ApiBLInstaller();
 BLInstaller.Install(builder.Services);
 
@@ -40,6 +46,10 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: false));
     options.SerializerOptions.PropertyNameCaseInsensitive = true;
 });
+
+// Add authentication and authorization
+builder.Services.AddAuthentication();
+builder.Services.AddAuthorization();
 
 
 ConfigureOpenApiDocuments(builder.Services);
@@ -57,6 +67,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 UseEndPoints(app);
 
@@ -171,7 +184,7 @@ void UseCardEndPoints(RouteGroupBuilder routeGroupBuilder)
         }
         var id = CardFacade.Create(model);
         return TypedResults.Ok(id);
-    });
+    }).RequireAuthorization();
 
     cardEndPoints.MapPut("", async Task<Results<Ok<Guid?>, ValidationProblem>> (ICardFacade CardFacade, CardDetailModel model, IValidator<CardDetailModel> validator) =>
     {
@@ -182,7 +195,7 @@ void UseCardEndPoints(RouteGroupBuilder routeGroupBuilder)
         }
         var id = CardFacade.Update(model);
         return TypedResults.Ok(id);
-    });
+    }).RequireAuthorization();
 
     cardEndPoints.MapPost("upsert", async Task<Results<Ok<Guid>, ValidationProblem>> (ICardFacade CardFacade, CardDetailModel model, IValidator<CardDetailModel> validator) =>
     {
@@ -193,7 +206,7 @@ void UseCardEndPoints(RouteGroupBuilder routeGroupBuilder)
         }
         var id = CardFacade.CreateOrUpdate(model);
         return TypedResults.Ok(id);
-    });
+    }).RequireAuthorization();
 
     cardEndPoints.MapGet("/{id:guid}",
        Results<Ok<CardDetailModel>, NotFound<string>> (
@@ -209,7 +222,7 @@ void UseCardEndPoints(RouteGroupBuilder routeGroupBuilder)
     cardEndPoints.MapDelete("/{id:guid}", (ICardFacade cardFacade, Guid id) =>
     {
         cardFacade.Delete(id);
-    });
+    }).RequireAuthorization();
 
 }
 void UseCollectionEndPoints(RouteGroupBuilder routeGroupBuilder)
@@ -244,7 +257,7 @@ void UseCollectionEndPoints(RouteGroupBuilder routeGroupBuilder)
         }
         var id = collectionFacade.Create(model);
         return TypedResults.Ok(id);
-    });
+    }).RequireAuthorization();
 
     collectionsEndPoints.MapPut("", async Task<Results<Ok<Guid?>, ValidationProblem>> (ICollectionFacade collectionFacade, CollectionDetailModel model, IValidator<CollectionDetailModel> validator) =>
     {
@@ -255,7 +268,7 @@ void UseCollectionEndPoints(RouteGroupBuilder routeGroupBuilder)
         }
         var id = collectionFacade.Update(model);
         return TypedResults.Ok(id);
-    });
+    }).RequireAuthorization();
 
     collectionsEndPoints.MapPost("upsert", async Task<Results<Ok<Guid>, ValidationProblem>> (ICollectionFacade collectionFacade, CollectionDetailModel model, IValidator<CollectionDetailModel> validator) =>
     {
@@ -266,7 +279,7 @@ void UseCollectionEndPoints(RouteGroupBuilder routeGroupBuilder)
         }
         var id = collectionFacade.CreateOrUpdate(model);
         return TypedResults.Ok(id);
-    });
+    }).RequireAuthorization();
 
     collectionsEndPoints.MapGet("/{id:guid}",
        Results<Ok<CollectionDetailModel>, NotFound<string>> (
@@ -282,7 +295,7 @@ void UseCollectionEndPoints(RouteGroupBuilder routeGroupBuilder)
     collectionsEndPoints.MapDelete("/{id:guid}", (ICollectionFacade collectionFacade, Guid id) =>
     {
         collectionFacade.Delete(id);
-    });
+    }).RequireAuthorization();
 }
 void UseCompletedLessonEndPoints(RouteGroupBuilder routeGroupBuilder)
 {
@@ -298,26 +311,26 @@ void UseCompletedLessonEndPoints(RouteGroupBuilder routeGroupBuilder)
     completedLessonsEndPoints.MapDelete("{id:guid}", (ICompletedLessonFacade facade, Guid id) =>
     {
         facade.Delete(id);
-    });
+    }).RequireAuthorization();
 
     completedLessonsEndPoints.MapPost("", (ICompletedLessonFacade facade, CompletedLessonDetailModel model) =>
     {
         var id = facade.Create(model);
         return TypedResults.Ok(id);
-    });
+    }).RequireAuthorization();
 
     completedLessonsEndPoints.MapPut("", (ICompletedLessonFacade facade, CompletedLessonDetailModel model) =>
     {
         var id = facade.Update(model);
         return TypedResults.Ok(id);
-    });
+    }).RequireAuthorization();
 
     completedLessonsEndPoints.MapPost("upsert", (ICompletedLessonFacade facade, CompletedLessonDetailModel model) =>
     {
-        var id = facade.Create(model);
+        var id = facade.CreateOrUpdate(model);
         return TypedResults.Ok(id);
 
-    });
+    }).RequireAuthorization();
 
     completedLessonsEndPoints.MapGet("{id:guid}", (ICompletedLessonFacade facade, Guid id) =>
     {

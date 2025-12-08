@@ -3,6 +3,7 @@ using Moq;
 using Flippit.Api.DAL.Common.Entities;
 using Flippit.Api.DAL.Common.Repositories;
 using Flippit.Api.BL.Mappers;
+using Flippit.Api.BL.Services;
 using Flippit.Api.BL.Facades;
 using Flippit.Common.Models.CompletedLesson;
 
@@ -10,11 +11,20 @@ namespace Flippit.Api.BL.UnitTests;
 
 public class CompletedLessonFacadeTests
 {
+    private static ICurrentUserService GetMockCurrentUserService(Guid? userId = null)
+    {
+        var mockService = new Mock<ICurrentUserService>();
+        mockService.Setup(s => s.CurrentUserId).Returns(userId ?? Guid.NewGuid());
+        mockService.Setup(s => s.IsInRole(It.IsAny<string>())).Returns(false);
+        return mockService.Object;
+    }
+
     private static CompletedLessonFacade GetFacadeWithForbiddenDependencyCalls()
     {
         var repository = new Mock<ICompletedLessonRepository>(MockBehavior.Strict).Object;
         var mapper = new Mock<CompletedLessonMapper>(MockBehavior.Strict).Object;
-        return new CompletedLessonFacade(repository, mapper);
+        var currentUserService = GetMockCurrentUserService();
+        return new CompletedLessonFacade(repository, mapper, currentUserService);
     }
     
     [Fact]
@@ -74,7 +84,7 @@ public class CompletedLessonFacadeTests
         
         repositoryMock.Setup(r => r.GetAll(null, null, 1, 10)).Returns(entities);
 
-        var facade = new CompletedLessonFacade(repositoryMock.Object, mapper);
+        var facade = new CompletedLessonFacade(repositoryMock.Object, mapper, GetMockCurrentUserService());
         var result = facade.GetAll();
 
         Assert.Equal(2, result.Count);
@@ -92,7 +102,7 @@ public class CompletedLessonFacadeTests
 
         repositoryMock.Setup(r => r.GetAll(null, null, 1, 10)).Returns(new List<CompletedLessonEntity>());
 
-        var facade = new CompletedLessonFacade(repositoryMock.Object, mapper);
+        var facade = new CompletedLessonFacade(repositoryMock.Object, mapper, GetMockCurrentUserService());
         var result = facade.GetAll();
 
         Assert.Empty(result);
@@ -118,7 +128,7 @@ public class CompletedLessonFacadeTests
         
         repositoryMock.Setup(r => r.GetById(entityId)).Returns(entity);
 
-        var facade = new CompletedLessonFacade(repositoryMock.Object, mapper);
+        var facade = new CompletedLessonFacade(repositoryMock.Object, mapper, GetMockCurrentUserService());
         var result = facade.GetById(entityId);
 
         Assert.NotNull(result);
@@ -137,7 +147,7 @@ public class CompletedLessonFacadeTests
         
         repositoryMock.Setup(r => r.GetById(nonExistentId)).Returns((CompletedLessonEntity?)null);
         
-        var facade = new CompletedLessonFacade(repositoryMock.Object, mapper);
+        var facade = new CompletedLessonFacade(repositoryMock.Object, mapper, GetMockCurrentUserService());
         var result = facade.GetById(nonExistentId);
         
         Assert.Null(result);
@@ -166,7 +176,7 @@ public class CompletedLessonFacadeTests
 
         repositoryMock.Setup(r => r.Search("Answers")).Returns(new List<CompletedLessonEntity> { entities[0] });
 
-        var facade = new CompletedLessonFacade(repositoryMock.Object, mapper);
+        var facade = new CompletedLessonFacade(repositoryMock.Object, mapper, GetMockCurrentUserService());
         var searchResult = facade.Search("Answers");
 
         Assert.Single(searchResult);
@@ -204,7 +214,7 @@ public class CompletedLessonFacadeTests
 
         repositoryMock.Setup(r => r.SearchByCreatorId(userId, null, 1, 10)).Returns(new List<CompletedLessonEntity> { entities[0], entities[1] });
 
-        var facade = new CompletedLessonFacade(repositoryMock.Object, mapper);
+        var facade = new CompletedLessonFacade(repositoryMock.Object, mapper, GetMockCurrentUserService());
         var searchResult = facade.SearchByCreatorId(userId);
 
         Assert.Equal(2, searchResult.Count);
@@ -241,7 +251,7 @@ public class CompletedLessonFacadeTests
 
         repositoryMock.Setup(r => r.SearchByCollectionId(collectionId, null, 1, 10)).Returns(new List<CompletedLessonEntity> { entities[0], entities[1] });
 
-        var facade = new CompletedLessonFacade(repositoryMock.Object, mapper);
+        var facade = new CompletedLessonFacade(repositoryMock.Object, mapper, GetMockCurrentUserService());
         var searchResult = facade.SearchByCollectionId(collectionId);
 
         Assert.Equal(2, searchResult.Count);
@@ -261,6 +271,8 @@ public class CompletedLessonFacadeTests
         Assert.Equal("lessonModel", exception.ParamName);
     }
     
+    // This test is no longer relevant - UserId is now overridden from authenticated user
+    /*
     [Fact]
     public void CreateOrUpdate_EmptyUserId_ThrowsArgumentException()
     {
@@ -280,6 +292,7 @@ public class CompletedLessonFacadeTests
         Assert.Equal("UserId", exception.ParamName);
         Assert.Contains("User ID cannot be empty.", exception.Message);
     }
+    */
     
     [Fact]
     public void CreateOrUpdate_EmptyCollectionId_ThrowsArgumentException()
@@ -320,15 +333,15 @@ public class CompletedLessonFacadeTests
         var entity = mapper.ModelToEntity(lessonModel);
         
         repositoryMock.Setup(r => r.Exists(lessonId)).Returns(false);
-        repositoryMock.Setup(r => r.Insert(entity)).Returns(lessonId);
+        repositoryMock.Setup(r => r.Insert(It.IsAny<CompletedLessonEntity>())).Returns(lessonId);
         
-        var facade = new CompletedLessonFacade(repositoryMock.Object, mapper);
+        var facade = new CompletedLessonFacade(repositoryMock.Object, mapper, GetMockCurrentUserService());
         var result = facade.CreateOrUpdate(lessonModel);
         
         Assert.Equal(lessonId, result);
         repositoryMock.Verify(r => r.Exists(lessonId), Times.Once);
-        repositoryMock.Verify(r => r.Insert(entity), Times.Once);
-        repositoryMock.Verify(r => r.Update(entity), Times.Never);
+        repositoryMock.Verify(r => r.Insert(It.IsAny<CompletedLessonEntity>()), Times.Once);
+        repositoryMock.Verify(r => r.Update(It.IsAny<CompletedLessonEntity>()), Times.Never);
     }
 
     [Fact]
@@ -350,14 +363,14 @@ public class CompletedLessonFacadeTests
         var updatedEntity = mapper.ModelToEntity(updatedLessonModel);
     
         repositoryMock.Setup(r => r.Exists(lessonId)).Returns(true);
-        repositoryMock.Setup(r => r.Update(updatedEntity)).Returns(lessonId);
+        repositoryMock.Setup(r => r.Update(It.IsAny<CompletedLessonEntity>())).Returns(lessonId);
     
-        var facade = new CompletedLessonFacade(repositoryMock.Object, mapper);
+        var facade = new CompletedLessonFacade(repositoryMock.Object, mapper, GetMockCurrentUserService());
         var result = facade.CreateOrUpdate(updatedLessonModel);
     
         Assert.Equal(lessonId, result);
         repositoryMock.Verify(r => r.Exists(lessonId), Times.Once);
-        repositoryMock.Verify(r => r.Update(updatedEntity), Times.Once);
+        repositoryMock.Verify(r => r.Update(It.IsAny<CompletedLessonEntity>()), Times.Once);
         repositoryMock.Verify(r => r.Insert(updatedEntity), Times.Never);
     }
     
@@ -371,6 +384,8 @@ public class CompletedLessonFacadeTests
         Assert.Equal("lessonModel", exception.ParamName);
     }
     
+    // This test is no longer relevant - UserId is now overridden from authenticated user
+    /*
     [Fact]
     public void Create_EmptyUserId_ThrowsArgumentException()
     {
@@ -390,6 +405,7 @@ public class CompletedLessonFacadeTests
         Assert.Equal("UserId", exception.ParamName);
         Assert.Contains("User ID cannot be empty.", exception.Message);
     }
+    */
 
     [Fact]
     public void Create_CallsInsert()
@@ -409,13 +425,13 @@ public class CompletedLessonFacadeTests
     
         var entity = mapper.ModelToEntity(lessonModel);
     
-        repositoryMock.Setup(r => r.Insert(entity)).Returns(lessonId);
+        repositoryMock.Setup(r => r.Insert(It.IsAny<CompletedLessonEntity>())).Returns(lessonId);
     
-        var facade = new CompletedLessonFacade(repositoryMock.Object, mapper);
+        var facade = new CompletedLessonFacade(repositoryMock.Object, mapper, GetMockCurrentUserService());
         var result = facade.Create(lessonModel);
     
         Assert.Equal(lessonId, result);
-        repositoryMock.Verify(r => r.Insert(entity), Times.Once);
+        repositoryMock.Verify(r => r.Insert(It.IsAny<CompletedLessonEntity>()), Times.Once);
     }
     
     [Fact]
@@ -428,6 +444,8 @@ public class CompletedLessonFacadeTests
         Assert.Equal("lessonModel", exception.ParamName);
     }
     
+    // This test is no longer relevant - UserId is now overridden from authenticated user
+    /*
     [Fact]
     public void Update_EmptyUserId_ThrowsArgumentException()
     {
@@ -447,6 +465,7 @@ public class CompletedLessonFacadeTests
         Assert.Equal("UserId", exception.ParamName);
         Assert.Contains("User ID cannot be empty.", exception.Message);
     }
+    */
     
     [Fact]
     public void Update_CallsUpdate()
@@ -466,15 +485,15 @@ public class CompletedLessonFacadeTests
     
         var updatedEntity = mapper.ModelToEntity(updatedLessonModel);
         
-        repositoryMock.Setup(r => r.Update(updatedEntity)).Returns(lessonId);
+        repositoryMock.Setup(r => r.Update(It.IsAny<CompletedLessonEntity>())).Returns(lessonId);
     
-        var facade = new CompletedLessonFacade(repositoryMock.Object, mapper);
+        var facade = new CompletedLessonFacade(repositoryMock.Object, mapper, GetMockCurrentUserService());
         var result = facade.Update(updatedLessonModel);
     
         Assert.NotNull(result);
         Assert.Equal(lessonId, result);
     
-        repositoryMock.Verify(r => r.Update(updatedEntity), Times.Once);
+        repositoryMock.Verify(r => r.Update(It.IsAny<CompletedLessonEntity>()), Times.Once);
     }
     
     [Fact]
@@ -486,7 +505,7 @@ public class CompletedLessonFacadeTests
     
         repositoryMock.Setup(r => r.Remove(lessonId));
     
-        var facade = new CompletedLessonFacade(repositoryMock.Object, mapper);
+        var facade = new CompletedLessonFacade(repositoryMock.Object, mapper, GetMockCurrentUserService());
         facade.Delete(lessonId);
     
         repositoryMock.Verify(r => r.Remove(lessonId), Times.Once);
