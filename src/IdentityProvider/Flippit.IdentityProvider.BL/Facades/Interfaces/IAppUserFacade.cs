@@ -1,5 +1,5 @@
 using Flippit.Common.BL.Facades;
-using Flippit.Common.Models.User;
+using Flippit.Common.Models.AppUser;
 using Flippit.IdentityProvider.BL.Models;
 
 namespace Flippit.IdentityProvider.BL.Facades;
@@ -11,7 +11,7 @@ public interface IAppUserFacade : IAppFacade
     Task<Guid> GetUserIdByUserNameAsync(string userName);
     public Task<AppUserDetailModel?> GetUserByIdAsync(Guid id);
 
-    Task<IList<UserListModel>> SearchAsync(string searchString);
+    Task<IList<AppUserListModel>> SearchAsync(string searchString);
     Task<AppUserDetailModel?> GetUserByUserNameAsync(string userName);
     Task<AppUserDetailModel?> GetAppUserByExternalProviderAsync(string provider, string providerIdentityKey);
     Task<AppUserDetailModel> CreateExternalAppUserAsync(AppUserExternalCreateModel appUserModel);

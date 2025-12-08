@@ -1,7 +1,6 @@
 using CookBook.IdentityProvider.BL.Mappers;
-using Flippit.Common.Models.User;
+using Flippit.Common.Models.AppUser;
 using Flippit.IdentityProvider.BL.Facades;
-using Flippit.IdentityProvider.BL.Mappers;
 using Flippit.IdentityProvider.BL.Models;
 using Flippit.IdentityProvider.DAL.Entities;
 using Flippit.IdentityProvider.DAL.Repositories;
@@ -127,7 +126,7 @@ public class AppUserFacade(
         }
     }
 
-    public async Task<IList<UserListModel>> SearchAsync(string searchString)
+    public async Task<IList<AppUserListModel>> SearchAsync(string searchString)
     {
         var users = await appUserRepository.SearchAsync(searchString);
         return appUserMapper.ToListModels(users);
