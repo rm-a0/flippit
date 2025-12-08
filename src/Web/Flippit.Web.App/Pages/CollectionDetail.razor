@@ -1,8 +1,7 @@
-﻿@page "/collections"
+﻿@page "/collections/{id:int}"
 @inject HttpClient Http
 
 <SearchHeader></SearchHeader>
-
 @{
     if(!Loading)
     {
@@ -10,29 +9,20 @@
         {
             <div class="mt-10 flex flex-col items-center gap-20">
                 <div class="w-mac flex flex-col gap-3">
-                    <h4 class="font-monserrat-b m-0 ml-2 text-2xl">Collections</h4>
-                    <div class="grid w-max grid-cols-4 gap-6">
+                    <h4 class="font-monserrat-b m-0 ml-2 text-2xl">Flashcards (@(cards.Count()))</h4>
+                    <div class="grid w-max grid-cols-5 gap-2">
                         @{
-                            foreach (var col in visible)
+                            foreach(var card in visible)
                             {
-                                <CollectionCard Id="col.Id" />
+                                <CardListCard QuestionType="@card.QuestionType" Question="@card.Question"></CardListCard>
                             }
                         }
                     </div>
-   
                 </div>
                 <button disabled="@(LoadMoreDisabled())" @onclick="LoadMore" class="dark-blue-border mb-10 h-10 w-30 rounded-xl border-2 bg-transparent disabled:cursor-not-allowed">
                     <p class="font-ubuntu-sans-l dark-blue-text">Load more</p>
                 </button>
             </div>
-        }
-        else
-        {
-            <div class="mt-20 flex flex-col items-center">
-                <h3 class="font-ubuntu-sans-l">There are no collections yet. </h3>
-                <a class="font-ubuntu-sans-l cursor-pointer text-blue-600 underline">Want to create one?</a>
-            </div>
-
         }
 
     }
@@ -40,15 +30,24 @@
     {
         <Loading></Loading>
     }
-
 }
 
 
 @code {
+
+    //change to guid later
+    [Parameter]
+    public int id { get; set; }
+
+    private Collection? collection;
     private Collection[]? collections;
     private List<Collection>? collectionsList;
-    private List<Collection>? visible;
+    private List<Card>? cards;
+    private List<Card>? visible;
     private int skip = 0;
+    private int size = 10;
+
+
     private bool Loading = false;
 
     protected override async Task OnInitializedAsync()
@@ -58,29 +57,46 @@
         if (collections != null)
         {
             collectionsList = collections.ToList();
-            visible = collectionsList.Skip(0).Take(8).ToList();
-            Console.WriteLine(skip);
+            collection = collectionsList.Where(c => c.Id == id).FirstOrDefault();
+            var cardsar = await Http.GetFromJsonAsync<Card[]>("sample-data/carddetail.json");
+            if(cardsar != null)
+            {
+                cards = cardsar.ToList();
+                visible = cards.Skip(0).Take(size).ToList();
+            }
+
         }
         Loading = false;
-
     }
 
     private bool LoadMoreDisabled()
     {
-        return collectionsList.Count() <= (skip + 1) * 8;
+        return cards.Count() <= (skip + 1) * size;
     }
 
     private void LoadMore()
     {
-        if((skip+1)*8 < collectionsList.Count())
+        if((skip+1)*size < cards.Count())
         {
             skip++;
-            var newItems = collectionsList.Skip(skip*8).Take(8).ToList();
+            var newItems = cards.Skip(skip*8).Take(8).ToList();
             visible.AddRange(newItems);
         }
         
     }
 
+    public class Card
+    {
+        public int Id { get; set; }
+        public string? QuestionType { get; set; }
+        public string? Question { get; set; }
+        public string? AnswerType { get; set; }
+        public string? Answer { get; set; }
+        public string? Description { get; set; }
+        public Guid CreatorId { get; set; }
+        public Guid CollectionId { get; set; }
+
+    }
     public class User
     {
         public string? Name { get; set; }
@@ -92,5 +108,4 @@
         public string? Name { get; set; }
         public User? User { get; set; }
     }
-
 }
