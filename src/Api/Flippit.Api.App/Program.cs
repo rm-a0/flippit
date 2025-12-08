@@ -29,7 +29,6 @@ builder.Services.AddSingleton<CardMapper>();
 builder.Services.AddSingleton<CollectionMapper>();
 builder.Services.AddSingleton<CompletedLessonMapper>();
 
-// Register CurrentUserService and dependencies
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
@@ -47,7 +46,6 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.PropertyNameCaseInsensitive = true;
 });
 
-// Add authentication and authorization
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
 
@@ -66,7 +64,11 @@ if (app.Environment.IsDevelopment())
 
 }
 
-app.UseHttpsRedirection();
+// Disable HTTPS redirection in Testing environment to avoid warnings in tests
+if (!app.Environment.IsEnvironment("Testing"))
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseAuthentication();
 app.UseAuthorization();
