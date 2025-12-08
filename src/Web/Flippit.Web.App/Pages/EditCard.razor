@@ -1,0 +1,107 @@
+﻿@page "/cards/{id:int}/edit"
+@inject NavigationManager NavigationManager
+
+<NameHeader Name="Edit card">
+    <button  @onclick="Save" class="green-bg flex size-10 cursor-pointer flex-col items-center justify-center rounded-lg">
+         <svg class="scale-70" width="28" height="30" viewBox="0 0 28 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M1 16.2755L10.6196 28.6986L26.8704 1.00024" stroke="#F0F2F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+         </svg>
+
+    </button>
+</NameHeader>
+
+<div class="font-ubuntu-sans-l mt-30 flex w-full flex-col items-center gap-10"> 
+
+
+    <div class="flex w-[80%] flex-col items-center gap-6">
+
+            <div class="grid w-full grid-cols-3 grid-rows-2 gap-3 rounded-2xl bg-white p-6 drop-shadow">
+                        <div class="flex flex-col gap-2">
+                            <p>Question type:</p>
+                            <div class="flex flex-row gap-2">
+                                <input required id="qtypetext" type="radio" checked="@(card.QuestionType == "Text")"
+                                    name="QuestionType" @onchange="@(() => card.QuestionType = "Text")" />
+                                <label for="qtypetext">Text</label>
+                            </div>
+
+                            
+                            <div class="flex flex-row gap-2">
+                                <input required id="qtypeimg" type="radio" checked="@(card.QuestionType == "Image")"
+                                    name="QuestionType" @onchange="@(() => card.QuestionType = "Image")" />
+                                <label for="qtypeimg">Image</label>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col gap-2">
+                            <p>Question type:</p>
+                            <div class="flex flex-row gap-2">
+                                <input required id="atypetext" type="radio" checked="@(card.AnswerType == "Text")"
+                                    name="AnswerType" @onchange="@(() => card.AnswerType = "Text")" />
+                                <label for="atypetext">Text</label>
+                            </div>
+
+                            
+                            <div class="flex flex-row gap-2">
+                                <input required id="atypeimg" type="radio" checked="@(card.AnswerType == "Image")"
+                                    name="AnswerType" @onchange="@(() => card.AnswerType = "Image")" />
+                                <label for="atypeimg">Image</label>
+                            </div>
+                        </div>
+
+                        <div class="col-1 row-2 flex flex-col gap-2">
+                            <p>Question (text or url):</p>
+                            <div class="rounded-lg bg-gray-100 p-3">
+                                <InputTextArea class="w-full resize-none focus:outline-0" @bind-value="card.Question"/>
+                            </div>
+                        </div>
+
+                         <div class="col-2 row-2 flex flex-col gap-2">
+                            <p>Answer (text or url):</p>
+                            <div class="rounded-lg bg-gray-100 p-3">
+                                <InputTextArea class="w-full resize-none focus:outline-0" @bind-value="card.Answer"/>
+                            </div>
+                        </div>
+
+                        <div class="col-3 row-2 flex flex-col gap-2">
+                            <p>Description:</p>
+                            <div class="rounded-lg bg-gray-100 p-3">
+                                <InputTextArea class="w-full resize-none focus:outline-0" @bind-value="card.Description"/>
+                            </div>
+                        </div>
+
+
+                        
+            </div> 
+
+
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+    private Card? card;
+
+    protected override void OnInitialized()
+    {
+        card = new Card();
+
+    }
+
+    private void Save()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+
+    public class Card
+    {
+        public string? QuestionType { get; set; }
+        public string? Question { get; set; }
+        public string? AnswerType { get; set; }
+        public string? Answer { get; set; }
+        public string? Description { get; set; }
+        public Guid? CreatorId { get; set; }
+        public Guid? CollectionId { get; set; }
+
+    }
+}
