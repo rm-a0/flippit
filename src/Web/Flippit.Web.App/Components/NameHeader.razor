@@ -12,6 +12,11 @@
             {
                 <h1 class="font-monserrat-b text-3xl">@Name</h1>
             }
+            if(ChildContent!=null)
+            {
+                @ChildContent
+
+            }
         }
         
     </div>
@@ -25,4 +30,6 @@
 @code {
     [Parameter]
     public string? Name { get; set; }
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
 }

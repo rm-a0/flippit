@@ -1,0 +1,153 @@
+﻿@page "/create"
+@inject NavigationManager NavigationManager
+
+<NameHeader Name="Create collection">
+    <button  @onclick="Save" class="green-bg flex size-10 cursor-pointer flex-col items-center justify-center rounded-lg">
+         <svg class="scale-70" width="28" height="30" viewBox="0 0 28 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M1 16.2755L10.6196 28.6986L26.8704 1.00024" stroke="#F0F2F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+         </svg>
+
+    </button>
+</NameHeader>
+
+<div class="font-ubuntu-sans-l mt-10 flex w-full flex-col items-center gap-10"> 
+    <div class="flex w-[80%] flex-row items-end justify-between gap-3">
+        <div class="flex flex-col gap-3">
+            <p>Collection name:</p>
+            <div class="w-80 rounded-lg bg-white p-3 drop-shadow">
+                <input type="text" class="w-full focus:outline-0"/>
+            </div>
+        </div>
+
+        <div class="grid w-max grid-cols-2 grid-rows-2 items-end gap-3">
+            <p>Start date:</p>
+            <div class="col-1 row-2 w-max rounded-lg bg-white p-3 drop-shadow">
+                <input type="date" />
+            </div>
+            <p>End date:</p>
+            <div class="col-2 row-2 w-max rounded-lg bg-white p-3 drop-shadow">
+                <input type="date" />
+            </div>
+            
+        </div>
+    </div>
+
+    <div class="flex w-[80%] flex-col items-center gap-6">
+        @for(int i = 0; i < cards.Count(); i ++) 
+        {
+            var card = cards[i];
+            var index = i;
+            <div class="grid w-full grid-cols-3 grid-rows-2 gap-3 rounded-2xl bg-white p-6 drop-shadow">
+                        <div class="flex flex-col gap-2">
+                            <p>Question type:</p>
+                            <div class="flex flex-row gap-2">
+                                <input required id="qtypetext-@i" type="radio" checked="@(card.QuestionType == "Text")"
+                                    name="QuestionType" @onchange="@(() => card.QuestionType = "Text")" />
+                                <label for="qtypetext-@i">Text</label>
+                            </div>
+
+                            
+                            <div class="flex flex-row gap-2">
+                                <input required id="qtypeimg-@i" type="radio" checked="@(card.QuestionType == "Image")"
+                                    name="QuestionType" @onchange="@(() => card.QuestionType = "Image")" />
+                                <label for="qtypeimg-@i">Image</label>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col gap-2">
+                            <p>Question type:</p>
+                            <div class="flex flex-row gap-2">
+                                <input required id="atypetext-@i" type="radio" checked="@(card.AnswerType == "Text")"
+                                    name="AnswerType" @onchange="@(() => card.AnswerType = "Text")" />
+                                <label for="atypetext-@i">Text</label>
+                            </div>
+
+                            
+                            <div class="flex flex-row gap-2">
+                                <input required id="atypeimg-@i" type="radio" checked="@(card.AnswerType == "Image")"
+                                    name="AnswerType" @onchange="@(() => card.AnswerType = "Image")" />
+                                <label for="atypeimg-@i">Image</label>
+                            </div>
+                        </div>
+
+                        <div class="col-1 row-2 flex flex-col gap-2">
+                            <p>Question (text or url):</p>
+                            <div class="rounded-lg bg-gray-100 p-3">
+                                <InputTextArea class="w-full resize-none focus:outline-0" @bind-value="card.Question"/>
+                            </div>
+                        </div>
+
+                         <div class="col-2 row-2 flex flex-col gap-2">
+                            <p>Answer (text or url):</p>
+                            <div class="rounded-lg bg-gray-100 p-3">
+                                <InputTextArea class="w-full resize-none focus:outline-0" @bind-value="card.Answer"/>
+                            </div>
+                        </div>
+
+                        <div class="col-3 row-2 flex flex-col gap-2">
+                            <p>Description:</p>
+                            <div class="rounded-lg bg-gray-100 p-3">
+                                <InputTextArea class="w-full resize-none focus:outline-0" @bind-value="card.Description"/>
+                            </div>
+                        </div>
+
+                        <div class="col-3 row-1 flex flex-row items-start justify-end">
+                            <button @onclick="() => RemoveCard(index)" class="cursor-pointer hover:scale-110">
+                                <svg class="scale-90" width="24" height="27" viewBox="0 0 24 27" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M2.75041 6.21907C2.90822 9.66751 3.29147 17.6057 3.56193 21.7709C3.77167 25.0009 7.16817 25.9632 8.97129 25.9632C10.7744 25.9632 14.7728 25.9632 16.3416 25.9632C18.3025 25.9632 19.8576 23.9347 19.9929 21.7709C20.1011 20.04 20.3986 10.6818 20.5338 6.21907M2.75041 6.21907H7.40067M2.75041 6.21907H1M20.5338 6.21907H16.0184M20.5338 6.21907H22.2069M7.40067 6.21907C7.40067 5.47194 7.40067 3.78086 7.40067 2.99355C7.40067 2.00941 8.58669 1 11.4382 1C14.2897 1 16.0184 1.78909 16.0184 2.75718C16.0184 3.53165 16.0184 5.3878 16.0184 6.21907M7.40067 6.21907H16.0184" stroke="red" stroke-width="2" stroke-linecap="round" />
+                                    <line x1="8.69629" y1="11.0005" x2="8.69629" y2="21.2825" stroke="red" stroke-width="2" stroke-linecap="round" />
+                                    <line x1="14.5283" y1="11.0005" x2="14.5283" y2="21.2825" stroke="red" stroke-width="2" stroke-linecap="round" />
+                                </svg>
+                            </button>
+
+                        </div>
+                        
+            </div> 
+
+        }
+        <div @onclick="AddCard" class="primary-blue-bg mb-20 flex size-10 min-w-10 cursor-pointer flex-col items-center justify-center rounded-md">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <line x1="11.6251" y1="1" x2="11.6251" y2="22.5206" stroke="white" stroke-width="2" stroke-linecap="round" />
+                <line x1="22.5206" y1="11.9957" x2="1" y2="11.9957" stroke="white" stroke-width="2" stroke-linecap="round" />
+            </svg>
+
+        </div>
+    </div>
+</div>
+
+@code {
+    public List<Card> cards = new List<Card>();
+
+    protected override void OnInitialized()
+    {
+        cards.Add(new Card());
+
+    }
+
+    private void Save()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+
+    private void AddCard()
+    {
+        cards.Add(new Card());
+    }
+
+    private void RemoveCard(int index)
+    {
+        cards.RemoveAt(index);
+    }
+
+    public class Card
+    {
+        public string? QuestionType { get; set; }
+        public string? Question { get; set; }
+        public string? AnswerType { get; set; }
+        public string? Answer { get; set; }
+        public string? Description { get; set; }
+        public Guid? CreatorId { get; set; }
+        public Guid? CollectionId { get; set; }
+
+    }
+}
