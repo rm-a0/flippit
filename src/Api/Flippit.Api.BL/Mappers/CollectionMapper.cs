@@ -18,8 +18,6 @@ namespace Flippit.Api.BL.Mappers
         public partial IList<CollectionListModel> ToListModels(IEnumerable<CollectionEntity> entities);
 
         [MapperIgnoreSource(nameof(CollectionEntity.CreatorId))]
-        [MapperIgnoreSource(nameof(CollectionEntity.StartTime))]
-        [MapperIgnoreSource(nameof(CollectionEntity.EndTime))]
         public partial CollectionListModel ToListModel(CollectionEntity entity);
     }
 }

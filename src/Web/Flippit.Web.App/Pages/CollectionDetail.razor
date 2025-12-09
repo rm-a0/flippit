@@ -1,11 +1,15 @@
-﻿@page "/collections/{id:int}"
+﻿@page "/collections/{ColId:guid}"
+@using Flippit.Common.Models.Card
+@using Flippit.Common.Models.Collection
+@using System.Text.Json
+@using System.Text.Json.Serialization
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 
 @{
     if(collection!=null)
     {
-        <NameHeader Name="@collection.Name">
+        <SearchHeader Name="aaaa">
             <div class="flex flex-row gap-3">
                 <button  @onclick="Edit" class="green-bg flex size-10 cursor-pointer flex-col items-center justify-center rounded-lg">
                      <svg  width="27" height="24" viewBox="0 0 27 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -23,16 +27,16 @@
                 </button>
             </div>
 
-        </NameHeader>
+        </SearchHeader>
 
     }
 
 
     if(!Loading)
     {
-        if (visible != null)
+        if (cards != null)
         {
-            <NavLink href="@($"/collections/{id}/play")">
+            <NavLink href="@($"/collections/{collection!.Id}/play")">
                  <div class="primary-blue-bg fixed right-20 bottom-20 size-14 cursor-pointer rounded-full">
                     <div class="flex size-14 flex-row items-center justify-center">
                         <svg  width="14" height="19" viewBox="0 0 14 19" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -48,7 +52,7 @@
                     <h4 class="font-monserrat-b m-0 ml-2 text-2xl">Flashcards (@(cards!.Count()))</h4>
                     <div class="grid w-max grid-cols-5 gap-2">
                         @{
-                            foreach(var card in visible)
+                            foreach(var card in cards)
                             {
                                 <CardListCard Id="@card.Id" QuestionType="@card.QuestionType" Question="@card.Question"></CardListCard>
                             }
@@ -71,88 +75,101 @@
 
 @code {
 
-    //change to guid later
+
+
     [Parameter]
-    public int id { get; set; }
+    public Guid ColId { get; set; }
 
-    private Collection? collection;
-    private Collection[]? collections;
-    private List<Collection>? collectionsList;
-    private List<Card>? cards;
-    private List<Card>? visible;
-    private int skip = 0;
+    private CollectionDetailModel? collection;
+    private List<CardListModel>? cards;
+
+    private int skip = 1;
     private int size = 10;
-
-
     private bool Loading = false;
+    private bool CanLoadMore = true;
+
+
+
+    private async Task GetCollection()
+    {
+        var options = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+        };
+
+        var col = await Http.GetFromJsonAsync<CollectionDetailModel>($"/api/collections/{ColId}", options);
+        Console.WriteLine(JsonSerializer.Serialize(col, options));
+        collection = col;
+
+
+    }
+
+    private async Task GetCards()
+    {
+        var options = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+        };
+
+
+        if(collection != null)
+        {
+            var newCards = await Http.GetFromJsonAsync<CardListModel[]>($"/api/collections/{ColId}/cards", options);
+            Console.WriteLine(JsonSerializer.Serialize(newCards, options));
+            if(newCards != null && newCards.Count() > 0)
+            {
+                if(cards == null)
+                {
+                    cards = new List<CardListModel>();
+                }
+                cards.AddRange(newCards);
+            }
+
+            if (newCards == null || newCards.Count() < size)
+            {
+                CanLoadMore = false;
+            }
+
+        }
+
+    }
 
     protected override async Task OnInitializedAsync()
     {
         Loading = true;
-        collections = await Http.GetFromJsonAsync<Collection[]>("sample-data/Collections.json");
-        if (collections != null)
-        {
-            collectionsList = collections.ToList();
-            collection = collectionsList.Where(c => c.Id == id).FirstOrDefault();
-            Console.WriteLine(collection.Name);
-            var cardsar = await Http.GetFromJsonAsync<Card[]>("sample-data/carddetail.json");
-            if(cardsar != null)
-            {
-                cards = cardsar.ToList();
-                visible = cards.Skip(0).Take(size).ToList();
-            }
-
-        }
+        await GetCollection();
+        await GetCards();
         Loading = false;
+    }
+
+
+    private async Task LoadMore()
+    {
+        Loading = true;
+        skip++;
+        await GetCards();
+        Loading = false;
+
     }
 
     private bool LoadMoreDisabled()
     {
-        return cards.Count() <= (skip + 1) * size;
-    }
-
-    private void LoadMore()
-    {
-        if((skip+1)*size < cards.Count())
-        {
-            skip++;
-            var newItems = cards.Skip(skip*8).Take(8).ToList();
-            visible.AddRange(newItems);
-        }
-
+        return Loading || !CanLoadMore;
     }
 
     private void Edit()
     {
-        NavigationManager.NavigateTo($"/collections/{id}/edit");
+        if(collection != null)
+        {
+           NavigationManager.NavigateTo($"/collections/{collection.Id}/edit"); 
+        }
+        
     }
 
     private void Delete()
     {
-        
-    }
 
-    public class Card
-    {
-        public int Id { get; set; }
-        public string? QuestionType { get; set; }
-        public string? Question { get; set; }
-        public string? AnswerType { get; set; }
-        public string? Answer { get; set; }
-        public string? Description { get; set; }
-        public Guid CreatorId { get; set; }
-        public Guid CollectionId { get; set; }
-
-    }
-    public class User
-    {
-        public string? Name { get; set; }
-        public string? PhotoUrl { get; set; }
-    }
-    public class Collection
-    {
-        public int Id { get; set; }
-        public string? Name { get; set; }
-        public User? User { get; set; }
     }
 }

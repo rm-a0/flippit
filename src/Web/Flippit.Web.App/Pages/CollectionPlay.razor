@@ -1,21 +1,27 @@
-﻿@page "/collections/{id:int}/play"
+﻿@page "/collections/{id:guid}/play"
 @inject HttpClient Http
 @using System.Text.Json;
+@using Flippit.Common.Enums
+@using Flippit.Common.Models.Card
+@using Flippit.Common.Models.Collection
+@using System.Text.Json.Serialization
 @inject NavigationManager NavigationManager
+@inject UserState userState
 
 
 @if(Loading)
 {
-    <NameHeader Name=""></NameHeader>
+    <SearchHeader Name="" ShowSearch="false"></SearchHeader>
     <Loading></Loading>
 }
-else
+else if(collection!=null)
 {
-    <NameHeader Name="Collection Name"></NameHeader>
+
+    <SearchHeader Name="@collection.Name" ShowSearch="false"></SearchHeader>
 
     @if(!showResults)
     {
-        @if(cards!=null && displayCard!=null)
+        @if(cards!=null && displayCard!=null && answerCard != null)
         {
             <div class="mt-10 flex flex-col items-center gap-4">
                 <h2 class="font-monserrat-b text-[24px]">@(count+1)/@(cards.Count())</h2>
@@ -30,7 +36,7 @@ else
                                 <div class="absolute size-full p-10 pt-12 backface-hidden">
                                     <div class="flex size-full flex-col items-center justify-center bg-white">
                                         <div class="flex size-full flex-col items-center justify-center">
-                                            @if(displayCard.QuestionType!.ToLower() == "text")
+                                            @if(displayCard.QuestionType == QAType.Text)
                                             {
                                                 <h6 class="text-[22px]">@displayCard.Question</h6>
 
@@ -40,7 +46,7 @@ else
                                                 }
 
                                             }
-                                            else if(displayCard.QuestionType.ToLower() == "image")
+                                            else if(displayCard.QuestionType == QAType.Pictures)
                                             {
                                                 <div class="h-60 w-80">
                                                     <img class="h-full w-full object-contain" src="@displayCard.Question" />
@@ -58,12 +64,12 @@ else
                                 </div>
                                 <div class="absolute size-full rotate-y-180 p-10 pt-12 backface-hidden">
                                     <div class="flex size-full flex-col items-center justify-center bg-white">
-                                        @if(displayCard.AnswerType!.ToLower() == "text")
+                                        @if(displayCard.AnswerType == QAType.Text)
                                         {
                                             <h6 class="text-[22px]">@displayCard.Answer</h6>
 
                                         }
-                                        else if(displayCard.AnswerType.ToLower() == "image")
+                                        else if(displayCard.AnswerType == QAType.Pictures)
                                         {
                                             <div class="h-60 w-80">
                                                 <img class="h-full w-full object-contain" src="@displayCard.Answer" />
@@ -81,14 +87,14 @@ else
 
 
                 <div class="flex flex-row gap-6">
-                    <button disabled="@buttonsdisabled" @onclick="async () => await SetAnswer(displayCard, false)" class=" red-bg size-12 cursor-pointer rounded-full disabled:!bg-gray-400 flex flex-col items-center justify-center">
+                    <button disabled="@buttonsdisabled" @onclick="async () => await SetAnswer(answerCard, false)" class=" red-bg size-12 cursor-pointer rounded-full disabled:!bg-gray-400 flex flex-col items-center justify-center">
                         <svg class="scale-80" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M21.5311 0.292847C21.9218 -0.0976562 22.5557 -0.0976562 22.9462 0.292847C23.3368 0.683472 23.3368 1.31738 22.9462 1.70789L13.0624 11.5907L23.3612 21.8895C23.7518 22.2802 23.7518 22.9131 23.3612 23.3036C22.9707 23.6942 22.3378 23.6942 21.9471 23.3036L11.6483 13.0048L1.70691 22.9471C1.31665 23.3375 0.683472 23.3373 0.292847 22.9471C-0.0976562 22.5566 -0.0976562 21.9227 0.292847 21.5321L10.2333 11.5897L0.707886 2.06433C0.317505 1.67383 0.317505 1.04077 0.707886 0.650269C1.09839 0.259766 1.73145 0.259888 2.12195 0.650269L11.6473 10.1757L21.5311 0.292847Z" fill="white"/>
                         </svg>
 
                     </button>
 
-                    <button disabled="@buttonsdisabled" @onclick="async () => await SetAnswer(displayCard, true)" class="green-bg size-12 cursor-pointer rounded-full disabled:!bg-gray-400 flex flex-col items-center justify-center">
+                    <button disabled="@buttonsdisabled" @onclick="async () => await SetAnswer(answerCard, true)" class="green-bg size-12 cursor-pointer rounded-full disabled:!bg-gray-400 flex flex-col items-center justify-center">
                         <svg class="scale-80" width="28" height="30" viewBox="0 0 28 30" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M1 16.2755L10.6196 28.6986L26.8704 1.00024" stroke="#F0F2F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
@@ -110,11 +116,11 @@ else
                 <div class="font-ubuntu-sans-l flex w-[80%] flex-row items-center gap-3 rounded-2xl border-2 border-gray-200 bg-white p-6 text-[18px]">
                     <p>@(Results.IndexOf(res)+1).</p>
                     <div class="flex-1/2">
-                        @if(res.Card.QuestionType!.ToLower() == "text")
+                        @if(res.Card.QuestionType == QAType.Text)
                         {
                             <p>@res.Card.Question</p>
 
-                        } else if(res.Card.QuestionType.ToLower() == "image")
+                        } else if(res.Card.QuestionType == QAType.Pictures)
                         {
                             <div class="h-60 w-80">
                                 <img class="h-full w-full object-contain" src="@res.Card.Question" />
@@ -123,12 +129,12 @@ else
                         }
                     </div>
                     <div class="flex-1/2 text-right">
-                        @if(res.Card.AnswerType!.ToLower() == "text")
+                        @if(res.Card.AnswerType == QAType.Text)
                         {
                             <p>@res.Card.Answer</p>
 
                         }
-                        else if(res.Card.AnswerType.ToLower() == "image")
+                        else if(res.Card.AnswerType == QAType.Pictures)
                         {
                             <div class="h-60 w-80">
                                 <img class="h-full w-full object-contain" src="@res.Card.Answer" />
@@ -171,21 +177,78 @@ else
 
 
     [Parameter]
-    public int id { get; set; }
+    public Guid id { get; set; }
 
-    private bool Loading = false;
-    private List<Card>? cards;
-    private Card? displayCard;
+    private CollectionDetailModel? collection;
+    private List<CardListModel>? cards;
+    private CardListModel? displayCard;
+    private CardDetailModel? answerCard;
     private int count = 0;
     private List<CardResult> Results = new List<CardResult>();
     private bool rotate = false;
 
+    private bool Loading = false;
+
+    //for sliding animation
     private bool slideleft = false;
     private bool slideright = false;
     private bool zeroopacity = false;
     private bool buttonsdisabled = false;
 
     private bool showResults = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Loading = true;
+        await GetCollection();
+        await GetCards();
+        Loading = false;
+    }
+
+    private async Task GetCollection()
+    {
+        var options = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+        };
+
+        var col = await Http.GetFromJsonAsync<CollectionDetailModel>($"/api/collections/{id}", options);
+        Console.WriteLine(JsonSerializer.Serialize(col, options));
+        collection = col;
+    }
+
+    private async Task GetCards()
+    {
+        var options = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+        };
+
+
+        if (collection != null)
+        {
+            var newCards = await Http.GetFromJsonAsync<CardListModel[]>($"/api/collections/{id}/cards", options);
+            Console.WriteLine(JsonSerializer.Serialize(newCards, options));
+            if (newCards != null && newCards.Count() > 0)
+            {
+                if (cards == null)
+                {
+                    cards = new List<CardListModel>();
+                }
+                cards.AddRange(newCards);
+                displayCard = cards[0];
+                answerCard = await Http.GetFromJsonAsync<CardDetailModel>($"/api/cards/{displayCard.Id}", options);
+            }
+
+        }
+    }
+
+    private async Task GetStats()
+    {
+        
+    }
 
     private void NavigateToMain()
     {
@@ -197,6 +260,8 @@ else
         NavigationManager.Refresh(true);
     }
 
+
+    //classes for animation
     private string getTransformleft()
     {
         return slideleft ? " -translate-x-full " :"";
@@ -212,7 +277,18 @@ else
         return zeroopacity ? " opacity-0 " : " opacity-100 ";
     }
 
-    private async Task SetAnswer(Card card, bool isCorrect)
+    private void ToogleCard()
+    {
+        rotate = !rotate;
+    }
+
+    private string GetRotateClass()
+    {
+        return rotate ? "rotate-y-180" : "";
+    }
+
+    //Results
+    private async Task SetAnswer(CardDetailModel card, bool isCorrect)
     {
         //card slides to the left
         buttonsdisabled = true;
@@ -242,40 +318,21 @@ else
 
     }
 
-
-    protected override async Task OnInitializedAsync()
+    private async Task GoNext()
     {
-        Loading = true;
-        var cardsar = await Http.GetFromJsonAsync<Card[]>("sample-data/carddetail.json");
-        if(cardsar != null)
+        var options = new JsonSerializerOptions
         {
-            cards = cardsar.ToList();
-            if(cards.Count() > 0)
-            {
-                displayCard = cards[0];
-            }
+            PropertyNameCaseInsensitive = true,
+            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+        };
 
-        }
-        Loading = false;
-    }
-
-    private void ToogleCard()
-    {
-        rotate = !rotate;
-    }
-
-    private string GetRotateClass()
-    {
-        return rotate ? "rotate-y-180" : "";
-    }
-
-    private void GoNext()
-    {
         rotate = false;
         if(count + 1 < cards.Count())
         {
             count++;
             displayCard = cards[count];
+            answerCard = await Http.GetFromJsonAsync<CardDetailModel>($"/api/cards/{displayCard.Id}", options);
+
         } 
         else
         {
@@ -288,22 +345,9 @@ else
         showResults = true;
     }
 
-    public class Card
-    {
-        public int Id { get; set; }
-        public string? QuestionType { get; set; }
-        public string? Question { get; set; }
-        public string? AnswerType { get; set; }
-        public string? Answer { get; set; }
-        public string? Description { get; set; }
-        public Guid CreatorId { get; set; }
-        public Guid CollectionId { get; set; }
-
-    }
-
     public class CardResult
     {
-        public required Card Card { get; set; }
+        public required CardDetailModel Card { get; set; }
         public bool IsCorrect { get; set; }
     }
 }

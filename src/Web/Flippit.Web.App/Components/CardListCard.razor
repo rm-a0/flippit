@@ -1,15 +1,16 @@
-﻿
+﻿@using Flippit.Common.Enums
+
 <div class="font-monserrat-m flex h-56 w-48 flex-col bg-contain bg-center bg-no-repeat p-6 pt-10"
      style="background-image: url('/icons/card-bg.svg')">
      <div class="flex-1">
         @{
-            if(!string.IsNullOrEmpty(QuestionType) && !string.IsNullOrEmpty(Question))
+            if(QuestionType != null && !string.IsNullOrEmpty(Question))
             {
-                if(QuestionType.ToLower() == "text")
+                if(QuestionType == QAType.Text)
                 {
                     <p>@Question</p>
                 }
-                else if(QuestionType.ToLower() == "image")
+                else if (QuestionType == QAType.Pictures)
                 {
                     <div>
                         <img src="@Question"/>
@@ -43,10 +44,10 @@
 
 @code {
     [Parameter]
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
     [Parameter]
-    public string? QuestionType { get; set; }
+    public QAType? QuestionType { get; set; }
 
     [Parameter]
     public string? Question { get; set; }

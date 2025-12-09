@@ -1,122 +1,169 @@
 ﻿@page "/"
+@using Flippit.Common.Models.Collection
+@using Flippit.Common.Models.User
 @inject HttpClient Http
+@inject UserState userState
 
 <PageTitle>Home</PageTitle>
 
-<SearchHeader></SearchHeader>
+<SearchHeader User="userState.User"></SearchHeader>
 
-<main class="mt-8 flex flex-col items-center gap-6">
-    <h2 class="font-monserrat-b text-[32px]">Welcome, User</h2>
-    <div></div>
-    <div class="grid grid-cols-26 grid-rows-7 gap-0.75">
-        @for(int i = 0; i < 182; i++)
-        {
-            <div class="size-4 rounded-sm bg-black"></div>
-        }
-    </div>
-    @{
-        if(visible != null)
-        {
-            <div class="mt-14 flex flex-col gap-4">
-                <div class="mx-20 flex flex-row justify-between">
-                    <h4 class="font-monserrat-b m-0 text-2xl">Collections</h4>
-                    <NavLink href="/collections">
-                        <p class="font-ubuntu-sans-l m-0 cursor-pointer">See all</p>
-                    </NavLink>
+@if(userState.User != null)
+{
+    <main class="mt-8 flex flex-col items-center gap-6">
+        <h2 class="font-monserrat-b text-[32px]">Welcome, User</h2>
+        <div></div>
+        <div class="grid grid-cols-26 grid-rows-7 gap-0.75">
+            @for(int i = 0; i < 182; i++)
+            {
+                <div class="size-4 rounded-sm bg-black"></div>
+            }
+        </div>
+        @if (collections != null)
+            {
+                <div class="mt-14 flex flex-col gap-4">
+                    <div class="mx-20 flex flex-row justify-between">
+                        <h4 class="font-monserrat-b m-0 text-2xl">Collections</h4>
+                        <NavLink href="/collections">
+                            <p class="font-ubuntu-sans-l m-0 cursor-pointer">See all</p>
+                        </NavLink>
             
-                </div>
-                <div class="flex flex-row items-center gap-6">
-                    <button disabled="@(LeftButtonDisabled())" @onclick="GoPrev" class="cursor-pointer disabled:cursor-not-allowed">
-                        <svg width="51" height="51" viewBox="0 0 51 51" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <rect x="1" y="1" width="48.78" height="48.7769" rx="24.3884" stroke="#CBCBCB" stroke-width="2" />
-                            <path d="M30.4276 15.2207L18.3524 25.3884L30.4276 35.5562" stroke="#CBCBCB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                    </button>
-
-
-                    <div class="flex flex-row gap-6">
-                        @{
-                            foreach (var col in visible!)
-                            {
-                                <CollectionCard Id="col.Id"></CollectionCard>
-                            }
-                        }
                     </div>
+                    <div class="flex flex-row items-center gap-6">
+                        <button disabled="@(LeftButtonDisabled())" @onclick="GoPrev" class="cursor-pointer disabled:cursor-not-allowed">
+                            <svg width="51" height="51" viewBox="0 0 51 51" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="1" y="1" width="48.78" height="48.7769" rx="24.3884" stroke="#CBCBCB" stroke-width="2" />
+                                <path d="M30.4276 15.2207L18.3524 25.3884L30.4276 35.5562" stroke="#CBCBCB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </button>
 
-                    <button disabled="@(RightButtonDisabled())" @onclick="GoNext" class="rotate-180 cursor-pointer disabled:cursor-not-allowed">
-                        <svg width="51" height="51" viewBox="0 0 51 51" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <rect x="1" y="1" width="48.78" height="48.7769" rx="24.3884" stroke="#CBCBCB" stroke-width="2" />
-                            <path d="M30.4276 15.2207L18.3524 25.3884L30.4276 35.5562" stroke="#CBCBCB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                    </button>
-                </div>
+
+                        <div class="flex flex-row gap-6">
+                            @{
+                                foreach (var col in collections!)
+                                {
+                                    <CollectionCard Id="col.Id"></CollectionCard>
+                                }
+                            }
+                        </div>
+
+                        <button disabled="@(RightButtonDisabled())" @onclick="GoNext" class="rotate-180 cursor-pointer disabled:cursor-not-allowed">
+                            <svg width="51" height="51" viewBox="0 0 51 51" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="1" y="1" width="48.78" height="48.7769" rx="24.3884" stroke="#CBCBCB" stroke-width="2" />
+                                <path d="M30.4276 15.2207L18.3524 25.3884L30.4276 35.5562" stroke="#CBCBCB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </button>
+                    </div>
+            </div>
+
+        }else
+        {
+            <div class="mt-10 flex flex-col items-center gap-5">
+                <p class="font-monserrat-b primary-blue-text text-[22px0]">You don't have any collections</p>
+                <NavLink class="col-span-2 row-3" href="/collections">
+                    <button class="dark-blue-border dark-blue-text font-ubuntu-sans-l cursor-pointer rounded-xl border p-4">Look at other users' collections</button>
+                </NavLink>
             </div>
         }
-    }
+
     
-    
-</main>
+    </main>
+}
+else
+{
+    <div class="mt-20 flex h-full flex-col items-center gap-10">
+        <h3 class="font-monserrat-b text-[28px]">Welcome to</h3>
+        <div class="w-120">
+            <img src="/icons/flippit-logo-color.svg" class="size-full object-contain" />
+        </div>
+        <div class="grid grid-cols-2 grid-rows-3 items-center justify-center gap-x-3">
+            <button class="dark-blue-border dark-blue-text font-ubuntu-sans-l col-1 row-1 cursor-pointer rounded-xl border p-4">Log in</button>
+            <button class="dark-blue-border dark-blue-text font-ubuntu-sans-l col-2 row-1 cursor-pointer rounded-xl border p-4">Sign up</button>
+            <p class="font-ubuntu-sans-l col-span-2 row-2 text-center"> OR</p>
+            <NavLink class="col-span-2 row-3" href="/collections">
+                <button class="dark-blue-border dark-blue-text font-ubuntu-sans-l cursor-pointer rounded-xl border p-4">Look at other users' collections</button>
+            </NavLink>
+            
+
+        </div>
+    </div>
+}
+
 @code {
 
-    private Collection[]? collections;
-    private List<Collection>? collectionsList;
-    private List<Collection>? visible;
-    private int skip = 0;
+    private List<CollectionListModel>? collections;
+
+    private int skip = 1;
+    private int pageSize = 4;
+    private bool Loading = false;
+    private bool CanLoadMore = true;
 
     protected override async Task OnInitializedAsync()
     {
-        collections = await Http.GetFromJsonAsync<Collection[]>("sample-data/Collections.json");
-        if(collections != null)
-        {
-            collectionsList = collections.ToList();
-            visible = collectionsList.Skip(0).Take(4).ToList();
-            Console.WriteLine(skip);
-        }
+        Loading = true;
+        await GetCollections();
+        await GetStats();
+        Loading = false;
 
     }
 
-    private void GoPrev()
+    // /api/collections or /api/user/{userid}/collections with skip and pagesize
+    private async Task GetCollections()
     {
-        if(skip > 0)
+        //var newCols = await Http.GetFromJsonAsync<Collection[]>("sample-data/Collections.json");
+        //collections.Clear();
+        //collections.AddRange(newCols);
+        // if(collections.Count() < pageSize)
+        // {
+        //     CanLoadMore = false;
+        // } else CanLoadMore = true;
+    }
+
+
+    // /api/users/{userid}/CompletedLessons
+    private async Task GetStats()
+    {
+
+    }
+
+    private async Task GoPrev()
+    {
+        Loading = true;
+        if(skip > 1)
         {
             skip--;
-            visible = collectionsList.Skip(skip * 4).Take(4).ToList();
+            await GetCollections();
         }
 
         Console.WriteLine(skip);
+        Loading = false;
     }
 
-    private void GoNext()
+    private async Task GoNext()
     {
-        if((skip+1)*4 < collectionsList.Count())
+        if(CanLoadMore)
         {
             skip++;
-            visible = collectionsList.Skip(skip * 4).Take(4).ToList();
+            await GetCollections();
         }
 
         Console.WriteLine(skip);
-        
+
     }
 
     private bool LeftButtonDisabled()
     {
-        return skip == 0;
+        return skip == 1;
     }
 
     private bool RightButtonDisabled()
     {
-        return collectionsList.Count() <= (skip + 1) * 4;
+        // if(collectiions!= null)
+        // {
+        //     return collectiions.Count() <= skip * pageSize;
+        // }
+        // return true;
+        return CanLoadMore || Loading;
     }
 
-    public class User
-    {
-        public string? Name { get; set; }
-        public string? PhotoUrl { get; set; }
-    }
-    public class Collection
-    {
-        public int Id { get; set; }
-        public string? Name { get; set; }
-        public User? User { get; set; }
-    }
 }

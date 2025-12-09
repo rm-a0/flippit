@@ -1,4 +1,6 @@
-﻿@page "/collections/{id:int}/edit"
+﻿@page "/collections/{id:guid}/edit"
+@using Flippit.Common.Enums
+@using Flippit.Common.Models.Card
 @inject NavigationManager NavigationManager
 
 <NameHeader Name="Edit collection">
@@ -41,15 +43,15 @@
                 <div class="flex flex-col gap-2">
                     <p>Question type:</p>
                     <div class="flex flex-row gap-2">
-                        <input required id="qtypetext-@i" type="radio" checked="@(card.QuestionType == "Text")"
-                               name="QuestionType" @onchange="@(() => card.QuestionType = "Text")" />
+                        <input required id="qtypetext-@i" type="radio" checked="@(card.QuestionType == QAType.Text)"
+                               name="QuestionType" @onchange="@(() => card.QuestionType = QAType.Text)" />
                         <label for="qtypetext-@i">Text</label>
                     </div>
 
 
                     <div class="flex flex-row gap-2">
-                        <input required id="qtypeimg-@i" type="radio" checked="@(card.QuestionType == "Image")"
-                               name="QuestionType" @onchange="@(() => card.QuestionType = "Image")" />
+                        <input required id="qtypeimg-@i" type="radio" checked="@(card.QuestionType == QAType.Pictures)"
+                               name="QuestionType" @onchange="@(() => card.QuestionType = QAType.Pictures)" />
                         <label for="qtypeimg-@i">Image</label>
                     </div>
                 </div>
@@ -57,15 +59,15 @@
                 <div class="flex flex-col gap-2">
                     <p>Question type:</p>
                     <div class="flex flex-row gap-2">
-                        <input required id="atypetext-@i" type="radio" checked="@(card.AnswerType == "Text")"
-                               name="AnswerType" @onchange="@(() => card.AnswerType = "Text")" />
+                        <input required id="atypetext-@i" type="radio" checked="@(card.AnswerType == QAType.Text)"
+                               name="AnswerType" @onchange="@(() => card.AnswerType = QAType.Text)" />
                         <label for="atypetext-@i">Text</label>
                     </div>
 
 
                     <div class="flex flex-row gap-2">
-                        <input required id="atypeimg-@i" type="radio" checked="@(card.AnswerType == "Image")"
-                               name="AnswerType" @onchange="@(() => card.AnswerType = "Image")" />
+                        <input required id="atypeimg-@i" type="radio" checked="@(card.AnswerType == QAType.Pictures)"
+                               name="AnswerType" @onchange="@(() => card.AnswerType = QAType.Pictures)" />
                         <label for="atypeimg-@i">Image</label>
                     </div>
                 </div>
@@ -117,23 +119,28 @@
 
 @code {
     [Parameter]
-    public int id { get; set; }
-    public List<Card> cards = new List<Card>();
+    public Guid id { get; set; }
+    public CreateCollectionModel collection = new CreateCollectionModel();
+    public List<CreateCardModel> cards = new List<CreateCardModel>();
 
     protected override void OnInitialized()
     {
-        cards.Add(new Card());
+        cards.Add(new CreateCardModel());
 
     }
 
     private void Save()
     {
+        if (string.IsNullOrEmpty(collection.Name) || collection.EndTime < collection.StartTime)
+        {
+            return;
+        }
         NavigationManager.NavigateTo("/");
     }
 
     private void AddCard()
     {
-        cards.Add(new Card());
+        cards.Add(new CreateCardModel());
     }
 
     private void RemoveCard(int index)
@@ -141,11 +148,19 @@
         cards.RemoveAt(index);
     }
 
-    public class Card
+    public class CreateCollectionModel
     {
-        public string? QuestionType { get; set; }
+        public string? Name { get; set; }
+        public Guid CreatorId { get; set; }
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
+    }
+
+    public class CreateCardModel
+    {
+        public QAType? QuestionType { get; set; }
         public string? Question { get; set; }
-        public string? AnswerType { get; set; }
+        public QAType? AnswerType { get; set; }
         public string? Answer { get; set; }
         public string? Description { get; set; }
         public Guid? CreatorId { get; set; }

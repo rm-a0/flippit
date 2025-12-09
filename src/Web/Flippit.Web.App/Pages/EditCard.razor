@@ -1,4 +1,6 @@
-﻿@page "/cards/{id:int}/edit"
+﻿@page "/cards/{id:guid}/edit"
+@using Flippit.Common.Enums
+@using Flippit.Common.Models.Card
 @inject NavigationManager NavigationManager
 
 <NameHeader Name="Edit card">
@@ -19,15 +21,15 @@
                         <div class="flex flex-col gap-2">
                             <p>Question type:</p>
                             <div class="flex flex-row gap-2">
-                                <input required id="qtypetext" type="radio" checked="@(card.QuestionType == "Text")"
-                                    name="QuestionType" @onchange="@(() => card.QuestionType = "Text")" />
-                                <label for="qtypetext">Text</label>
+                                <input required id="qtypetext" type="radio" checked="@(card.QuestionType == QAType.Text)"
+                           name="QuestionType" @onchange="@(() => card.QuestionType = QAType.Text)" />
+                    <label for="qtypetext">Text</label>
                             </div>
 
                             
                             <div class="flex flex-row gap-2">
-                                <input required id="qtypeimg" type="radio" checked="@(card.QuestionType == "Image")"
-                                    name="QuestionType" @onchange="@(() => card.QuestionType = "Image")" />
+                                <input required id="qtypeimg" type="radio" checked="@(card.QuestionType == QAType.Pictures)"
+                                    name="QuestionType" @onchange="@(() => card.QuestionType = QAType.Pictures)" />
                                 <label for="qtypeimg">Image</label>
                             </div>
                         </div>
@@ -35,15 +37,15 @@
                         <div class="flex flex-col gap-2">
                             <p>Question type:</p>
                             <div class="flex flex-row gap-2">
-                                <input required id="atypetext" type="radio" checked="@(card.AnswerType == "Text")"
-                                    name="AnswerType" @onchange="@(() => card.AnswerType = "Text")" />
-                                <label for="atypetext">Text</label>
+                    <input required id="atypetext" type="radio" checked="@(card.AnswerType == QAType.Text)"
+                           name="AnswerType" @onchange="@(() => card.AnswerType = QAType.Text)" />
+                    <label for="atypetext">Text</label>
                             </div>
 
                             
                             <div class="flex flex-row gap-2">
-                                <input required id="atypeimg" type="radio" checked="@(card.AnswerType == "Image")"
-                                    name="AnswerType" @onchange="@(() => card.AnswerType = "Image")" />
+                    <input required id="atypeimg" type="radio" checked="@(card.AnswerType == QAType.Pictures)"
+                           name="AnswerType" @onchange="@(() => card.AnswerType = QAType.Pictures)" />
                                 <label for="atypeimg">Image</label>
                             </div>
                         </div>
@@ -79,29 +81,26 @@
 
 @code {
     [Parameter]
-    public int id { get; set; }
-    private Card? card;
+    public Guid id { get; set; }
+    private CardDetailModel? card;
+    private bool Loading = false;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        card = new Card();
+        await GetCard();
 
+    }
+
+    private async Task GetCard()
+    {
+        //card = ...
+        await Task.Delay(500);
     }
 
     private void Save()
     {
+        //save
         NavigationManager.NavigateTo("/");
     }
 
-    public class Card
-    {
-        public string? QuestionType { get; set; }
-        public string? Question { get; set; }
-        public string? AnswerType { get; set; }
-        public string? Answer { get; set; }
-        public string? Description { get; set; }
-        public Guid? CreatorId { get; set; }
-        public Guid? CollectionId { get; set; }
-
-    }
 }

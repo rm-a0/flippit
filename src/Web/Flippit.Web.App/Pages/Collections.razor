@@ -1,21 +1,24 @@
 ﻿@page "/collections"
+@using Flippit.Common.Models.Collection
 @inject HttpClient Http
+@using System.Text.Json;
 
-<SearchHeader></SearchHeader>
+
+<SearchHeader ShowSearch="true"></SearchHeader>
 
 @{
     if(!Loading)
     {
-        if (visible != null)
+        if (collections != null)
         {
             <div class="mt-10 flex flex-col items-center gap-20">
                 <div class="w-mac flex flex-col gap-3">
                     <h4 class="font-monserrat-b m-0 ml-2 text-2xl">All collections</h4>
                     <div class="grid w-max grid-cols-4 gap-6">
                         @{
-                            foreach (var col in visible)
+                            foreach (var col in collections)
                             {
-                                <CollectionCard Id="col.Id" />
+                                <CollectionCard collection="col" />
                             }
                         }
                     </div>
@@ -30,7 +33,8 @@
         {
             <div class="mt-20 flex flex-col items-center">
                 <h3 class="font-ubuntu-sans-l">There are no collections yet. </h3>
-                <a class="font-ubuntu-sans-l cursor-pointer text-blue-600 underline">Want to create one?</a>
+                 @*do smth so this link redirects to auth if user isnt logged in*@
+                <a href="/create" class="font-ubuntu-sans-l cursor-pointer text-blue-600 underline">Want to create one?</a>
             </div>
 
         }
@@ -45,52 +49,52 @@
 
 
 @code {
-    private Collection[]? collections;
-    private List<Collection>? collectionsList;
-    private List<Collection>? visible;
-    private int skip = 0;
+
+
+    private List<CollectionListModel>? collections;
+
+    private int skip = 1;
+    private int pageSize = 8;
     private bool Loading = false;
+    private bool CanLoadMore = true;
+
+    private async Task GetCollections()
+    {
+        var newCols = await Http.GetFromJsonAsync<CollectionListModel[]>($"/api/collections?page={skip}&pageSize={pageSize}");
+        Console.WriteLine(JsonSerializer.Serialize(newCols));
+        if(newCols != null && newCols.Count() > 0)
+        {
+            if(collections == null)
+            {
+                collections = new List<CollectionListModel>();
+            }
+            collections.AddRange(newCols);
+        }
+        
+        if (newCols == null || newCols.Count() < pageSize)
+        {
+            CanLoadMore = false;
+        } else CanLoadMore = true;
+    }
 
     protected override async Task OnInitializedAsync()
     {
         Loading = true;
-        collections = await Http.GetFromJsonAsync<Collection[]>("sample-data/Collections.json");
-        if (collections != null)
-        {
-            collectionsList = collections.ToList();
-            visible = collectionsList.Skip(0).Take(8).ToList();
-            Console.WriteLine(skip);
-        }
+        await GetCollections();
+        Loading = false;
+    }
+
+    private async Task LoadMore()
+    {
+        Loading = true;
+        skip++;
+        await GetCollections();
         Loading = false;
 
     }
 
     private bool LoadMoreDisabled()
     {
-        return collectionsList.Count() <= (skip + 1) * 8;
+        return Loading || !CanLoadMore;
     }
-
-    private void LoadMore()
-    {
-        if((skip+1)*8 < collectionsList.Count())
-        {
-            skip++;
-            var newItems = collectionsList.Skip(skip*8).Take(8).ToList();
-            visible.AddRange(newItems);
-        }
-        
-    }
-
-    public class User
-    {
-        public string? Name { get; set; }
-        public string? PhotoUrl { get; set; }
-    }
-    public class Collection
-    {
-        public int Id { get; set; }
-        public string? Name { get; set; }
-        public User? User { get; set; }
-    }
-
 }

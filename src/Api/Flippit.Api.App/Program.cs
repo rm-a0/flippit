@@ -41,6 +41,16 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.PropertyNameCaseInsensitive = true;
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("https://localhost:7267")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 
 ConfigureOpenApiDocuments(builder.Services);
 
@@ -55,6 +65,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUi();
 
 }
+
+app.UseCors();
 
 app.UseHttpsRedirection();
 
