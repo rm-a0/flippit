@@ -25,7 +25,8 @@ namespace Flippit.Api.App.EndToEndTests
             {
                 new Claim(ClaimTypes.NameIdentifier, DefaultUserId),
                 new Claim(ClaimTypes.Name, "Test User"),
-                new Claim(ClaimTypes.Role, "User")
+                new Claim(ClaimTypes.Role, "User"),
+                new Claim(ClaimTypes.Role, "Admin")
             };
 
             var identity = new ClaimsIdentity(claims, SchemeName);
