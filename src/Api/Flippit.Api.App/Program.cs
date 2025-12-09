@@ -1,6 +1,9 @@
 ﻿using System.Globalization;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Flippit.Api.App.Models;
+using Flippit.Api.App.Services;
 using Flippit.Api.BL.Facades;
 using Flippit.Api.BL.Installers;
 using Flippit.Api.BL.Mappers;
@@ -10,16 +13,48 @@ using Flippit.Common.Models.Card;
 using Flippit.Common.Models.Collection;
 using Flippit.Common.Models.CompletedLesson;
 using Flippit.Common.Models.User;
+using Flippit.IdentityProvider.BL.Installers;
+using Flippit.IdentityProvider.DAL;
+using Flippit.IdentityProvider.DAL.Entities;
+using Flippit.IdentityProvider.DAL.Installers;
 using FluentValidation;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using static System.Net.Mime.MediaTypeNames;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure IdentityProviderDbContext with InMemory database
+// This replaces the DAL installer to avoid SQL Server dependency
+builder.Services.AddDbContext<IdentityProviderDbContext>(options =>
+    options.UseInMemoryDatabase("FlippitIdentityDb"));
+
+// Register repositories from IdentityProvider DAL
+builder.Services.AddTransient<Flippit.IdentityProvider.DAL.Repositories.IAppUserRepository, Flippit.IdentityProvider.DAL.Repositories.AppUserRepository>();
+
+// Configure ASP.NET Core Identity
+builder.Services.AddIdentity<AppUserEntity, AppRoleEntity>(options =>
+{
+    // Password settings for development
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireNonAlphanumeric = true;
+    options.Password.RequiredLength = 6;
+})
+.AddEntityFrameworkStores<IdentityProviderDbContext>()
+.AddDefaultTokenProviders();
+
+// Install Identity BL components (facades, mappers)
+var identityBLInstaller = new IdentityProviderBLInstaller();
+identityBLInstaller.Install(builder.Services);
 
 var DALinstaller = new ApiDALMemoryInstaller();
 DALinstaller.Install(builder.Services);
@@ -29,6 +64,7 @@ builder.Services.AddSingleton<CardMapper>();
 builder.Services.AddSingleton<CollectionMapper>();
 builder.Services.AddSingleton<CompletedLessonMapper>();
 
+// Register CurrentUserService and dependencies
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
@@ -46,7 +82,43 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.PropertyNameCaseInsensitive = true;
 });
 
-builder.Services.AddAuthentication();
+// Register JWT token service
+builder.Services.AddScoped<JwtTokenService>();
+
+// Add authentication and authorization
+// In Testing environment, the test factory will override this configuration
+if (!builder.Environment.IsEnvironment("Testing"))
+{
+    var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not configured");
+    var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("JWT Issuer not configured");
+    var jwtAudience = builder.Configuration["Jwt:Audience"] ?? throw new InvalidOperationException("JWT Audience not configured");
+
+    builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtIssuer,
+            ValidAudience = jwtAudience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+        };
+    });
+}
+else
+{
+    // In Testing environment, authentication is configured by the test factory
+    builder.Services.AddAuthentication();
+}
+
 builder.Services.AddAuthorization();
 
 
@@ -54,6 +126,11 @@ ConfigureOpenApiDocuments(builder.Services);
 
 var app = builder.Build();
 
+// Seed data (roles and users) - only in non-Testing environments
+if (!app.Environment.IsEnvironment("Testing"))
+{
+    await DataSeeder.SeedAsync(app.Services);
+}
 
 
 if (app.Environment.IsDevelopment())
@@ -91,10 +168,53 @@ void UseEndPoints(WebApplication application)
     var endPointsBase = application.MapGroup("api")
         .WithOpenApi();
 
+    UseAuthEndPoints(endPointsBase);
     UseUserEndPoints(endPointsBase);
     UseCardEndPoints(endPointsBase);
     UseCollectionEndPoints(endPointsBase);
     UseCompletedLessonEndPoints(endPointsBase);
+}
+
+void UseAuthEndPoints(RouteGroupBuilder routeGroupBuilder)
+{
+    var authEndPoints = routeGroupBuilder.MapGroup("auth")
+        .WithTags("authentication");
+
+    authEndPoints.MapPost("/login", async Task<Results<Ok<LoginResponse>, UnauthorizedHttpResult, BadRequest<string>>> (
+        [FromBody] LoginRequest request,
+        [FromServices] UserManager<AppUserEntity> userManager,
+        [FromServices] JwtTokenService jwtTokenService) =>
+    {
+        if (string.IsNullOrEmpty(request.UserName) || string.IsNullOrEmpty(request.Password))
+        {
+            return TypedResults.BadRequest("Username and password are required");
+        }
+
+        var user = await userManager.FindByNameAsync(request.UserName);
+        if (user == null)
+        {
+            return TypedResults.Unauthorized();
+        }
+
+        var isValidPassword = await userManager.CheckPasswordAsync(user, request.Password);
+        if (!isValidPassword)
+        {
+            return TypedResults.Unauthorized();
+        }
+
+        var token = await jwtTokenService.GenerateTokenAsync(user);
+        var roles = await userManager.GetRolesAsync(user);
+
+        var response = new LoginResponse
+        {
+            Token = token,
+            UserId = user.Id,
+            UserName = user.UserName ?? string.Empty,
+            Roles = roles
+        };
+
+        return TypedResults.Ok(response);
+    }).AllowAnonymous();
 }
 
 void UseUserEndPoints(RouteGroupBuilder routeGroupBuilder)
