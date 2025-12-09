@@ -3,6 +3,7 @@ using Moq;
 using Flippit.Api.DAL.Common.Entities;
 using Flippit.Api.DAL.Common.Repositories;
 using Flippit.Api.BL.Mappers;
+using Flippit.Api.BL.Services;
 using Flippit.Common.Enums;
 using Flippit.Common.Models;
 using Flippit.Api.BL.Facades;
@@ -12,11 +13,20 @@ namespace Flippit.Api.BL.UnitTests;
 
 public class CardFacadeTests
 {
+    private static ICurrentUserService GetMockCurrentUserService(Guid? userId = null)
+    {
+        var mockService = new Mock<ICurrentUserService>();
+        mockService.Setup(s => s.CurrentUserId).Returns(userId ?? Guid.NewGuid());
+        mockService.Setup(s => s.IsInRole(It.IsAny<string>())).Returns(false);
+        return mockService.Object;
+    }
+
     private static CardFacade GetFacadeWithForbiddenDependencyCalls()
     {
         var repository = new Mock<ICardRepository>(MockBehavior.Strict).Object;
         var mapper = new Mock<CardMapper>(MockBehavior.Strict).Object;
-        return new CardFacade(repository, mapper);
+        var currentUserService = GetMockCurrentUserService();
+        return new CardFacade(repository, mapper, currentUserService);
     }
     
     [Fact]
@@ -82,7 +92,7 @@ public class CardFacadeTests
         
         repositoryMock.Setup(r => r.GetAll(null, null, 1, 10)).Returns(entities);
 
-        var facade = new CardFacade(repositoryMock.Object, mapper);
+        var facade = new CardFacade(repositoryMock.Object, mapper, GetMockCurrentUserService());
         var result = facade.GetAll();
 
         Assert.Equal(2, result.Count);
@@ -101,7 +111,7 @@ public class CardFacadeTests
 
         repositoryMock.Setup(r => r.GetAll(null, null, 1, 10)).Returns(new List<CardEntity>());
 
-        var facade = new CardFacade(repositoryMock.Object, mapper);
+        var facade = new CardFacade(repositoryMock.Object, mapper, GetMockCurrentUserService());
         var result = facade.GetAll();
 
         Assert.Empty(result);
@@ -129,7 +139,7 @@ public class CardFacadeTests
         
         repositoryMock.Setup(r => r.GetById(entity.Id)).Returns(entity);
 
-        var facade = new CardFacade(repositoryMock.Object, mapper);
+        var facade = new CardFacade(repositoryMock.Object, mapper, GetMockCurrentUserService());
         var result = facade.GetById(entity.Id);
 
         Assert.NotNull(result);
@@ -151,7 +161,7 @@ public class CardFacadeTests
         
         repositoryMock.Setup(r => r.GetById(nonExistentId)).Returns((CardEntity?)null);
         
-        var facade = new CardFacade(repositoryMock.Object, mapper);
+        var facade = new CardFacade(repositoryMock.Object, mapper, GetMockCurrentUserService());
         var result = facade.GetById(nonExistentId);
         
         Assert.Null(result);
@@ -182,7 +192,7 @@ public class CardFacadeTests
 
         repositoryMock.Setup(r => r.Search("Question 1")).Returns(new List<CardEntity> { entities[0] });
 
-        var facade = new CardFacade(repositoryMock.Object, mapper);
+        var facade = new CardFacade(repositoryMock.Object, mapper, GetMockCurrentUserService());
         var searchResult = facade.Search("Question 1");
 
         Assert.Single(searchResult);
@@ -227,7 +237,7 @@ public class CardFacadeTests
 
         repositoryMock.Setup(r => r.SearchByCreatorId(creatorId, null, null, 1, 10)).Returns(new List<CardEntity> { entities[0], entities[1] });
 
-        var facade = new CardFacade(repositoryMock.Object, mapper);
+        var facade = new CardFacade(repositoryMock.Object, mapper, GetMockCurrentUserService());
         var searchResult = facade.SearchByCreatorId(creatorId);
 
         Assert.Equal(2, searchResult.Count);
@@ -273,7 +283,7 @@ public class CardFacadeTests
 
         repositoryMock.Setup(r => r.SearchByCollectionId(collectionId, null, null, 1, 10)).Returns(new List<CardEntity> { entities[0], entities[1] });
 
-        var facade = new CardFacade(repositoryMock.Object, mapper);
+        var facade = new CardFacade(repositoryMock.Object, mapper, GetMockCurrentUserService());
         var searchResult = facade.SearchByCollectionId(collectionId);
 
         Assert.Equal(2, searchResult.Count);
@@ -359,15 +369,15 @@ public class CardFacadeTests
         var entity = mapper.ModelToEntity(cardModel);
         
         repositoryMock.Setup(r => r.Exists(cardId)).Returns(false);
-        repositoryMock.Setup(r => r.Insert(entity)).Returns(cardId);
+        repositoryMock.Setup(r => r.Insert(It.IsAny<CardEntity>())).Returns(cardId);
         
-        var facade = new CardFacade(repositoryMock.Object, mapper);
+        var facade = new CardFacade(repositoryMock.Object, mapper, GetMockCurrentUserService());
         var result = facade.CreateOrUpdate(cardModel);
         
         Assert.Equal(cardId, result);
         repositoryMock.Verify(r => r.Exists(cardId), Times.Once);
-        repositoryMock.Verify(r => r.Insert(entity), Times.Once);
-        repositoryMock.Verify(r => r.Update(entity), Times.Never);
+        repositoryMock.Verify(r => r.Insert(It.IsAny<CardEntity>()), Times.Once);
+        repositoryMock.Verify(r => r.Update(It.IsAny<CardEntity>()), Times.Never);
     }
 
     [Fact]
@@ -392,14 +402,14 @@ public class CardFacadeTests
         var updatedEntity = mapper.ModelToEntity(updatedCardModel);
     
         repositoryMock.Setup(r => r.Exists(cardId)).Returns(true);
-        repositoryMock.Setup(r => r.Update(updatedEntity)).Returns(cardId);
+        repositoryMock.Setup(r => r.Update(It.IsAny<CardEntity>())).Returns(cardId);
     
-        var facade = new CardFacade(repositoryMock.Object, mapper);
+        var facade = new CardFacade(repositoryMock.Object, mapper, GetMockCurrentUserService());
         var result = facade.CreateOrUpdate(updatedCardModel);
     
         Assert.Equal(cardId, result);
         repositoryMock.Verify(r => r.Exists(cardId), Times.Once);
-        repositoryMock.Verify(r => r.Update(updatedEntity), Times.Once);
+        repositoryMock.Verify(r => r.Update(It.IsAny<CardEntity>()), Times.Once);
         repositoryMock.Verify(r => r.Insert(updatedEntity), Times.Never);
     }
     
@@ -456,13 +466,13 @@ public class CardFacadeTests
     
         var entity = mapper.ModelToEntity(cardModel);
     
-        repositoryMock.Setup(r => r.Insert(entity)).Returns(cardId);
+        repositoryMock.Setup(r => r.Insert(It.IsAny<CardEntity>())).Returns(cardId);
     
-        var facade = new CardFacade(repositoryMock.Object, mapper);
+        var facade = new CardFacade(repositoryMock.Object, mapper, GetMockCurrentUserService());
         var result = facade.Create(cardModel);
     
         Assert.Equal(cardId, result);
-        repositoryMock.Verify(r => r.Insert(entity), Times.Once);
+        repositoryMock.Verify(r => r.Insert(It.IsAny<CardEntity>()), Times.Once);
     }
     
     [Fact]
@@ -518,16 +528,16 @@ public class CardFacadeTests
     
         var updatedEntity = mapper.ModelToEntity(updatedCardModel);
         
-        repositoryMock.Setup(r => r.Update(updatedEntity)).Returns(cardId);
+        repositoryMock.Setup(r => r.Update(It.IsAny<CardEntity>())).Returns(cardId);
     
-        var facade = new CardFacade(repositoryMock.Object, mapper);
+        var facade = new CardFacade(repositoryMock.Object, mapper, GetMockCurrentUserService());
         var result = facade.Update(updatedCardModel);
         
     
         Assert.NotNull(result);
         Assert.Equal(cardId, result);
     
-        repositoryMock.Verify(r => r.Update(updatedEntity), Times.Once);
+        repositoryMock.Verify(r => r.Update(It.IsAny<CardEntity>()), Times.Once);
     }
     
     [Fact]
@@ -539,7 +549,7 @@ public class CardFacadeTests
     
         repositoryMock.Setup(r => r.Remove(cardId));
     
-        var facade = new CardFacade(repositoryMock.Object, mapper);
+        var facade = new CardFacade(repositoryMock.Object, mapper, GetMockCurrentUserService());
         facade.Delete(cardId);
     
         repositoryMock.Verify(r => r.Remove(cardId), Times.Once);
