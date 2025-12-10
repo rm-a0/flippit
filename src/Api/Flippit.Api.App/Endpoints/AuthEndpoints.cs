@@ -1,9 +1,10 @@
-using Flippit.Api.App.Models;
+﻿using Flippit.Api.App.Models;
 using Flippit.Api.App.Services;
 using Flippit.IdentityProvider.DAL.Entities;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 
 namespace Flippit.Api.App.Endpoints;
 
@@ -17,7 +18,8 @@ public static class AuthEndpoints
         authEndPoints.MapPost("/login", async Task<Results<Ok<LoginResponse>, UnauthorizedHttpResult, BadRequest<string>>> (
             [FromBody] LoginRequest request,
             [FromServices] UserManager<AppUserEntity> userManager,
-            [FromServices] JwtTokenService jwtTokenService) =>
+            [FromServices] JwtTokenService jwtTokenService,
+            HttpResponse response) =>
         {
             if (string.IsNullOrEmpty(request.UserName) || string.IsNullOrEmpty(request.Password))
             {
@@ -39,7 +41,17 @@ public static class AuthEndpoints
             var token = await jwtTokenService.GenerateTokenAsync(user);
             var roles = await userManager.GetRolesAsync(user);
 
-            var response = new LoginResponse
+            //cookie with token
+            //response.Cookies.Append("jwt_token", token, new CookieOptions
+            //{
+            //    HttpOnly = true,
+            //    Secure = true,
+            //    SameSite = SameSiteMode.None,
+            //    Path = "/",
+            //    Expires = DateTimeOffset.UtcNow.AddHours(1)
+            //});
+
+            var responseBody = new LoginResponse
             {
                 Token = token,
                 UserId = user.Id,
@@ -47,7 +59,7 @@ public static class AuthEndpoints
                 Roles = roles
             };
 
-            return TypedResults.Ok(response);
+            return TypedResults.Ok(responseBody);
         }).AllowAnonymous();
 
         authEndPoints.MapPost("/register", async Task<Results<Ok<RegisterResponse>, BadRequest<string>>> (

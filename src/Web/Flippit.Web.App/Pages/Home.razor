@@ -6,7 +6,15 @@
 
 <PageTitle>Home</PageTitle>
 
+
+
+
 <SearchHeader User="userState.User"></SearchHeader>
+
+@if (showAuthMenu)
+{
+    <UserComponent CloseDialog="@CloseDialog" IsLogin="authLogin"></UserComponent>
+}
 
 @if(userState.User != null)
 {
@@ -77,8 +85,8 @@ else
             <img src="/icons/flippit-logo-color.svg" class="size-full object-contain" />
         </div>
         <div class="grid grid-cols-2 grid-rows-3 items-center justify-center gap-x-3">
-            <button class="dark-blue-border dark-blue-text font-ubuntu-sans-l col-1 row-1 cursor-pointer rounded-xl border p-4">Log in</button>
-            <button class="dark-blue-border dark-blue-text font-ubuntu-sans-l col-2 row-1 cursor-pointer rounded-xl border p-4">Sign up</button>
+            <button @onclick="() => {authLogin = true; showAuthMenu = true;}" class="dark-blue-border dark-blue-text font-ubuntu-sans-l col-1 row-1 cursor-pointer rounded-xl border p-4">Log in</button>
+            <button @onclick="() => { authLogin = false; showAuthMenu = true; }" class="dark-blue-border dark-blue-text font-ubuntu-sans-l col-2 row-1 cursor-pointer rounded-xl border p-4">Sign up</button>
             <p class="font-ubuntu-sans-l col-span-2 row-2 text-center"> OR</p>
             <NavLink class="col-span-2 row-3" href="/collections">
                 <button class="dark-blue-border dark-blue-text font-ubuntu-sans-l cursor-pointer rounded-xl border p-4">Look at other users' collections</button>
@@ -100,6 +108,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        userState.OnChange += StateHasChanged;
         Loading = true;
         await GetCollections();
         await GetStats();
@@ -164,6 +173,13 @@ else
         // }
         // return true;
         return CanLoadMore || Loading;
+    }
+
+    private bool showAuthMenu = false;
+    private bool authLogin = true;
+    private void CloseDialog()
+    {
+        showAuthMenu = false;
     }
 
 }

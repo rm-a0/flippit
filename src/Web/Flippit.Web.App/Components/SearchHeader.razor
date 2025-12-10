@@ -86,9 +86,15 @@
     }
     else
     {
-        <button class="primary-blue-bg font-ubuntu-sans-l cursor-pointer rounded-xl p-3 text-white">
+        <button @onclick="() => {showAuthMenu = true;}" class="primary-blue-bg font-ubuntu-sans-l cursor-pointer rounded-xl p-3 text-white">
             Log in
         </button>
+
+        @if(showAuthMenu)
+        {
+            <UserComponent IsLogin="true" CloseDialog="@CloseDialog"></UserComponent>
+        }
+
     }
 
 
@@ -106,4 +112,11 @@
     public bool ShowSearch { get; set; } = true;
 
     private bool showUserMenu = false;
+
+    private bool showAuthMenu = false;
+
+    private void CloseDialog()
+    {
+        showAuthMenu = false;
+    }
 }
