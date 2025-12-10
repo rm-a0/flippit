@@ -1,4 +1,5 @@
-﻿using Flippit.Common.BL.Facades;
+﻿using Flippit.Common.Models;
+using Flippit.Common.BL.Facades;
 using Flippit.Common.Models.User;
 
 namespace Flippit.Web.BL.Facades
@@ -9,5 +10,7 @@ namespace Flippit.Web.BL.Facades
         Task<Flippit.Common.Models.User.UserDetailModel?> GetByIdAsync(Guid id);
         Task<Guid> CreateOrUpdateAsync(Flippit.Common.Models.User.UserDetailModel userModel);
         Task DeleteAsync(Guid id);
+        Task<(Flippit.Common.Models.AuthModels.LoginResponse?, string?)> RegisterLoginAsync(Flippit.Common.Models.AuthModels.RegisterRequest registerRequest);
+        Task<(Flippit.Common.Models.AuthModels.LoginResponse?, string?)> LoginAsync(Flippit.Common.Models.AuthModels.LoginRequest loginRequest);
     }
 }

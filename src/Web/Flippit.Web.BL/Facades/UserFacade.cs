@@ -1,4 +1,5 @@
-﻿using Flippit.Common.Models.User;
+﻿using Flippit.Common.Models;
+using Flippit.Common.Models.User;
 using Flippit.Web.BL.Mappers;
 using Flippit.Web.DAL.Repositories;
 
@@ -11,6 +12,7 @@ namespace Flippit.Web.BL.Facades
         private readonly LocalDbOptions _localDbOptions;
         private readonly IApiApiClient _apiClient;
         private readonly IUsersApiClient _usersApiClient;
+        private readonly IAuthApiClient _authApiClient;
         private readonly ApiModelMapper _apiMapper;
 
         public UserFacade(
@@ -19,6 +21,7 @@ namespace Flippit.Web.BL.Facades
             LocalDbOptions localDbOptions,
             IApiApiClient apiClient,
             IUsersApiClient usersApiClient,
+            IAuthApiClient authApiClient,
             ApiModelMapper apiMapper)
         {
             _repository = repository;
@@ -27,6 +30,7 @@ namespace Flippit.Web.BL.Facades
             _apiClient = apiClient;
             _usersApiClient = usersApiClient;
             _apiMapper = apiMapper;
+            _authApiClient = authApiClient;
         }
 
         public async Task<IList<Flippit.Common.Models.User.UserListModel>> GetAllAsync(string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10)
@@ -101,6 +105,45 @@ namespace Flippit.Web.BL.Facades
             {
                 await _apiClient.UsersDeleteAsync(id, CancellationToken.None);
             }
+        }
+
+        public async Task<(Flippit.Common.Models.AuthModels.LoginResponse?, string?)> RegisterLoginAsync(Flippit.Common.Models.AuthModels.RegisterRequest registerRequest)
+        {
+            try
+            {
+                var response = await _authApiClient.RegisterAsync(_apiMapper.ToApiRegisterModel(registerRequest), CancellationToken.None);
+            }catch(ApiException<string> e)
+            {
+                return (null, e.Result);
+            }
+
+            LoginResponse loginResponse;
+            try
+            {
+                loginResponse = await _authApiClient.LoginAsync(new LoginRequest { UserName = registerRequest.UserName, Password = registerRequest.Password });
+            }
+            catch(ApiException<string> e)
+            {
+                return (null, e.Result);
+            }
+
+            return (_apiMapper.ToCommonLoginResponse(loginResponse), null);
+
+        }
+
+        public async Task<(Flippit.Common.Models.AuthModels.LoginResponse?, string?)> LoginAsync(Flippit.Common.Models.AuthModels.LoginRequest loginRequest)
+        {
+            LoginResponse loginResponse;
+            try
+            {
+                loginResponse = await _authApiClient.LoginAsync(_apiMapper.ToApiLoginModel(loginRequest));
+            }
+            catch (ApiException<string> e)
+            {
+                return (null, e.Result);
+            }
+
+            return (_apiMapper.ToCommonLoginResponse(loginResponse), null);
         }
     }
 }

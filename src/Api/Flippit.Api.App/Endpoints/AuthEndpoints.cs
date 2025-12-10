@@ -1,10 +1,11 @@
-﻿using Flippit.Api.App.Models;
+﻿using Flippit.Common.Models;
 using Flippit.Api.App.Services;
 using Flippit.IdentityProvider.DAL.Entities;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
+using Flippit.Common.Models.AuthModels;
 
 namespace Flippit.Api.App.Endpoints;
 

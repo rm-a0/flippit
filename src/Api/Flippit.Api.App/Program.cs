@@ -3,7 +3,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Flippit.Api.App.Endpoints;
-using Flippit.Api.App.Models;
+using Flippit.Common.Models;
 using Flippit.Api.App.Services;
 using Flippit.Api.BL.Facades;
 using Flippit.Api.BL.Installers;

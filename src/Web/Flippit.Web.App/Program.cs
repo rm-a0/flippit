@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Flippit.Web.App;
-using Flippit.Web.BL;
 using Flippit.Web.BL.Installers;
 using Flippit.Web.BL.Mappers;
 using Flippit.Web.BL.Facades;
 using Flippit.Web.DAL;
 using Flippit.Web.DAL.Repositories;
+using Flippit.Web.BL;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -31,6 +31,7 @@ builder.Services.AddScoped<IUsersApiClient, UsersApiClient>();
 builder.Services.AddScoped<ICardsApiClient, CardsApiClient>();
 builder.Services.AddScoped<ICollectionsApiClient, CollectionsApiClient>();
 builder.Services.AddScoped<ICompletedLessonsApiClient, CompletedLessonsApiClient>();
+builder.Services.AddScoped<IAuthApiClient, AuthApiClient>();
 
 // Register LocalDb and repositories
 builder.Services.AddSingleton<LocalDb>();

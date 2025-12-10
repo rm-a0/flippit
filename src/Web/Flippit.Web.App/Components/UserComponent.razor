@@ -1,10 +1,12 @@
-﻿@using Flippit.Api.App.Models
+﻿@using Flippit.Common.Models.AuthModels
 @using System.Text.Json
 @using Flippit.Common.Models.User
 @using System.Text.Json.Serialization
+@using Flippit.Web.BL.Facades
 @inject HttpClient Http
 @inject UserState userState
 @inject NavigationManager NavigationManager
+@inject IUserFacade userFacade
 
 <div class="fixed top-0 left-0 h-screen w-screen items-center backdrop-blur">
     <div class="flex size-full flex-col items-center justify-center">
@@ -74,100 +76,101 @@
     [Parameter]
     public bool IsLogin { get; set; } = true;
 
+    private string? error;
+
 
     private RegisterForm registerForm = new RegisterForm
     {
         registerRequest = new RegisterRequest(),
         userDetail = new UserDetailModel(),
     };
-    //private RegisterRequest registerForm = new RegisterRequest();
+
     private LoginRequest loginForm = new LoginRequest();
 
     private async Task Login()
     {
+        error = null;
         Console.WriteLine(JsonSerializer.Serialize(loginForm));
-        var response = await Http.PostAsJsonAsync("/api/auth/login", loginForm);
-        if(response.IsSuccessStatusCode)
+        (LoginResponse? response, error) = await userFacade.LoginAsync(loginForm);
+
+        if(!string.IsNullOrEmpty(error))
         {
-            var loginResult = await response.Content.ReadFromJsonAsync<LoginResponse>();
-            Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", loginResult.Token);
+            return;
+        }
 
-            var options = new JsonSerializerOptions
-            {
-                Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
-            };
+        Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", response!.Token);
 
-            var getUserResponse = await Http.GetFromJsonAsync<UserDetailModel>($"/api/users/{loginResult.UserId}", options);
-            if(getUserResponse != null)
-            {
-                userState.SetUser(getUserResponse);
-                await CloseDialog.InvokeAsync();
-            }
+        var options = new JsonSerializerOptions
+        {
+            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+        };
+
+        var getUserResponse = await userFacade.GetByIdAsync(response!.UserId);
+
+        if (getUserResponse != null)
+        {
+            userState.SetUser(getUserResponse);
+            await CloseDialog.InvokeAsync();
+        }
+        else
+        {
+            error = "Error while getting user.";
         }
     }
 
     private async Task Register()
     {
+        error = null;
         Console.WriteLine(JsonSerializer.Serialize(registerForm));
-        HttpResponseMessage response = await Http.PostAsJsonAsync("/api/auth/register", registerForm.registerRequest);
-        Console.WriteLine(response);
+        (LoginResponse? response, error) = await userFacade.RegisterLoginAsync(registerForm.registerRequest);
 
-        if (response.IsSuccessStatusCode)
+        if(!string.IsNullOrEmpty(error))
         {
-            var result = await response.Content.ReadFromJsonAsync<RegisterResponse>();
-            var userId = result.UserId;
-
-            var user = new UserDetailModel
-            {
-                Name = registerForm.userDetail.Name,
-                Id = userId,
-                PhotoUrl = registerForm.userDetail.PhotoUrl
-            };
-
-            HttpResponseMessage loginResponse = await Http.PostAsJsonAsync("/api/auth/login", new LoginRequest { UserName = registerForm.registerRequest.UserName, Password = registerForm.registerRequest.Password });
-            if (loginResponse.IsSuccessStatusCode)
-            {
-                var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResponse>();
-
-                if(loginResult.Roles.Contains("Admin"))
-                {
-                    user.Role = Common.Enums.Role.Admin;
-                }
-                else
-                {
-                    user.Role = Common.Enums.Role.User;
-
-                }
-
-                Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", loginResult.Token);
-
-                var options = new JsonSerializerOptions
-                {
-                    Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
-                };
-
-                var createResponse = await Http.PostAsJsonAsync("/api/users", user, options);
-                if(createResponse.IsSuccessStatusCode)
-                {
-                    userState.SetUser(user);
-                    Console.WriteLine("SUCCESS");
-                    Console.WriteLine(JsonSerializer.Serialize(userState.User));
-                    await CloseDialog.InvokeAsync();
-                }
+            return;
+        }
 
 
-            }
+        var userId = response!.UserId;
+
+        var user = new UserDetailModel
+        {
+            Name = registerForm.userDetail.Name,
+            Id = userId,
+            PhotoUrl = registerForm.userDetail.PhotoUrl
+        };
+
+        if (response!.Roles.Contains("Admin"))
+        {
+            user.Role = Common.Enums.Role.Admin;
         }
         else
         {
-            var error = await response.Content.ReadAsStringAsync();
-        }
-        
-    }
+            user.Role = Common.Enums.Role.User;
 
+        }
+
+
+
+        Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", response!.Token);
+
+        var options = new JsonSerializerOptions
+        {
+            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+        };
+
+        var createResponse = await userFacade.CreateOrUpdateAsync(user);
+
+        userState.SetUser(user);
+        Console.WriteLine("SUCCESS");
+        Console.WriteLine(JsonSerializer.Serialize(userState.User));
+        await CloseDialog.InvokeAsync();
+
+    }
+        
     private class RegisterForm
     {
         public RegisterRequest registerRequest { get; set; }
         public UserDetailModel userDetail { get; set; }
     }
+
 }

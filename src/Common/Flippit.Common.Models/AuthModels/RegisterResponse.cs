@@ -1,4 +1,4 @@
-﻿namespace Flippit.Api.App.Models;
+﻿namespace Flippit.Common.Models.AuthModels;
 
 public class RegisterResponse
 {

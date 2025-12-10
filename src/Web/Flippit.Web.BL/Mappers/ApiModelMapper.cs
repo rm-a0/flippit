@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Riok.Mapperly.Abstractions;
 using ApiUserDetailModel = Flippit.Web.BL.UserDetailModel;
 using ApiUserListModel = Flippit.Web.BL.UserListModel;
@@ -10,6 +10,7 @@ using ApiCompletedLessonDetailModel = Flippit.Web.BL.CompletedLessonDetailModel;
 using ApiCompletedLessonListModel = Flippit.Web.BL.CompletedLessonListModel;
 using ApiRole = Flippit.Web.BL.Role;
 using ApiQAType = Flippit.Web.BL.QAType;
+using Flippit.Common.Models.AuthModels;
 
 namespace Flippit.Web.BL.Mappers
 {
@@ -25,7 +26,12 @@ namespace Flippit.Web.BL.Mappers
         public partial Flippit.Common.Models.User.UserListModel ToCommonUserList(ApiUserListModel apiModel);
         public partial IList<Flippit.Common.Models.User.UserListModel> ToCommonUserLists(IEnumerable<ApiUserListModel> apiModels);
         public partial ApiUserDetailModel ToApiUserDetail(Flippit.Common.Models.User.UserDetailModel commonModel);
-        
+        public partial RegisterRequest ToApiRegisterModel(Flippit.Common.Models.AuthModels.RegisterRequest commonModel);
+        public partial LoginRequest ToApiLoginModel(Flippit.Common.Models.AuthModels.LoginRequest commonModel);
+        public partial Flippit.Common.Models.AuthModels.RegisterResponse ToCommonRegisterResponse(RegisterResponse apiModel);
+        public partial Flippit.Common.Models.AuthModels.LoginResponse ToCommonLoginResponse(LoginResponse apiModel);
+
+
         // Card mappings
         public partial Flippit.Common.Models.Card.CardDetailModel ToCommonCardDetail(ApiCardDetailModel apiModel);
         public partial IList<Flippit.Common.Models.Card.CardDetailModel> ToCommonCardDetails(IEnumerable<ApiCardDetailModel> apiModels);
