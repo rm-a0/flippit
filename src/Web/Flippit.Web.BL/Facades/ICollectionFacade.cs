@@ -5,9 +5,9 @@ namespace Flippit.Web.BL.Facades
 {
     public interface ICollectionFacade : IAppFacade
     {
-        Task<IList<CollectionListModel>> GetAllAsync(string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10);
-        Task<CollectionDetailModel?> GetByIdAsync(Guid id);
-        Task<Guid> CreateOrUpdateAsync(CollectionDetailModel collectionModel);
+        Task<IList<Flippit.Common.Models.Collection.CollectionListModel>> GetAllAsync(string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10);
+        Task<Flippit.Common.Models.Collection.CollectionDetailModel?> GetByIdAsync(Guid id);
+        Task<Guid> CreateOrUpdateAsync(Flippit.Common.Models.Collection.CollectionDetailModel collectionModel);
         Task DeleteAsync(Guid id);
     }
 }

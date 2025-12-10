@@ -15,7 +15,7 @@ namespace Flippit.Web.BL.Facades
             _mapper = mapper;
         }
 
-        public async Task<IList<CardListModel>> GetAllAsync(string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10)
+        public async Task<IList<Flippit.Common.Models.Card.CardListModel>> GetAllAsync(string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10)
         {
             var entities = await _repository.GetAllAsync();
             var query = entities.AsEnumerable();
@@ -30,7 +30,7 @@ namespace Flippit.Web.BL.Facades
             return _mapper.DetailToListModels(paged);
         }
 
-        public async Task<IList<CardListModel>> SearchByCollectionIdAsync(Guid collectionId, string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10)
+        public async Task<IList<Flippit.Common.Models.Card.CardListModel>> SearchByCollectionIdAsync(Guid collectionId, string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10)
         {
             var entities = await _repository.GetAllAsync();
             
@@ -45,12 +45,12 @@ namespace Flippit.Web.BL.Facades
             return _mapper.DetailToListModels(paged);
         }
 
-        public async Task<CardDetailModel?> GetByIdAsync(Guid id)
+        public async Task<Flippit.Common.Models.Card.CardDetailModel?> GetByIdAsync(Guid id)
         {
             return await _repository.GetByIdAsync(id);
         }
 
-        public async Task<Guid> CreateOrUpdateAsync(CardDetailModel cardModel)
+        public async Task<Guid> CreateOrUpdateAsync(Flippit.Common.Models.Card.CardDetailModel cardModel)
         {
             var modelToSave = cardModel;
 

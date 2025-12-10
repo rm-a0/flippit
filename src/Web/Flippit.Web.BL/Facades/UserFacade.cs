@@ -15,7 +15,7 @@ namespace Flippit.Web.BL.Facades
             _mapper = mapper;
         }
 
-        public async Task<IList<UserListModel>> GetAllAsync(string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10)
+        public async Task<IList<Flippit.Common.Models.User.UserListModel>> GetAllAsync(string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10)
         {
             var entities = await _repository.GetAllAsync();
 
@@ -33,12 +33,12 @@ namespace Flippit.Web.BL.Facades
             return _mapper.DetailToListModels(pagedEntities);
         }
 
-        public async Task<UserDetailModel?> GetByIdAsync(Guid id)
+        public async Task<Flippit.Common.Models.User.UserDetailModel?> GetByIdAsync(Guid id)
         {
             return await _repository.GetByIdAsync(id);
         }
 
-        public async Task<Guid> CreateOrUpdateAsync(UserDetailModel userModel)
+        public async Task<Guid> CreateOrUpdateAsync(Flippit.Common.Models.User.UserDetailModel userModel)
         {
             var modelToSave = userModel;
     

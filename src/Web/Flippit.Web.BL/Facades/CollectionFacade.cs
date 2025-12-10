@@ -15,7 +15,7 @@ namespace Flippit.Web.BL.Facades
             _mapper = mapper;
         }
 
-        public async Task<IList<CollectionListModel>> GetAllAsync(string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10)
+        public async Task<IList<Flippit.Common.Models.Collection.CollectionListModel>> GetAllAsync(string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10)
         {
             var entities = await _repository.GetAllAsync();
             var query = entities.AsEnumerable();
@@ -29,12 +29,12 @@ namespace Flippit.Web.BL.Facades
             return _mapper.DetailToListModels(paged);
         }
 
-        public async Task<CollectionDetailModel?> GetByIdAsync(Guid id)
+        public async Task<Flippit.Common.Models.Collection.CollectionDetailModel?> GetByIdAsync(Guid id)
         {
             return await _repository.GetByIdAsync(id);
         }
 
-        public async Task<Guid> CreateOrUpdateAsync(CollectionDetailModel collectionModel)
+        public async Task<Guid> CreateOrUpdateAsync(Flippit.Common.Models.Collection.CollectionDetailModel collectionModel)
         {
             if (collectionModel.StartTime == default) collectionModel.StartTime = DateTime.Now;
             if (collectionModel.EndTime == default) collectionModel.EndTime = DateTime.Now;

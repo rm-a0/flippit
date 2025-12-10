@@ -8,8 +8,8 @@ namespace Flippit.Web.BL.Mappers
     public partial class CollectionMapper
     {
         [MapperIgnoreSource(nameof(CollectionDetailModel.CreatorId))]
-        public partial CollectionListModel DetailToListModel(CollectionDetailModel detail);
+        public partial Flippit.Common.Models.Collection.CollectionListModel DetailToListModel(Flippit.Common.Models.Collection.CollectionDetailModel detail);
 
-        public partial IList<CollectionListModel> DetailToListModels(IEnumerable<CollectionDetailModel> details);
+        public partial IList<Flippit.Common.Models.Collection.CollectionListModel> DetailToListModels(IEnumerable<Flippit.Common.Models.Collection.CollectionDetailModel> details);
     }
 }

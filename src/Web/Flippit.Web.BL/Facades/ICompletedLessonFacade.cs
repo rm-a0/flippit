@@ -5,10 +5,10 @@ namespace Flippit.Web.BL.Facades
 {
     public interface ICompletedLessonFacade : IAppFacade
     {
-        Task<IList<CompletedLessonListModel>> GetAllAsync(string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10);
-        Task<IList<CompletedLessonListModel>> SearchByCollectionIdAsync(Guid collectionId);
-        Task<CompletedLessonDetailModel?> GetByIdAsync(Guid id);
-        Task<Guid> CreateOrUpdateAsync(CompletedLessonDetailModel lessonModel);
+        Task<IList<Flippit.Common.Models.CompletedLesson.CompletedLessonListModel>> GetAllAsync(string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10);
+        Task<IList<Flippit.Common.Models.CompletedLesson.CompletedLessonListModel>> SearchByCollectionIdAsync(Guid collectionId);
+        Task<Flippit.Common.Models.CompletedLesson.CompletedLessonDetailModel?> GetByIdAsync(Guid id);
+        Task<Guid> CreateOrUpdateAsync(Flippit.Common.Models.CompletedLesson.CompletedLessonDetailModel lessonModel);
         Task DeleteAsync(Guid id);
     }
 }

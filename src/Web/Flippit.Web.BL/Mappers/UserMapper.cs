@@ -7,7 +7,7 @@ namespace Flippit.Web.BL.Mappers
     [Mapper]
     public partial class UserMapper
     {
-        public partial UserListModel DetailToListModel(UserDetailModel detail);
-        public partial IList<UserListModel> DetailToListModels(IEnumerable<UserDetailModel> details);
+        public partial Flippit.Common.Models.User.UserListModel DetailToListModel(Flippit.Common.Models.User.UserDetailModel detail);
+        public partial IList<Flippit.Common.Models.User.UserListModel> DetailToListModels(IEnumerable<Flippit.Common.Models.User.UserDetailModel> details);
     }
 }
