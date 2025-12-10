@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Common\Flippit.Common.Models\Flippit.Common.Models.csproj" />
+        <ProjectReference Include="..\Flippit.Web.DAL\Flippit.Web.DAL.csproj" />
+        <ProjectReference Include="..\..\Common\Flippit.Common.BL\Flippit.Common.BL.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Riok.Mapperly" Version="4.3.0" />
+    </ItemGroup>
+
+</Project>
