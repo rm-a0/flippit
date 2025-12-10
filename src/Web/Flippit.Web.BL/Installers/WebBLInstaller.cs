@@ -19,6 +19,7 @@ namespace Flippit.Web.BL.Installers
             serviceCollection.AddSingleton<CardMapper>();
             serviceCollection.AddSingleton<CollectionMapper>();
             serviceCollection.AddSingleton<CompletedLessonMapper>();
+            serviceCollection.AddSingleton<ApiModelMapper>();
         }
     }
 }

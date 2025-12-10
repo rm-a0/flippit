@@ -8,52 +8,97 @@ namespace Flippit.Web.BL.Facades
     {
         private readonly CollectionRepository _repository;
         private readonly CollectionMapper _mapper;
+        private readonly LocalDbOptions _localDbOptions;
+        private readonly IApiApiClient _apiClient;
+        private readonly ICollectionsApiClient _collectionsApiClient;
+        private readonly ApiModelMapper _apiMapper;
 
-        public CollectionFacade(CollectionRepository repository, CollectionMapper mapper)
+        public CollectionFacade(
+            CollectionRepository repository, 
+            CollectionMapper mapper,
+            LocalDbOptions localDbOptions,
+            IApiApiClient apiClient,
+            ICollectionsApiClient collectionsApiClient,
+            ApiModelMapper apiMapper)
         {
             _repository = repository;
             _mapper = mapper;
+            _localDbOptions = localDbOptions;
+            _apiClient = apiClient;
+            _collectionsApiClient = collectionsApiClient;
+            _apiMapper = apiMapper;
         }
 
         public async Task<IList<Flippit.Common.Models.Collection.CollectionListModel>> GetAllAsync(string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10)
         {
-            var entities = await _repository.GetAllAsync();
-            var query = entities.AsEnumerable();
-
-            if (!string.IsNullOrWhiteSpace(filter))
+            if (_localDbOptions.IsLocalDbEnabled)
             {
-                query = query.Where(c => c.Name.Contains(filter, StringComparison.OrdinalIgnoreCase));
-            }
+                var entities = await _repository.GetAllAsync();
+                var query = entities.AsEnumerable();
 
-            var paged = query.Skip((page - 1) * pageSize).Take(pageSize);
-            return _mapper.DetailToListModels(paged);
+                if (!string.IsNullOrWhiteSpace(filter))
+                {
+                    query = query.Where(c => c.Name.Contains(filter, StringComparison.OrdinalIgnoreCase));
+                }
+
+                var paged = query.Skip((page - 1) * pageSize).Take(pageSize);
+                return _mapper.DetailToListModels(paged);
+            }
+            else
+            {
+                var apiCollections = await _apiClient.CollectionsGetAsync(filter, page, pageSize, sortBy, CancellationToken.None);
+                return _apiMapper.ToCommonCollectionLists(apiCollections);
+            }
         }
 
         public async Task<Flippit.Common.Models.Collection.CollectionDetailModel?> GetByIdAsync(Guid id)
         {
-            return await _repository.GetByIdAsync(id);
+            if (_localDbOptions.IsLocalDbEnabled)
+            {
+                return await _repository.GetByIdAsync(id);
+            }
+            else
+            {
+                var apiCollection = await _apiClient.CollectionsGetAsync(id, CancellationToken.None);
+                return apiCollection != null ? _apiMapper.ToCommonCollectionDetail(apiCollection) : null;
+            }
         }
 
         public async Task<Guid> CreateOrUpdateAsync(Flippit.Common.Models.Collection.CollectionDetailModel collectionModel)
         {
-            if (collectionModel.StartTime == default) collectionModel.StartTime = DateTime.Now;
-            if (collectionModel.EndTime == default) collectionModel.EndTime = DateTime.Now;
-
-            var modelToSave = collectionModel;
-
-            if (modelToSave.Id == Guid.Empty)
+            if (_localDbOptions.IsLocalDbEnabled)
             {
-                modelToSave = modelToSave with { Id = Guid.NewGuid() };
-            }
+                if (collectionModel.StartTime == default) collectionModel.StartTime = DateTime.Now;
+                if (collectionModel.EndTime == default) collectionModel.EndTime = DateTime.Now;
 
-            await _repository.RemoveAsync(modelToSave.Id);
-            await _repository.InsertAsync(modelToSave);
-            return modelToSave.Id;
+                var modelToSave = collectionModel;
+
+                if (modelToSave.Id == Guid.Empty)
+                {
+                    modelToSave = modelToSave with { Id = Guid.NewGuid() };
+                }
+
+                await _repository.RemoveAsync(modelToSave.Id);
+                await _repository.InsertAsync(modelToSave);
+                return modelToSave.Id;
+            }
+            else
+            {
+                var apiModel = _apiMapper.ToApiCollectionDetail(collectionModel);
+                return await _collectionsApiClient.UpsertAsync(apiModel, CancellationToken.None);
+            }
         }
 
         public async Task DeleteAsync(Guid id)
         {
-            await _repository.RemoveAsync(id);
+            if (_localDbOptions.IsLocalDbEnabled)
+            {
+                await _repository.RemoveAsync(id);
+            }
+            else
+            {
+                await _apiClient.CollectionsDeleteAsync(id, CancellationToken.None);
+            }
         }
     }
 }

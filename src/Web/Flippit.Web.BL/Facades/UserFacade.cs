@@ -8,54 +8,99 @@ namespace Flippit.Web.BL.Facades
     {
         private readonly UserRepository _repository;
         private readonly UserMapper _mapper;
+        private readonly LocalDbOptions _localDbOptions;
+        private readonly IApiApiClient _apiClient;
+        private readonly IUsersApiClient _usersApiClient;
+        private readonly ApiModelMapper _apiMapper;
 
-        public UserFacade(UserRepository repository, UserMapper mapper)
+        public UserFacade(
+            UserRepository repository, 
+            UserMapper mapper, 
+            LocalDbOptions localDbOptions,
+            IApiApiClient apiClient,
+            IUsersApiClient usersApiClient,
+            ApiModelMapper apiMapper)
         {
             _repository = repository;
             _mapper = mapper;
+            _localDbOptions = localDbOptions;
+            _apiClient = apiClient;
+            _usersApiClient = usersApiClient;
+            _apiMapper = apiMapper;
         }
 
         public async Task<IList<Flippit.Common.Models.User.UserListModel>> GetAllAsync(string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10)
         {
-            var entities = await _repository.GetAllAsync();
-
-            var query = entities.AsEnumerable();
-
-            if (!string.IsNullOrWhiteSpace(filter))
+            if (_localDbOptions.IsLocalDbEnabled)
             {
-                query = query.Where(u => u.Name.Contains(filter, StringComparison.OrdinalIgnoreCase));
+                var entities = await _repository.GetAllAsync();
+
+                var query = entities.AsEnumerable();
+
+                if (!string.IsNullOrWhiteSpace(filter))
+                {
+                    query = query.Where(u => u.Name != null && u.Name.Contains(filter, StringComparison.OrdinalIgnoreCase));
+                }
+
+                var pagedEntities = query
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize);
+
+                return _mapper.DetailToListModels(pagedEntities);
             }
-
-            var pagedEntities = query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize);
-
-            return _mapper.DetailToListModels(pagedEntities);
+            else
+            {
+                var apiUsers = await _apiClient.UsersGetAsync(filter, page, pageSize, sortBy, CancellationToken.None);
+                return _apiMapper.ToCommonUserLists(apiUsers);
+            }
         }
 
         public async Task<Flippit.Common.Models.User.UserDetailModel?> GetByIdAsync(Guid id)
         {
-            return await _repository.GetByIdAsync(id);
+            if (_localDbOptions.IsLocalDbEnabled)
+            {
+                return await _repository.GetByIdAsync(id);
+            }
+            else
+            {
+                var apiUser = await _apiClient.UsersGetAsync(id, CancellationToken.None);
+                return apiUser != null ? _apiMapper.ToCommonUserDetail(apiUser) : null;
+            }
         }
 
         public async Task<Guid> CreateOrUpdateAsync(Flippit.Common.Models.User.UserDetailModel userModel)
         {
-            var modelToSave = userModel;
-    
-            if (modelToSave.Id == Guid.Empty)
+            if (_localDbOptions.IsLocalDbEnabled)
             {
-                modelToSave = modelToSave with { Id = Guid.NewGuid() };
+                var modelToSave = userModel;
+        
+                if (modelToSave.Id == Guid.Empty)
+                {
+                    modelToSave = modelToSave with { Id = Guid.NewGuid() };
+                }
+        
+                await _repository.RemoveAsync(modelToSave.Id);
+                await _repository.InsertAsync(modelToSave);
+        
+                return modelToSave.Id;
             }
-    
-            await _repository.RemoveAsync(modelToSave.Id);
-            await _repository.InsertAsync(modelToSave);
-    
-            return modelToSave.Id;
+            else
+            {
+                var apiModel = _apiMapper.ToApiUserDetail(userModel);
+                return await _usersApiClient.UpsertAsync(apiModel, CancellationToken.None);
+            }
         }
 
         public async Task DeleteAsync(Guid id)
         {
-            await _repository.RemoveAsync(id);
+            if (_localDbOptions.IsLocalDbEnabled)
+            {
+                await _repository.RemoveAsync(id);
+            }
+            else
+            {
+                await _apiClient.UsersDeleteAsync(id, CancellationToken.None);
+            }
         }
     }
 }
