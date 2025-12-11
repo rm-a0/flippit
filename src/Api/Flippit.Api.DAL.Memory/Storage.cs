@@ -15,10 +15,10 @@ namespace Flippit.Api.DAL.Memory
             new("c3d4e5f6-a7b8-9012-cdef-3456789012cd")
         };
 
-        private readonly IList<Guid> userGuids = new List<Guid>
+        private readonly IList<string> ownerIds = new List<string>
         {
-            new("d4e5f6a7-b890-1234-defa-4567890123de"),
-            new("e5f6a7b8-9012-3456-efab-5678901234ef")
+            "d4e5f6a7-b890-1234-defa-4567890123de",
+            "e5f6a7b8-9012-3456-efab-5678901234ef"
         };
 
         private readonly IList<Guid> collectionGuids = new List<Guid>
@@ -34,7 +34,6 @@ namespace Flippit.Api.DAL.Memory
         };
 
         public IList<CardEntity> Cards { get; } = new List<CardEntity>();
-        public IList<UserEntity> Users { get; } = new List<UserEntity>();
         public IList<CollectionEntity> Collections { get; } = new List<CollectionEntity>();
         public IList<CompletedLessonEntity> CompletedLessons { get; } = new List<CompletedLessonEntity>();
 
@@ -42,30 +41,10 @@ namespace Flippit.Api.DAL.Memory
         {
             if (seedData)
             {
-                SeedUsers();
                 SeedCards();
                 SeedCollections();
                 SeedCompletedLessons();
             }
-        }
-
-        private void SeedUsers()
-        {
-            Users.Add(new UserEntity
-            {
-                Id = userGuids[0],
-                Name = "John Doe",
-                PhotoUrl = "https://example.com/john.jpg",
-                Role = Role.User
-            });
-
-            Users.Add(new UserEntity
-            {
-                Id = userGuids[1],
-                Name = "Admin Jane",
-                PhotoUrl = "https://example.com/jane.jpg",
-                Role = Role.Admin
-            });
         }
 
         private void SeedCards()
@@ -78,7 +57,7 @@ namespace Flippit.Api.DAL.Memory
                 Question = "What is the capital of France?",
                 Answer = "Paris",
                 Description = "Basic geography question",
-                CreatorId = userGuids[0],
+                OwnerId = ownerIds[0],
                 CollectionId = collectionGuids[0]
             });
 
@@ -90,7 +69,7 @@ namespace Flippit.Api.DAL.Memory
                 Question = "https://example.com/eiffel.jpg",
                 Answer = "Eiffel Tower",
                 Description = "Landmark identification",
-                CreatorId = userGuids[0],
+                OwnerId = ownerIds[0],
                 CollectionId = collectionGuids[0]
             });
 
@@ -101,7 +80,7 @@ namespace Flippit.Api.DAL.Memory
                 AnswerType = QAType.Text,
                 Question = "What is 2 + 2?",
                 Answer = "4",
-                CreatorId = userGuids[1],
+                OwnerId = ownerIds[1],
                 CollectionId = collectionGuids[1]
             });
         }
@@ -114,7 +93,7 @@ namespace Flippit.Api.DAL.Memory
                 Name = "Geography Basics",
                 StartTime = DateTime.UtcNow.AddDays(-1),
                 EndTime = DateTime.UtcNow.AddDays(7),
-                CreatorId = userGuids[0]
+                OwnerId = ownerIds[0]
             });
 
             Collections.Add(new CollectionEntity
@@ -123,7 +102,7 @@ namespace Flippit.Api.DAL.Memory
                 Name = "Math Fundamentals",
                 StartTime = DateTime.UtcNow,
                 EndTime = DateTime.UtcNow.AddDays(14),
-                CreatorId = userGuids[1]
+                OwnerId = ownerIds[1]
             });
         }
 
@@ -140,7 +119,7 @@ namespace Flippit.Api.DAL.Memory
                 Id = completedLessonGuids[0],
                 AnswersJson = JsonSerializer.Serialize(answers1),
                 StatisticsJson = JsonSerializer.Serialize(stats1),
-                UserId = userGuids[0],
+                UserId = Guid.Parse(ownerIds[0]),
                 CollectionId = collectionGuids[0]
             });
 
@@ -154,7 +133,7 @@ namespace Flippit.Api.DAL.Memory
                 Id = completedLessonGuids[1],
                 AnswersJson = JsonSerializer.Serialize(answers2),
                 StatisticsJson = JsonSerializer.Serialize(stats2),
-                UserId = userGuids[1],
+                UserId = Guid.Parse(ownerIds[1]),
                 CollectionId = collectionGuids[1]
             });
         }

@@ -44,9 +44,9 @@ namespace Flippit.Api.DAL.EF.Repositories
                 .ToList();
         }
 
-        public IEnumerable<CardEntity> SearchByCreatorId(Guid creatorId, string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10)
+        public IEnumerable<CardEntity> SearchByOwnerId(string ownerId, string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10)
         {
-            var query = _dbContext.Cards.Where(c => c.CreatorId == creatorId)
+            var query = _dbContext.Cards.Where(c => c.OwnerId == ownerId)
                 .ApplyFilterSortAndPage(filter, sortBy, page, pageSize);
 
             return query.ToList();
