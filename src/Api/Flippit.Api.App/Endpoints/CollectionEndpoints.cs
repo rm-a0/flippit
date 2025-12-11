@@ -1,5 +1,6 @@
 ﻿using Flippit.Api.App.Helpers;
 using Flippit.Api.BL.Facades;
+using Flippit.Api.BL.Services;
 using Flippit.Common.Models.Collection;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
@@ -55,13 +56,33 @@ public static class CollectionEndpoints
             return TypedResults.Ok(id);
         });
 
-        collectionsEndPoints.MapPut("", [Authorize] async Task<Results<Ok<Guid?>, ValidationProblem>> (ICollectionFacade collectionFacade, CollectionDetailModel model, IValidator<CollectionDetailModel> validator) =>
+        collectionsEndPoints.MapPut("", [Authorize] async Task<Results<Ok<Guid?>, ValidationProblem, ForbidHttpResult, NotFound<string>>> (
+            ICollectionFacade collectionFacade, 
+            CollectionDetailModel model, 
+            IValidator<CollectionDetailModel> validator,
+            ICurrentUserService currentUserService) =>
         {
             var validationErrors = await ValidationHelper.ValidateModelAsync(model, validator);
             if (validationErrors != null)
             {
                 return TypedResults.ValidationProblem(validationErrors);
             }
+
+            // Check if collection exists and user has permission
+            var existingCollection = collectionFacade.GetById(model.Id);
+            if (existingCollection == null)
+            {
+                return TypedResults.NotFound($"Collection with ID {model.Id} was not found.");
+            }
+
+            // Check authorization: must be owner or admin
+            var currentUserId = currentUserService.CurrentUserId;
+            var isAdmin = currentUserService.IsInRole("Admin");
+            if (currentUserId != existingCollection.CreatorId && !isAdmin)
+            {
+                return TypedResults.Forbid();
+            }
+
             var id = collectionFacade.Update(model);
             return TypedResults.Ok(id);
         });
@@ -77,9 +98,28 @@ public static class CollectionEndpoints
             return TypedResults.Ok(id);
         });
 
-        collectionsEndPoints.MapDelete("/{id:guid}", [Authorize] (ICollectionFacade collectionFacade, Guid id) =>
+        collectionsEndPoints.MapDelete("/{id:guid}", [Authorize] Results<NoContent, ForbidHttpResult, NotFound<string>> (
+            ICollectionFacade collectionFacade, 
+            Guid id,
+            ICurrentUserService currentUserService) =>
         {
+            // Check if collection exists and user has permission
+            var existingCollection = collectionFacade.GetById(id);
+            if (existingCollection == null)
+            {
+                return TypedResults.NotFound($"Collection with ID {id} was not found.");
+            }
+
+            // Check authorization: must be owner or admin
+            var currentUserId = currentUserService.CurrentUserId;
+            var isAdmin = currentUserService.IsInRole("Admin");
+            if (currentUserId != existingCollection.CreatorId && !isAdmin)
+            {
+                return TypedResults.Forbid();
+            }
+
             collectionFacade.Delete(id);
+            return TypedResults.NoContent();
         });
 
         return routeGroupBuilder;

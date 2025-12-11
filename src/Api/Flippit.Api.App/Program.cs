@@ -32,8 +32,10 @@ using static System.Net.Mime.MediaTypeNames;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var identityConnectionString = builder.Configuration.GetConnectionString("IdentityConnection") 
+    ?? throw new InvalidOperationException("Identity connection string not configured");
 builder.Services.AddDbContext<IdentityProviderDbContext>(options =>
-    options.UseInMemoryDatabase("FlippitIdentityDb"));
+    options.UseSqlServer(identityConnectionString));
 
 builder.Services.AddTransient<Flippit.IdentityProvider.DAL.Repositories.IAppUserRepository, Flippit.IdentityProvider.DAL.Repositories.AppUserRepository>();
 
@@ -119,7 +121,12 @@ else
     builder.Services.AddAuthentication();
 }
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+});
+
+builder.Services.AddSingleton<IAuthorizationHandler, Flippit.Api.App.Authorization.ResourceOwnerAuthorizationHandler>();
 
 
 ConfigureOpenApiDocuments(builder.Services);

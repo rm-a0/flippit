@@ -1,6 +1,7 @@
 using Flippit.IdentityProvider.DAL;
 using Flippit.IdentityProvider.DAL.Entities;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace Flippit.Api.App.Services;
 
@@ -13,7 +14,9 @@ public class DataSeeder
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUserEntity>>();
         var dbContext = scope.ServiceProvider.GetRequiredService<IdentityProviderDbContext>();
 
-        await dbContext.Database.EnsureCreatedAsync();
+        // Apply migrations
+        await dbContext.Database.MigrateAsync();
+        
         await SeedRolesAsync(roleManager);
         await SeedUsersAsync(userManager);
     }
