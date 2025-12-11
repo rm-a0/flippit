@@ -7,6 +7,7 @@
       "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
       "Courier New", monospace;
+    --color-red-400: oklch(70.4% 0.191 22.216);
     --color-red-700: oklch(50.5% 0.213 27.518);
     --color-blue-600: oklch(54.6% 0.245 262.881);
     --color-gray-50: oklch(98.5% 0.002 247.839);
@@ -498,9 +499,6 @@
   .me-auto {
     margin-inline-end: auto;
   }
-  .-mt-5 {
-    margin-top: calc(var(--spacing) * -5);
-  }
   .-mt-7 {
     margin-top: calc(var(--spacing) * -7);
   }
@@ -605,10 +603,6 @@
   }
   .table-row {
     display: table-row;
-  }
-  .size-4 {
-    width: calc(var(--spacing) * 4);
-    height: calc(var(--spacing) * 4);
   }
   .size-5 {
     width: calc(var(--spacing) * 5);
@@ -746,11 +740,17 @@
   .w-screen {
     width: 100vw;
   }
+  .max-w-40 {
+    max-width: calc(var(--spacing) * 40);
+  }
   .max-w-56 {
     max-width: calc(var(--spacing) * 56);
   }
   .max-w-screen-xl {
     max-width: var(--breakpoint-xl);
+  }
+  .min-w-0 {
+    min-width: calc(var(--spacing) * 0);
   }
   .min-w-8 {
     min-width: calc(var(--spacing) * 8);
@@ -875,8 +875,11 @@
   .grid-cols-5 {
     grid-template-columns: repeat(5, minmax(0, 1fr));
   }
-  .grid-cols-26 {
-    grid-template-columns: repeat(26, minmax(0, 1fr));
+  .grid-cols-10 {
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+  }
+  .grid-cols-12 {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
   }
   .grid-rows-2 {
     grid-template-rows: repeat(2, minmax(0, 1fr));
@@ -884,8 +887,8 @@
   .grid-rows-3 {
     grid-template-rows: repeat(3, minmax(0, 1fr));
   }
-  .grid-rows-7 {
-    grid-template-rows: repeat(7, minmax(0, 1fr));
+  .grid-rows-5 {
+    grid-template-rows: repeat(5, minmax(0, 1fr));
   }
   .flex-col {
     flex-direction: column;
@@ -925,9 +928,6 @@
   }
   .gap-0 {
     gap: calc(var(--spacing) * 0);
-  }
-  .gap-0\.75 {
-    gap: calc(var(--spacing) * 0.75);
   }
   .gap-1 {
     gap: calc(var(--spacing) * 1);
@@ -1290,6 +1290,9 @@
   .text-wrap {
     text-wrap: wrap;
   }
+  .break-words {
+    overflow-wrap: break-word;
+  }
   .overflow-ellipsis {
     text-overflow: ellipsis;
   }
@@ -1304,6 +1307,9 @@
   }
   .text-gray-700 {
     color: var(--color-gray-700);
+  }
+  .text-red-400 {
+    color: var(--color-red-400);
   }
   .text-red-700 {
     color: var(--color-red-700);

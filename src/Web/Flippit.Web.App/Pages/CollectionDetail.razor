@@ -10,6 +10,8 @@
 @inject NavigationManager NavigationManager
 @inject IUserFacade userfacade
 @inject UserState userState
+@inject ICardFacade cardFacade
+@inject ICollectionFacade collectionFacade
 
 @{
     if(collection!=null && creator!=null)
@@ -80,12 +82,12 @@
                         @{
                             foreach(var card in cards)
                             {
-                                <CardListCard card="card"></CardListCard>
+                                <CardListCard DeleteCard="()=>DeleteCard(card.Id)" card="card"></CardListCard>
                             }
                         }
                     </div>
                 </div>
-                <button disabled="@(LoadMoreDisabled())" @onclick="LoadMore" class="dark-blue-border mb-10 h-10 w-30 rounded-xl border-2 bg-transparent disabled:cursor-not-allowed">
+                <button hidden="@(cards.Count() == 0)" disabled="@(LoadMoreDisabled())" @onclick="LoadMore" class="dark-blue-border mb-10 h-10 w-30 rounded-xl border-2 bg-transparent disabled:cursor-not-allowed">
                     <p class="font-ubuntu-sans-l dark-blue-text">Load more</p>
                 </button>
             </div>
@@ -116,7 +118,6 @@
     private bool CanLoadMore = true;
 
 
-
     private async Task GetCollection()
     {
         var options = new JsonSerializerOptions
@@ -125,7 +126,7 @@
             Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
         };
 
-        var col = await Http.GetFromJsonAsync<CollectionDetailModel>($"/api/collections/{ColId}", options);
+        var col = await collectionFacade.GetByIdAsync(ColId);
         Console.WriteLine(JsonSerializer.Serialize(col, options));
         collection = col;
 
@@ -143,7 +144,7 @@
 
         if(collection != null)
         {
-            var newCards = await Http.GetFromJsonAsync<CardListModel[]>($"/api/collections/{ColId}/cards", options);
+            var newCards = await cardFacade.SearchByCollectionIdAsync(collection.Id, null, null, skip, size);
             Console.WriteLine(JsonSerializer.Serialize(newCards, options));
             if(newCards != null && newCards.Count() > 0)
             {
@@ -191,13 +192,29 @@
     {
         if(collection != null)
         {
-           NavigationManager.NavigateTo($"/collections/{collection.Id}/edit"); 
+            NavigationManager.NavigateTo($"/collections/{collection.Id}/edit"); 
         }
-        
+
     }
 
-    private void Delete()
+    private async Task DeleteCard(Guid id)
     {
+        await cardFacade.DeleteAsync(id);
+        Loading = true;
+        skip = 1;
+        size = 10;
+        cards.Clear();
+        CanLoadMore = true;
+        await GetCards();
+        Loading = false;
+        StateHasChanged();
 
+
+    }
+
+    private async Task Delete()
+    {
+        await collectionFacade.DeleteAsync(ColId);
+        NavigationManager.NavigateTo("/collections");
     }
 }

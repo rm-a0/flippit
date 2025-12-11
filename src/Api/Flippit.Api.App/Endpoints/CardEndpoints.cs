@@ -1,4 +1,4 @@
-using Flippit.Api.App.Helpers;
+﻿using Flippit.Api.App.Helpers;
 using Flippit.Api.BL.Facades;
 using Flippit.Common.Models.Card;
 using FluentValidation;
@@ -65,7 +65,7 @@ public static class CardEndpoints
             return TypedResults.Ok(id);
         });
 
-        cardEndPoints.MapDelete("/{id:guid}", [Authorize(Roles = "Admin")] (ICardFacade cardFacade, Guid id) =>
+        cardEndPoints.MapDelete("/{id:guid}", [Authorize] (ICardFacade cardFacade, Guid id) =>
         {
             cardFacade.Delete(id);
         });

@@ -10,6 +10,8 @@
 @inject NavigationManager NavigationManager
 @inject UserState userState
 @inject ICompletedLessonFacade completedLessonFacade
+@inject ICardFacade cardFacade
+@inject ICollectionFacade collectionFacade
 
 
 @if(Loading)
@@ -22,156 +24,170 @@ else if(collection!=null)
 
     <SearchHeader Name="@collection.Name" ShowSearch="false"></SearchHeader>
 
-    @if(!showResults)
+
+    @if (DateTime.UtcNow > collection.EndTime)
     {
-        @if(cards!=null && displayCard!=null && answerCard != null)
-        {
-            <div class="mt-10 flex flex-col items-center gap-4">
-                <h2 class="font-monserrat-b text-[24px]">@(count+1)/@(cards.Count())</h2>
 
-
-
-                <div class="relative h-[377px] w-[593px]">
-                    <div class="absolute size-full @(getTransformleft()) @(getTransformright()) @(getOpacity()) transition-all duration-500">
-                        <div @onclick="ToogleCard" class="group font-monserrat-m size-60 h-[377px] w-[593px] cursor-pointer flex-col items-center justify-center [perspective:2000px]">
-                            <div class="relative size-full bg-contain bg-center bg-no-repeat transition-transform duration-700 transform-3d @GetRotateClass()"
-                            style="background-image: url('/icons/card-play-bg.svg')">
-                                <div class="absolute size-full p-10 pt-12 backface-hidden">
-                                    <div class="flex size-full flex-col items-center justify-center bg-white">
-                                        <div class="flex size-full flex-col items-center justify-center">
-                                            @if(displayCard.QuestionType == QAType.Text)
-                                            {
-                                                <h6 class="text-[22px]">@displayCard.Question</h6>
-
-                                                @if(!string.IsNullOrEmpty(displayCard.Description))
-                                                {
-                                                    <p class="text-gray-700">@displayCard.Description</p>
-                                                }
-
-                                            }
-                                            else if(displayCard.QuestionType == QAType.Pictures)
-                                            {
-                                                <div class="h-60 w-80">
-                                                    <img class="h-full w-full object-contain" src="@displayCard.Question" />
-                                                </div>
-                                            
-                                                @if(!string.IsNullOrEmpty(displayCard.Description))
-                                                {
-                                                    <p class="text-gray-700">@displayCard.Description</p>
-                                                }
-                                            }
-                                        </div>
-                           
-                                        <p class="opacity-0 transition-opacity duration-500 group-hover:opacity-40">Click to show answer</p>
-                                </div>
-                                </div>
-                                <div class="absolute size-full rotate-y-180 p-10 pt-12 backface-hidden">
-                                    <div class="flex size-full flex-col items-center justify-center bg-white">
-                                        @if(displayCard.AnswerType == QAType.Text)
-                                        {
-                                            <h6 class="text-[22px]">@displayCard.Answer</h6>
-
-                                        }
-                                        else if(displayCard.AnswerType == QAType.Pictures)
-                                        {
-                                            <div class="h-60 w-80">
-                                                <img class="h-full w-full object-contain" src="@displayCard.Answer" />
-                                            </div>
-                                        }
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-
-                </div>
-            
-
-
-                <div class="flex flex-row gap-6">
-                    <button disabled="@buttonsdisabled" @onclick="async () => await SetAnswer(answerCard, false)" class=" red-bg size-12 cursor-pointer rounded-full disabled:!bg-gray-400 flex flex-col items-center justify-center">
-                        <svg class="scale-80" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M21.5311 0.292847C21.9218 -0.0976562 22.5557 -0.0976562 22.9462 0.292847C23.3368 0.683472 23.3368 1.31738 22.9462 1.70789L13.0624 11.5907L23.3612 21.8895C23.7518 22.2802 23.7518 22.9131 23.3612 23.3036C22.9707 23.6942 22.3378 23.6942 21.9471 23.3036L11.6483 13.0048L1.70691 22.9471C1.31665 23.3375 0.683472 23.3373 0.292847 22.9471C-0.0976562 22.5566 -0.0976562 21.9227 0.292847 21.5321L10.2333 11.5897L0.707886 2.06433C0.317505 1.67383 0.317505 1.04077 0.707886 0.650269C1.09839 0.259766 1.73145 0.259888 2.12195 0.650269L11.6473 10.1757L21.5311 0.292847Z" fill="white"/>
-                        </svg>
-
-                    </button>
-
-                    <button disabled="@buttonsdisabled" @onclick="async () => await SetAnswer(answerCard, true)" class="green-bg size-12 cursor-pointer rounded-full disabled:!bg-gray-400 flex flex-col items-center justify-center">
-                        <svg class="scale-80" width="28" height="30" viewBox="0 0 28 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M1 16.2755L10.6196 28.6986L26.8704 1.00024" stroke="#F0F2F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-
-                    </button>
-                
-                </div>
-                <div class="flex w-full flex-col items-end">
-                    <button @onclick="EndSession" class="red-bg font-ubuntu-sans-l w-max cursor-pointer rounded-xl p-4 text-white">End Session</button>
-                </div>
-            </div>
-        }
+        <div class="flex flex-col items-center">
+            <p class="font-monserrat-b text-[28px]">Too late!</p>
+            <p class="font-ubuntu-sans-l">You can't train with these cards anymore</p>
+            <p class="">Deadline was @collection.EndTime.ToString("HH:mm - dd.MM.yyyy")</p><button class="dark-blue-border dark-blue-text font-ubuntu-sans-l mt-10 cursor-pointer rounded-xl border p-5" @onclick="NavigateToMain">Return to home page</button>
+        </div>
     }
     else
     {
-        <div class="mt-10 flex w-full flex-col items-center gap-3">
-            @foreach(var res in Results)
+        @if(!showResults)
+        {
+            @if(cards!=null && displayCard!=null && answerCard != null)
             {
-                <div class="font-ubuntu-sans-l flex w-[80%] flex-row items-center gap-3 rounded-2xl border-2 border-gray-200 bg-white p-6 text-[18px]">
-                    <p>@(Results.IndexOf(res)+1).</p>
-                    <div class="flex-1/2">
-                        @if(res.Card.QuestionType == QAType.Text)
-                        {
-                            <p>@res.Card.Question</p>
+                <div class="mt-10 flex flex-col items-center gap-4">
+                    <h2 class="font-monserrat-b text-[24px]">@(count+1)/@(cards.Count())</h2>
 
-                        } else if(res.Card.QuestionType == QAType.Pictures)
-                        {
-                            <div class="h-60 w-80">
-                                <img class="h-full w-full object-contain" src="@res.Card.Question" />
-                            </div>
-                    
-                        }
-                    </div>
-                    <div class="flex-1/2 text-right">
-                        @if(res.Card.AnswerType == QAType.Text)
-                        {
-                            <p>@res.Card.Answer</p>
 
-                        }
-                        else if(res.Card.AnswerType == QAType.Pictures)
-                        {
-                            <div class="h-60 w-80">
-                                <img class="h-full w-full object-contain" src="@res.Card.Answer" />
+
+                    <div class="relative h-[377px] w-[593px]">
+                        <div class="absolute size-full @(getTransformleft()) @(getTransformright()) @(getOpacity()) transition-all duration-500">
+                            <div @onclick="ToogleCard" class="group font-monserrat-m size-60 h-[377px] w-[593px] cursor-pointer flex-col items-center justify-center [perspective:2000px]">
+                                <div class="relative size-full bg-contain bg-center bg-no-repeat transition-transform duration-700 transform-3d @GetRotateClass()"
+                                style="background-image: url('/icons/card-play-bg.svg')">
+                                    <div class="absolute size-full p-10 pt-12 backface-hidden">
+                                        <div class="flex size-full flex-col items-center justify-center bg-white">
+                                            <div class="flex size-full flex-col items-center justify-center">
+                                                @if(displayCard.QuestionType == QAType.Text)
+                                                {
+                                                    <h6 class="text-[22px]">@displayCard.Question</h6>
+
+                                                    @if(!string.IsNullOrEmpty(displayCard.Description))
+                                                    {
+                                                        <p class="text-gray-700">@displayCard.Description</p>
+                                                    }
+
+                                                }
+                                                else if(displayCard.QuestionType == QAType.Pictures)
+                                                {
+                                                    <div class="h-60 w-80">
+                                                        <img class="h-full w-full object-contain" src="@displayCard.Question" />
+                                                    </div>
+                                            
+                                                    @if(!string.IsNullOrEmpty(displayCard.Description))
+                                                    {
+                                                        <p class="text-gray-700">@displayCard.Description</p>
+                                                    }
+                                                }
+                                            </div>
+                           
+                                            <p class="opacity-0 transition-opacity duration-500 group-hover:opacity-40">Click to show answer</p>
+                                    </div>
+                                    </div>
+                                    <div class="absolute size-full rotate-y-180 p-10 pt-12 backface-hidden">
+                                        <div class="flex size-full flex-col items-center justify-center bg-white">
+                                            @if(displayCard.AnswerType == QAType.Text)
+                                            {
+                                                <h6 class="text-[22px]">@displayCard.Answer</h6>
+
+                                            }
+                                            else if(displayCard.AnswerType == QAType.Pictures)
+                                            {
+                                                <div class="h-60 w-80">
+                                                    <img class="h-full w-full object-contain" src="@displayCard.Answer" />
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        }
-                    
-                    </div>
-                    @if(res.IsCorrect)
-                    {
-                        <div class="green-bg flex size-8 min-w-8 cursor-pointer flex-col items-center justify-center rounded-full">
-                            <svg class="scale-50" width="28" height="30" viewBox="0 0 28 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M1 16.2755L10.6196 28.6986L26.8704 1.00024" stroke="#F0F2F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
 
                         </div>
-                    } 
-                    else
-                    {
-                        <div class="red-bg flex size-8 min-w-8 cursor-pointer flex-col items-center justify-center rounded-full">
-                            <svg class="scale-50" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+                    </div>
+            
+
+
+                    <div class="flex flex-row gap-6">
+                        <button disabled="@buttonsdisabled" @onclick="async () => await SetAnswer(answerCard, false)" class=" red-bg size-12 cursor-pointer rounded-full disabled:!bg-gray-400 flex flex-col items-center justify-center">
+                            <svg class="scale-80" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M21.5311 0.292847C21.9218 -0.0976562 22.5557 -0.0976562 22.9462 0.292847C23.3368 0.683472 23.3368 1.31738 22.9462 1.70789L13.0624 11.5907L23.3612 21.8895C23.7518 22.2802 23.7518 22.9131 23.3612 23.3036C22.9707 23.6942 22.3378 23.6942 21.9471 23.3036L11.6483 13.0048L1.70691 22.9471C1.31665 23.3375 0.683472 23.3373 0.292847 22.9471C-0.0976562 22.5566 -0.0976562 21.9227 0.292847 21.5321L10.2333 11.5897L0.707886 2.06433C0.317505 1.67383 0.317505 1.04077 0.707886 0.650269C1.09839 0.259766 1.73145 0.259888 2.12195 0.650269L11.6473 10.1757L21.5311 0.292847Z" fill="white"/>
                             </svg>
 
-                        </div>
-                    }
+                        </button>
+
+                        <button disabled="@buttonsdisabled" @onclick="async () => await SetAnswer(answerCard, true)" class="green-bg size-12 cursor-pointer rounded-full disabled:!bg-gray-400 flex flex-col items-center justify-center">
+                            <svg class="scale-80" width="28" height="30" viewBox="0 0 28 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M1 16.2755L10.6196 28.6986L26.8704 1.00024" stroke="#F0F2F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+
+                        </button>
+                
+                    </div>
+                    <div class="flex w-full flex-col items-end">
+                        <button @onclick="EndSession" class="red-bg font-ubuntu-sans-l w-max cursor-pointer rounded-xl p-4 text-white">End Session</button>
+                    </div>
                 </div>
             }
-            <div class="my-10 flex flex-row gap-3">
-                <button class="green-bg font-ubuntu-sans-l cursor-pointer rounded-xl p-5 text-white" @onclick="TryAgain">Try again</button>
-                <button class="dark-blue-border dark-blue-text font-ubuntu-sans-l cursor-pointer rounded-xl border p-5" @onclick="NavigateToMain">Return to home page</button>
-            </div>
+        }
+        else
+        {
+            <div class="mt-10 flex w-full flex-col items-center gap-3">
+                @foreach(var res in Results)
+                {
+                    <div class="font-ubuntu-sans-l flex w-[80%] flex-row items-center gap-3 rounded-2xl border-2 border-gray-200 bg-white p-6 text-[18px]">
+                        <p>@(Results.IndexOf(res)+1).</p>
+                        <div class="flex-1/2">
+                            @if(res.Card.QuestionType == QAType.Text)
+                            {
+                                <p>@res.Card.Question</p>
+
+                            } else if(res.Card.QuestionType == QAType.Pictures)
+                            {
+                                <div class="h-60 w-80">
+                                    <img class="h-full w-full object-contain" src="@res.Card.Question" />
+                                </div>
+                    
+                            }
+                        </div>
+                        <div class="flex-1/2 text-right">
+                            @if(res.Card.AnswerType == QAType.Text)
+                            {
+                                <p>@res.Card.Answer</p>
+
+                            }
+                            else if(res.Card.AnswerType == QAType.Pictures)
+                            {
+                                <div class="h-60 w-80">
+                                    <img class="h-full w-full object-contain" src="@res.Card.Answer" />
+                                </div>
+                            }
+                    
+                        </div>
+                        @if(res.IsCorrect)
+                        {
+                            <div class="green-bg flex size-8 min-w-8 cursor-pointer flex-col items-center justify-center rounded-full">
+                                <svg class="scale-50" width="28" height="30" viewBox="0 0 28 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M1 16.2755L10.6196 28.6986L26.8704 1.00024" stroke="#F0F2F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+
+                            </div>
+                        } 
+                        else
+                        {
+                            <div class="red-bg flex size-8 min-w-8 cursor-pointer flex-col items-center justify-center rounded-full">
+                                <svg class="scale-50" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M21.5311 0.292847C21.9218 -0.0976562 22.5557 -0.0976562 22.9462 0.292847C23.3368 0.683472 23.3368 1.31738 22.9462 1.70789L13.0624 11.5907L23.3612 21.8895C23.7518 22.2802 23.7518 22.9131 23.3612 23.3036C22.9707 23.6942 22.3378 23.6942 21.9471 23.3036L11.6483 13.0048L1.70691 22.9471C1.31665 23.3375 0.683472 23.3373 0.292847 22.9471C-0.0976562 22.5566 -0.0976562 21.9227 0.292847 21.5321L10.2333 11.5897L0.707886 2.06433C0.317505 1.67383 0.317505 1.04077 0.707886 0.650269C1.09839 0.259766 1.73145 0.259888 2.12195 0.650269L11.6473 10.1757L21.5311 0.292847Z" fill="white"/>
+                                </svg>
+
+                            </div>
+                        }
+                    </div>
+                }
+                <div class="my-10 flex flex-row gap-3">
+                    @* <button class="green-bg font-ubuntu-sans-l cursor-pointer rounded-xl p-5 text-white" @onclick="TryAgain">Try again</button> *@
+                    <button class="dark-blue-border dark-blue-text font-ubuntu-sans-l cursor-pointer rounded-xl border p-5" @onclick="NavigateToMain">Return to home page</button>
+                </div>
         
-        </div>
+            </div>
+        }
     }
+    
 }
 
 
@@ -216,9 +232,11 @@ else if(collection!=null)
             Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
         };
 
-        var col = await Http.GetFromJsonAsync<CollectionDetailModel>($"/api/collections/{id}", options);
+        var col = await collectionFacade.GetByIdAsync(id);
         Console.WriteLine(JsonSerializer.Serialize(col, options));
         collection = col;
+        Console.WriteLine(DateTime.UtcNow.ToString());
+        Console.WriteLine(collection.EndTime.ToLocalTime().ToString());
     }
 
     private async Task GetCards()
@@ -232,7 +250,7 @@ else if(collection!=null)
 
         if (collection != null)
         {
-            var newCards = await Http.GetFromJsonAsync<CardListModel[]>($"/api/collections/{id}/cards", options);
+            var newCards = await cardFacade.SearchByCollectionIdAsync(id);
             Console.WriteLine(JsonSerializer.Serialize(newCards, options));
             if (newCards != null && newCards.Count() > 0)
             {
@@ -242,7 +260,7 @@ else if(collection!=null)
                 }
                 cards.AddRange(newCards);
                 displayCard = cards[0];
-                answerCard = await Http.GetFromJsonAsync<CardDetailModel>($"/api/cards/{displayCard.Id}", options);
+                answerCard = await cardFacade.GetByIdAsync(displayCard.Id);
             }
 
         }
@@ -260,7 +278,7 @@ else if(collection!=null)
 
     private void TryAgain()
     {
-        NavigationManager.Refresh(true);
+        NavigationManager.NavigateTo($"/collections/{id}/play?reload={Guid.NewGuid()}");
     }
 
 
@@ -334,7 +352,7 @@ else if(collection!=null)
         {
             count++;
             displayCard = cards[count];
-            answerCard = await Http.GetFromJsonAsync<CardDetailModel>($"/api/cards/{displayCard.Id}", options);
+            answerCard = await cardFacade.GetByIdAsync(displayCard.Id);
 
         } 
         else

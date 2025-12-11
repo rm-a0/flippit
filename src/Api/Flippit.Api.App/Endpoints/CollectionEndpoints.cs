@@ -1,4 +1,4 @@
-using Flippit.Api.App.Helpers;
+﻿using Flippit.Api.App.Helpers;
 using Flippit.Api.BL.Facades;
 using Flippit.Common.Models.Collection;
 using FluentValidation;
@@ -77,7 +77,7 @@ public static class CollectionEndpoints
             return TypedResults.Ok(id);
         });
 
-        collectionsEndPoints.MapDelete("/{id:guid}", [Authorize(Roles = "Admin")] (ICollectionFacade collectionFacade, Guid id) =>
+        collectionsEndPoints.MapDelete("/{id:guid}", [Authorize] (ICollectionFacade collectionFacade, Guid id) =>
         {
             collectionFacade.Delete(id);
         });

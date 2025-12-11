@@ -10,5 +10,6 @@ namespace Flippit.Web.BL.Facades
         Task<Flippit.Common.Models.CompletedLesson.CompletedLessonDetailModel?> GetByIdAsync(Guid id);
         Task<Guid> CreateOrUpdateAsync(Flippit.Common.Models.CompletedLesson.CompletedLessonDetailModel lessonModel);
         Task DeleteAsync(Guid id);
+        Task<IList<Flippit.Common.Models.CompletedLesson.CompletedLessonListModel>> GetAllByUserid(Guid userId, int page = 1, int pageSize = 10, string? sortBy = null);
     }
 }

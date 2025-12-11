@@ -3851,7 +3851,7 @@ namespace Flippit.Web.BL
         [System.Text.Json.Serialization.JsonPropertyName("endTime")]
         public System.DateTimeOffset EndTime { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("CreatorId")]
+        [System.Text.Json.Serialization.JsonPropertyName("creatorId")]
         public System.Guid CreatorId { get; set; }
 
     }

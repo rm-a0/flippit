@@ -1,4 +1,5 @@
-﻿using Flippit.Common.Models.CompletedLesson;
+﻿using System.Linq;
+using Flippit.Common.Models.CompletedLesson;
 using Flippit.Web.BL.Mappers;
 using Flippit.Web.DAL.Repositories;
 
@@ -10,6 +11,7 @@ namespace Flippit.Web.BL.Facades
         private readonly CompletedLessonMapper _mapper;
         private readonly LocalDbOptions _localDbOptions;
         private readonly IApiApiClient _apiClient;
+        private readonly IUsersApiClient _usersApiClient;
         private readonly ICompletedLessonsApiClient _completedLessonsApiClient;
         private readonly ApiModelMapper _apiMapper;
 
@@ -18,6 +20,7 @@ namespace Flippit.Web.BL.Facades
             CompletedLessonMapper mapper,
             LocalDbOptions localDbOptions,
             IApiApiClient apiClient,
+            IUsersApiClient usersApiClient,
             ICompletedLessonsApiClient completedLessonsApiClient,
             ApiModelMapper apiMapper)
         {
@@ -27,6 +30,7 @@ namespace Flippit.Web.BL.Facades
             _apiClient = apiClient;
             _completedLessonsApiClient = completedLessonsApiClient;
             _apiMapper = apiMapper;
+            _usersApiClient = usersApiClient;
         }
 
         public async Task<IList<Flippit.Common.Models.CompletedLesson.CompletedLessonListModel>> GetAllAsync(string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10)
@@ -106,6 +110,22 @@ namespace Flippit.Web.BL.Facades
             else
             {
                 await _apiClient.CompletedLessonsDeleteAsync(id, CancellationToken.None);
+            }
+        }
+
+        public async Task<IList<Common.Models.CompletedLesson.CompletedLessonListModel>> GetAllByUserid(Guid userId, int page = 1, int pageSize = 10, string? sortBy = null)
+        {
+
+            if (_localDbOptions.IsLocalDbEnabled)
+            {
+                var entities = await _repository.GetAllAsync();
+                var paged = entities.Where(e => e.UserId == userId).Skip((page - 1) * pageSize).Take(pageSize);
+                return _mapper.DetailToListModels(paged);
+            }
+            else
+            {
+                var apiLessons = await _usersApiClient.CompletedLessonsAsync(userId,page, pageSize, sortBy, CancellationToken.None);
+                return _apiMapper.ToCommonCompletedLessonLists(apiLessons);
             }
         }
     }

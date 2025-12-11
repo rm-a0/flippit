@@ -211,6 +211,7 @@ else
 
         foreach(var card in removedCards)
         {
+            Console.WriteLine(card.Id);
             await cardFacade.DeleteAsync(card.Id);
         }
 
