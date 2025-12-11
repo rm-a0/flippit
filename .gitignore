@@ -266,3 +266,5 @@ appsettings.*.json
 
 # http
 *.http
+# Cookbook reference
+/tmp/cookbook
