@@ -22,5 +22,19 @@ namespace Flippit.Api.DAL.EF.Installers
                     .AsMatchingInterface()
                     .WithScopedLifetime());
         }
+
+        public void InstallWithInMemory(IServiceCollection serviceCollection, string databaseName = "FlippitDataDb")
+        {
+            base.Install(serviceCollection);
+
+            serviceCollection.AddDbContext<FlippitDbContext>(options => 
+                options.UseInMemoryDatabase(databaseName));
+
+            serviceCollection.Scan(selector =>
+                selector.FromAssemblyOf<ApiDALEFInstaller>()
+                    .AddClasses(classes => classes.AssignableTo(typeof(IApiRepository<>)))
+                    .AsMatchingInterface()
+                    .WithScopedLifetime());
+        }
     }
 }

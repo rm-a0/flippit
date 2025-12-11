@@ -4,12 +4,12 @@ using Microsoft.Extensions.Configuration;
 
 namespace Flippit.Api.DAL.EF.Factories
 {
-    public class CookBookDbContextFactory : IDesignTimeDbContextFactory<FlippitDbContext>
+    public class FlippitDbContextFactory : IDesignTimeDbContextFactory<FlippitDbContext>
     {
         public FlippitDbContext CreateDbContext(string[] args)
         {
             var configuration = new ConfigurationBuilder()
-                .AddUserSecrets<CookBookDbContextFactory>(optional: true)
+                .AddUserSecrets<FlippitDbContextFactory>(optional: true)
                 .Build();
 
             var optionsBuilder = new DbContextOptionsBuilder<FlippitDbContext>();

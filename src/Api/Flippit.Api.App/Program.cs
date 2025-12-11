@@ -10,6 +10,7 @@ using Flippit.Api.BL.Installers;
 using Flippit.Api.BL.Mappers;
 using Flippit.Api.BL.Services;
 using Flippit.Api.DAL.Memory.Installers;
+using Flippit.Api.DAL.EF.Installers;
 using Flippit.Common.Models.Card;
 using Flippit.Common.Models.Collection;
 using Flippit.Common.Models.CompletedLesson;
@@ -67,8 +68,30 @@ builder.Services.AddIdentity<AppUserEntity, AppRoleEntity>(options =>
 var identityBLInstaller = new IdentityProviderBLInstaller();
 identityBLInstaller.Install(builder.Services);
 
-var DALinstaller = new ApiDALMemoryInstaller();
-DALinstaller.Install(builder.Services);
+// Configure Database Provider for User Data
+var databaseProvider = builder.Configuration["DatabaseProvider"] ?? "InMemory";
+
+if (builder.Environment.IsEnvironment("Testing") || databaseProvider.Equals("InMemory", StringComparison.OrdinalIgnoreCase))
+{
+    // Use InMemory database
+    var DALinstaller = new ApiDALMemoryInstaller();
+    DALinstaller.Install(builder.Services);
+}
+else if (databaseProvider.Equals("SqlServer", StringComparison.OrdinalIgnoreCase))
+{
+    // Use SQL Server database
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    if (string.IsNullOrEmpty(connectionString))
+    {
+        throw new InvalidOperationException("DefaultConnection connection string not configured for SqlServer provider");
+    }
+    var efInstaller = new ApiDALEFInstaller();
+    efInstaller.Install(builder.Services, connectionString);
+}
+else
+{
+    throw new InvalidOperationException($"Invalid DatabaseProvider: {databaseProvider}. Supported values are 'InMemory' or 'SqlServer'");
+}
 
 builder.Services.AddSingleton<UserMapper>();
 builder.Services.AddSingleton<CardMapper>();
@@ -149,7 +172,7 @@ var app = builder.Build();
 
 if (!app.Environment.IsEnvironment("Testing"))
 {
-    await DataSeeder.SeedAsync(app.Services);
+    await DataSeeder.SeedAsync(app.Services, databaseProvider);
 }
 
 

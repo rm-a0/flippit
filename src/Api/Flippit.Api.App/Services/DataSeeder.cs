@@ -1,5 +1,6 @@
 using Flippit.IdentityProvider.DAL;
 using Flippit.IdentityProvider.DAL.Entities;
+using Flippit.Api.DAL.EF;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,21 +8,38 @@ namespace Flippit.Api.App.Services;
 
 public class DataSeeder
 {
-    public static async Task SeedAsync(IServiceProvider serviceProvider)
+    public static async Task SeedAsync(IServiceProvider serviceProvider, string databaseProvider)
     {
         using var scope = serviceProvider.CreateScope();
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<AppRoleEntity>>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUserEntity>>();
-        var dbContext = scope.ServiceProvider.GetRequiredService<IdentityProviderDbContext>();
+        var identityDbContext = scope.ServiceProvider.GetRequiredService<IdentityProviderDbContext>();
 
         // For SQL Server, apply migrations. For InMemory, ensure database is created.
-        if (dbContext.Database.IsSqlServer())
+        if (identityDbContext.Database.IsSqlServer())
         {
-            await dbContext.Database.MigrateAsync();
+            await identityDbContext.Database.MigrateAsync();
         }
         else
         {
-            await dbContext.Database.EnsureCreatedAsync();
+            await identityDbContext.Database.EnsureCreatedAsync();
+        }
+
+        // Initialize FlippitDbContext if using SqlServer provider
+        if (databaseProvider.Equals("SqlServer", StringComparison.OrdinalIgnoreCase))
+        {
+            var flippitDbContext = scope.ServiceProvider.GetService<FlippitDbContext>();
+            if (flippitDbContext != null)
+            {
+                if (flippitDbContext.Database.IsSqlServer())
+                {
+                    await flippitDbContext.Database.MigrateAsync();
+                }
+                else
+                {
+                    await flippitDbContext.Database.EnsureCreatedAsync();
+                }
+            }
         }
         
         await SeedRolesAsync(roleManager);

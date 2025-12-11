@@ -10,9 +10,9 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.9" />
     <PackageReference Include="NSwag.AspNetCore" Version="14.6.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.10" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.10" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.10">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.9">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -24,6 +24,7 @@
     <ProjectReference Include="..\..\Common\Flippit.Common.Models\Flippit.Common.Models.csproj" />
     <ProjectReference Include="..\Flippit.Api.BL\Flippit.Api.BL.csproj" />
     <ProjectReference Include="..\Flippit.Api.DAL.Memory\Flippit.Api.DAL.Memory.csproj" />
+    <ProjectReference Include="..\Flippit.Api.DAL.EF\Flippit.Api.DAL.EF.csproj" />
     <ProjectReference Include="..\..\IdentityProvider\Flippit.IdentityProvider.BL\Flippit.IdentityProvider.BL.csproj" />
     <ProjectReference Include="..\..\IdentityProvider\Flippit.IdentityProvider.DAL\Flippit.IdentityProvider.DAL.csproj" />
   </ItemGroup>
