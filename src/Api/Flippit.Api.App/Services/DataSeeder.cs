@@ -1,5 +1,10 @@
 using Flippit.IdentityProvider.DAL;
 using Flippit.IdentityProvider.DAL.Entities;
+using Flippit.Api.BL.Facades;
+using Flippit.Common.Models.User;
+using Flippit.Common.Models.Collection;
+using Flippit.Common.Models.Card;
+using Flippit.Common.Enums;
 using Microsoft.AspNetCore.Identity;
 
 namespace Flippit.Api.App.Services;
@@ -15,7 +20,10 @@ public class DataSeeder
 
         await dbContext.Database.EnsureCreatedAsync();
         await SeedRolesAsync(roleManager);
-        await SeedUsersAsync(userManager);
+        var seededUsers = await SeedUsersAsync(userManager);
+        
+        // Seed API users, collections and cards
+        await SeedApiDataAsync(scope.ServiceProvider, seededUsers);
     }
 
     private static async Task SeedRolesAsync(RoleManager<AppRoleEntity> roleManager)
@@ -36,11 +44,14 @@ public class DataSeeder
         }
     }
 
-    private static async Task SeedUsersAsync(UserManager<AppUserEntity> userManager)
+    private static async Task<Dictionary<string, Guid>> SeedUsersAsync(UserManager<AppUserEntity> userManager)
     {
+        var seededUsers = new Dictionary<string, Guid>();
+        
         // Seed admin user
         var adminEmail = "admin@flippit.local";
-        if (await userManager.FindByEmailAsync(adminEmail) == null)
+        var existingAdmin = await userManager.FindByEmailAsync(adminEmail);
+        if (existingAdmin == null)
         {
             var adminUser = new AppUserEntity
             {
@@ -55,12 +66,18 @@ public class DataSeeder
             if (result.Succeeded)
             {
                 await userManager.AddToRoleAsync(adminUser, "Admin");
+                seededUsers["admin"] = adminUser.Id;
             }
+        }
+        else
+        {
+            seededUsers["admin"] = existingAdmin.Id;
         }
 
         // Seed regular user
         var userEmail = "user@flippit.local";
-        if (await userManager.FindByEmailAsync(userEmail) == null)
+        var existingUser = await userManager.FindByEmailAsync(userEmail);
+        if (existingUser == null)
         {
             var regularUser = new AppUserEntity
             {
@@ -75,7 +92,152 @@ public class DataSeeder
             if (result.Succeeded)
             {
                 await userManager.AddToRoleAsync(regularUser, "User");
+                seededUsers["user"] = regularUser.Id;
             }
+        }
+        else
+        {
+            seededUsers["user"] = existingUser.Id;
+        }
+        
+        return seededUsers;
+    }
+    
+    private static async Task SeedApiDataAsync(IServiceProvider serviceProvider, Dictionary<string, Guid> seededUsers)
+    {
+        if (!seededUsers.ContainsKey("admin") || !seededUsers.ContainsKey("user"))
+        {
+            return;
+        }
+
+        var userFacade = serviceProvider.GetRequiredService<IUserFacade>();
+        var collectionFacade = serviceProvider.GetRequiredService<ICollectionFacade>();
+        var cardFacade = serviceProvider.GetRequiredService<ICardFacade>();
+
+        var adminId = seededUsers["admin"];
+        var userId = seededUsers["user"];
+
+        // Seed API users
+        var existingUsers = userFacade.GetAll();
+        if (!existingUsers.Any(u => u.Id == adminId))
+        {
+            userFacade.Create(new UserDetailModel
+            {
+                Id = adminId,
+                Name = "Admin User",
+                PhotoUrl = "https://i.pravatar.cc/150?u=admin",
+                Role = Role.Admin
+            });
+        }
+
+        if (!existingUsers.Any(u => u.Id == userId))
+        {
+            userFacade.Create(new UserDetailModel
+            {
+                Id = userId,
+                Name = "Regular User",
+                PhotoUrl = "https://i.pravatar.cc/150?u=user",
+                Role = Role.User
+            });
+        }
+
+        // Seed collections
+        var existingCollections = collectionFacade.GetAll();
+        if (!existingCollections.Any())
+        {
+            var collection1Id = Guid.NewGuid();
+            var collection2Id = Guid.NewGuid();
+
+            collectionFacade.Create(new CollectionDetailModel
+            {
+                Id = collection1Id,
+                Name = "Geography Basics",
+                CreatorId = userId,
+                StartTime = DateTime.UtcNow.AddDays(-1),
+                EndTime = DateTime.UtcNow.AddDays(30)
+            });
+
+            collectionFacade.Create(new CollectionDetailModel
+            {
+                Id = collection2Id,
+                Name = "Math Fundamentals",
+                CreatorId = userId,
+                StartTime = DateTime.UtcNow,
+                EndTime = DateTime.UtcNow.AddDays(60)
+            });
+
+            var collection3Id = Guid.NewGuid();
+            collectionFacade.Create(new CollectionDetailModel
+            {
+                Id = collection3Id,
+                Name = "Admin's Collection",
+                CreatorId = adminId,
+                StartTime = DateTime.UtcNow,
+                EndTime = DateTime.UtcNow.AddDays(90)
+            });
+
+            // Seed cards for collection 1 (Geography)
+            cardFacade.Create(new CardDetailModel
+            {
+                Id = Guid.NewGuid(),
+                QuestionType = QAType.Text,
+                AnswerType = QAType.Text,
+                Question = "What is the capital of France?",
+                Answer = "Paris",
+                Description = "Basic geography question",
+                CreatorId = userId,
+                CollectionId = collection1Id
+            });
+
+            cardFacade.Create(new CardDetailModel
+            {
+                Id = Guid.NewGuid(),
+                QuestionType = QAType.Text,
+                AnswerType = QAType.Text,
+                Question = "What is the largest ocean?",
+                Answer = "Pacific Ocean",
+                Description = "Geography question",
+                CreatorId = userId,
+                CollectionId = collection1Id
+            });
+
+            // Seed cards for collection 2 (Math)
+            cardFacade.Create(new CardDetailModel
+            {
+                Id = Guid.NewGuid(),
+                QuestionType = QAType.Text,
+                AnswerType = QAType.Text,
+                Question = "What is 2 + 2?",
+                Answer = "4",
+                Description = "Basic arithmetic",
+                CreatorId = userId,
+                CollectionId = collection2Id
+            });
+
+            cardFacade.Create(new CardDetailModel
+            {
+                Id = Guid.NewGuid(),
+                QuestionType = QAType.Text,
+                AnswerType = QAType.Text,
+                Question = "What is 5 * 6?",
+                Answer = "30",
+                Description = "Multiplication",
+                CreatorId = userId,
+                CollectionId = collection2Id
+            });
+
+            // Seed cards for collection 3 (Admin's)
+            cardFacade.Create(new CardDetailModel
+            {
+                Id = Guid.NewGuid(),
+                QuestionType = QAType.Text,
+                AnswerType = QAType.Text,
+                Question = "What is the speed of light?",
+                Answer = "299,792,458 m/s",
+                Description = "Physics question",
+                CreatorId = adminId,
+                CollectionId = collection3Id
+            });
         }
     }
 }

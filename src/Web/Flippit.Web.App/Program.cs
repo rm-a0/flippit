@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Flippit.Web.App;
+using Flippit.Web.App.Services;
 using Flippit.Web.BL.Installers;
 using Flippit.Web.BL.Mappers;
 using Flippit.Web.BL.Facades;
@@ -24,6 +25,9 @@ var apiBaseUrl = builder.Configuration.GetValue<string>("Api:BaseUrl") ?? "https
 
 // Register HttpClient with base address
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(apiBaseUrl) });
+
+// Register authentication service
+builder.Services.AddScoped<AuthenticationService>();
 
 // Register API clients
 builder.Services.AddScoped<IApiApiClient, ApiApiClient>();
@@ -53,4 +57,31 @@ builder.Services.AddScoped<ICardFacade, CardFacade>();
 builder.Services.AddScoped<ICollectionFacade, CollectionFacade>();
 builder.Services.AddScoped<ICompletedLessonFacade, CompletedLessonFacade>();
 
-await builder.Build().RunAsync();
+var app = builder.Build();
+
+// Restore authentication on startup
+var authService = app.Services.GetRequiredService<AuthenticationService>();
+await authService.RestoreAuthenticationAsync();
+
+// Restore user state if authenticated
+var userState = app.Services.GetRequiredService<UserState>();
+var userFacade = app.Services.GetRequiredService<IUserFacade>();
+var userId = await authService.GetUserIdAsync();
+if (userId.HasValue)
+{
+    try
+    {
+        var user = await userFacade.GetByIdAsync(userId.Value);
+        if (user != null)
+        {
+            userState.SetUser(user);
+        }
+    }
+    catch
+    {
+        // Failed to restore user, clear auth
+        await authService.ClearTokenAsync();
+    }
+}
+
+await app.RunAsync();
