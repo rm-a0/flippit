@@ -67,7 +67,9 @@ The API is configured with:
 ### Web App Configuration (`src/Web/Flippit.Web.App/wwwroot/appsettings.json`)
 
 The Web App is configured to call the API at:
-- **BaseUrl**: `https://localhost:7175`
+- **BaseUrl**: `http://localhost:5242`
+
+> **Note**: The application is configured to use HTTP for local development to avoid certificate issues. For production deployments, use HTTPS with proper SSL certificates.
 
 ## Testing the Authentication Flow
 

@@ -22,8 +22,9 @@ namespace Flippit.Web.App.Services
             {
                 return await _jsRuntime.InvokeAsync<string?>("localStorage.getItem", TokenKey);
             }
-            catch
+            catch (JSException)
             {
+                // localStorage not available (e.g., during prerendering)
                 return null;
             }
         }
@@ -36,9 +37,9 @@ namespace Flippit.Web.App.Services
                 await _jsRuntime.InvokeVoidAsync("localStorage.setItem", UserIdKey, userId.ToString());
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             }
-            catch
+            catch (JSException)
             {
-                // localStorage might not be available
+                // localStorage not available (e.g., during prerendering)
             }
         }
 
@@ -52,9 +53,9 @@ namespace Flippit.Web.App.Services
                     return userId;
                 }
             }
-            catch
+            catch (JSException)
             {
-                // localStorage might not be available
+                // localStorage not available (e.g., during prerendering)
             }
             return null;
         }
@@ -67,9 +68,9 @@ namespace Flippit.Web.App.Services
                 await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", UserIdKey);
                 _httpClient.DefaultRequestHeaders.Authorization = null;
             }
-            catch
+            catch (JSException)
             {
-                // localStorage might not be available
+                // localStorage not available (e.g., during prerendering)
             }
         }
 

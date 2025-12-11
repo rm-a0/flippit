@@ -241,7 +241,5 @@ public class DataSeeder
                 CollectionId = collection3Id
             });
         }
-        
-        await Task.CompletedTask; // Keep async signature for consistency
     }
 }
