@@ -1,5 +1,6 @@
 ﻿using Flippit.Api.App.Helpers;
 using Flippit.Api.BL.Facades;
+using Flippit.Api.BL.Services;
 using Flippit.Common.Models.Card;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
@@ -43,13 +44,33 @@ public static class CardEndpoints
             return TypedResults.Ok(id);
         });
 
-        cardEndPoints.MapPut("", [Authorize] async Task<Results<Ok<Guid?>, ValidationProblem>> (ICardFacade CardFacade, CardDetailModel model, IValidator<CardDetailModel> validator) =>
+        cardEndPoints.MapPut("", [Authorize] async Task<Results<Ok<Guid?>, ValidationProblem, ForbidHttpResult, NotFound<string>>> (
+            ICardFacade CardFacade, 
+            CardDetailModel model, 
+            IValidator<CardDetailModel> validator,
+            ICurrentUserService currentUserService) =>
         {
             var validationErrors = await ValidationHelper.ValidateModelAsync(model, validator);
             if (validationErrors != null)
             {
                 return TypedResults.ValidationProblem(validationErrors);
             }
+
+            // Check if card exists and user has permission
+            var existingCard = CardFacade.GetById(model.Id);
+            if (existingCard == null)
+            {
+                return TypedResults.NotFound($"Card with ID {model.Id} was not found.");
+            }
+
+            // Check authorization: must be owner or admin
+            var currentUserId = currentUserService.CurrentUserId;
+            var isAdmin = currentUserService.IsInRole("Admin");
+            if (currentUserId != existingCard.CreatorId && !isAdmin)
+            {
+                return TypedResults.Forbid();
+            }
+
             var id = CardFacade.Update(model);
             return TypedResults.Ok(id);
         });
@@ -65,9 +86,28 @@ public static class CardEndpoints
             return TypedResults.Ok(id);
         });
 
-        cardEndPoints.MapDelete("/{id:guid}", [Authorize] (ICardFacade cardFacade, Guid id) =>
+        cardEndPoints.MapDelete("/{id:guid}", [Authorize] Results<NoContent, ForbidHttpResult, NotFound<string>> (
+            ICardFacade cardFacade, 
+            Guid id,
+            ICurrentUserService currentUserService) =>
         {
+            // Check if card exists and user has permission
+            var existingCard = cardFacade.GetById(id);
+            if (existingCard == null)
+            {
+                return TypedResults.NotFound($"Card with ID {id} was not found.");
+            }
+
+            // Check authorization: must be owner or admin
+            var currentUserId = currentUserService.CurrentUserId;
+            var isAdmin = currentUserService.IsInRole("Admin");
+            if (currentUserId != existingCard.CreatorId && !isAdmin)
+            {
+                return TypedResults.Forbid();
+            }
+
             cardFacade.Delete(id);
+            return TypedResults.NoContent();
         });
 
         return routeGroupBuilder;
