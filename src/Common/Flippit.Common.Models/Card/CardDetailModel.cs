@@ -16,7 +16,6 @@ namespace Flippit.Common.Models.Card
         public string Question { get; set; }
         public string Answer { get; set; }
         public string? Description { get; set; }
-        public Guid CreatorId { get; set; }
         public Guid CollectionId { get; set; }
     }
 
@@ -39,9 +38,6 @@ namespace Flippit.Common.Models.Card
             RuleFor(x => x.Answer)
                 .NotEmpty()
                 .WithMessage("Answer field must not be empty");
-
-            RuleFor(x => x.CreatorId)
-                .NotEmpty();
 
             RuleFor(x => x.CollectionId)
                 .NotEmpty();

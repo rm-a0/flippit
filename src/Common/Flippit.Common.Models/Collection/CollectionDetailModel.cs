@@ -12,7 +12,6 @@ namespace Flippit.Common.Models.Collection
     {
         public Guid Id { get; init; }
         public string Name { get; set; }
-        public Guid CreatorId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
     }

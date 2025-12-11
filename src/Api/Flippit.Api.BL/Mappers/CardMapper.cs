@@ -12,8 +12,12 @@ namespace Flippit.Api.BL.Mappers
     [Mapper]
     public partial class CardMapper
     {
+        [MapperIgnoreTarget(nameof(CardEntity.OwnerId))]
         public partial CardEntity ModelToEntity(CardDetailModel model);
+        
+        [MapperIgnoreSource(nameof(CardEntity.OwnerId))]
         public partial CardDetailModel ToDetailModel(CardEntity entity);
+        
         public partial IList<CardListModel> ToListModels(IEnumerable<CardEntity> entities);
         public partial CardListModel ToListModel(CardEntity entity);
     }

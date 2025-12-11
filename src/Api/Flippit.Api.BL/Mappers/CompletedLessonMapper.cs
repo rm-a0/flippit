@@ -13,11 +13,16 @@ namespace Flippit.Api.BL.Mappers
     [Mapper]
     public partial class CompletedLessonMapper
     {
+        [MapperIgnoreTarget(nameof(CompletedLessonEntity.OwnerId))]
         public partial CompletedLessonEntity ModelToEntity(CompletedLessonDetailModel model);
+        
+        [MapperIgnoreSource(nameof(CompletedLessonEntity.OwnerId))]
         public partial CompletedLessonDetailModel ToDetailModel(CompletedLessonEntity entity);
+        
         public partial IList<CompletedLessonListModel> ToListModels(IEnumerable<CompletedLessonEntity> entities);
 
         [MapperIgnoreSource(nameof(CompletedLessonEntity.UserId))]
+        [MapperIgnoreSource(nameof(CompletedLessonEntity.OwnerId))]
         public partial CompletedLessonListModel ToListModel(CompletedLessonEntity entity);
     }
 }
