@@ -4,6 +4,7 @@
 @using Flippit.Web.BL.Facades
 @inject NavigationManager NavigationManager
 @inject ICardFacade cardFacade
+@inject UserState userState
 
 
 @if(card != null)
@@ -106,6 +107,11 @@ else
     {
         //card = ...
         card = await cardFacade.GetByIdAsync(id);
+        if (card != null && userState.User != null && userState.User.Id != card.CreatorId && userState.User.Role != Role.Admin)
+        {
+            NavigationManager.NavigateTo("/");
+        }
+
     }
 
     private async Task Save()

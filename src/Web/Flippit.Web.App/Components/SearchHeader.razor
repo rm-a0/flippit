@@ -1,6 +1,8 @@
 ﻿@using Flippit.Common.Models.User
+@using Flippit.Web.BL.Facades
 @inject UserState userState
 @inject NavigationManager NavigationManager
+@inject IUserFacade userFacade
 
 <header class="flex w-full flex-row justify-between p-4">
     <div class="size-12 cursor-pointer">
@@ -79,18 +81,43 @@
 
                         </button>
                     </div>
-                    <div class="size-30 overflow-hidden rounded-full">
-                        <img draggable="false" class="h-full w-full" src="@(userState.User.PhotoUrl == null ? "icons/user.svg" : userState.User.PhotoUrl)" />
-                    </div>
-                    <p>@userState.User.Name</p>
-                    <div class="flex flex-row gap-2">
-                        <button class="cursor-pointer rounded-md bg-gray-100 p-1 px-2 transition-colors hover:bg-gray-200">
-                            Edit
-                        </button>
-                        <button @onclick="Logout" class="cursor-pointer rounded-md bg-gray-100 p-1 px-2 transition-colors hover:bg-gray-200">
-                            Log out
-                        </button>
-                    </div>
+
+                    @if (!EditMode)
+                    {
+                        <div class="size-30 overflow-hidden rounded-full">
+                            <img draggable="false" class="h-full w-full" src="@(userState.User.PhotoUrl == null ? "icons/user.svg" : userState.User.PhotoUrl)" />
+                        </div>
+                        <p>@userState.User.Name</p>
+                        <div class="flex flex-row gap-2">
+                            <button @onclick="()=>EditMode = true" class="cursor-pointer rounded-md bg-gray-100 p-1 px-2 transition-colors hover:bg-gray-200">
+                                Edit
+                            </button>
+                            <button @onclick="Logout" class="cursor-pointer rounded-md bg-gray-100 p-1 px-2 transition-colors hover:bg-gray-200">
+                                Log out
+                            </button>
+                        </div>
+                    } else
+                    {
+                        <p>Name:</p>
+                        <div class="bg-gray-100 rounded-md p-2 w-full">
+                            <input @bind="userState.User.Name" class="focus:outline-0"/>
+                        </div>
+                        <p>Photo url:</p>
+                        <div class="bg-gray-100 rounded-md p-2 w-full">
+                            <input @bind="userState.User.PhotoUrl" class="focus:outline-0" />
+                        </div>
+                        <div>
+                            <div class="flex flex-row gap-2">
+                            <button @onclick="()=>EditMode = false" class="cursor-pointer rounded-md bg-gray-100 p-1 px-2 transition-colors hover:bg-gray-200">
+                                Cancel
+                            </button>
+                            <button @onclick="Save" class="cursor-pointer rounded-md bg-gray-100 p-1 px-2 transition-colors hover:bg-gray-200">
+                                Save
+                            </button>
+                        </div>
+                        </div>
+                    }
+
                 </div>
             </div>
         </div>
@@ -122,6 +149,7 @@
     public bool ShowSearch { get; set; } = true;
 
     private bool SearchListVisible = false;
+    private bool EditMode = false;
 
     private SearchList slist;
     private string SearchText;
@@ -129,6 +157,13 @@
     private bool showUserMenu = false;
 
     private bool showAuthMenu = false;
+
+
+    protected override void OnInitialized()
+    {
+        userState.OnChange += StateHasChanged;
+
+    }
 
     private void CloseDialog()
     {
@@ -161,5 +196,23 @@
         userState.SetUser(null); 
         NavigationManager.NavigateTo("/"); 
         showUserMenu = false;
+    }
+
+    private async Task Save()
+    {
+        if(userState.User != null)
+        {
+            var editedUser = new UserDetailModel
+            {
+                Name = userState.User.Name,
+                PhotoUrl = (string.IsNullOrEmpty(userState.User.PhotoUrl) || string.IsNullOrEmpty(userState.User.PhotoUrl)) ? null : userState.User.PhotoUrl,
+                Id = userState.User.Id,
+                Role = userState.User.Role
+            };
+            userState.SetUser(editedUser);
+            await userFacade.CreateOrUpdateAsync(userState.User);
+            EditMode = false;
+        }
+
     }
 }
