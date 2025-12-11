@@ -11,10 +11,10 @@ namespace Flippit.Common.Models.Collection
     public record CollectionDetailModel : IWithId
     {
         public Guid Id { get; init; }
-        public required string Name { get; set; }
-        public required Guid CreatorId { get; set; }
-        public required DateTime StartTime { get; set; }
-        public required DateTime EndTime { get; set; }
+        public string Name { get; set; }
+        public Guid CreatorId { get; set; }
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
     }
 
     public class CollectionDetailModelValidator : AbstractValidator<CollectionDetailModel>

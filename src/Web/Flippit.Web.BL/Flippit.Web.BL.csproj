@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Common\Flippit.Common.Models\Flippit.Common.Models.csproj" />
+        <ProjectReference Include="..\Flippit.Web.DAL\Flippit.Web.DAL.csproj" />
+        <ProjectReference Include="..\..\Common\Flippit.Common.BL\Flippit.Common.BL.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="NSwag.MSBuild" Version="14.6.3">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Riok.Mapperly" Version="4.3.0" />
+    </ItemGroup>
+
+</Project>

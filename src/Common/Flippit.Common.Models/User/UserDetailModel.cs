@@ -11,9 +11,9 @@ namespace Flippit.Common.Models.User
     public record UserDetailModel : IWithId
     {
         public Guid Id { get; init; }
-        public required string Name { get; set; }
+        public string? Name { get; set; }
         public string? PhotoUrl { get; set; }
-        public Role Role { get; set; }
+        public Role? Role { get; set; }
 
     }
 

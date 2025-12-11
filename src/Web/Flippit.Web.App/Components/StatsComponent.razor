@@ -1,0 +1,98 @@
+﻿@using Flippit.Common.Models.Card
+@using Flippit.Common.Models.CompletedLesson
+@using Flippit.Web.BL.Facades
+@using System.Text.Json
+@inject UserState userState
+@inject ICompletedLessonFacade completedLessonFacade
+
+<div class="font-ubuntu-sans-l mt-5 flex flex-col items-center gap-3">
+    <p>Last 60 days statistics</p>
+    <div class="grid grid-cols-12 gap-1">
+        @foreach (var day in Last60Days)
+        {
+            int? score = Heatmap[day];
+            <div style="width:20px; height:20px; background:@GetColorForScore(score); border-radius:4px;"></div>
+            @* <div class="block size-5 bg-white"></div> *@
+        }
+    </div>
+</div>
+
+
+@code {
+
+    private Dictionary<DateTime, int?> Heatmap = new();
+    private List<CompletedLessonListModel> completedLessons = new List<CompletedLessonListModel>();
+    private List<FinalStats> stats = new List<FinalStats>();
+    private List<FinalStats> statsPerDay = new List<FinalStats>();
+    private List<DateTime> Last60Days = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetStats();
+
+        foreach (var lesson in completedLessons)
+        {
+            if (!string.IsNullOrEmpty(lesson.StatisticsJson))
+            {
+                var parsed = JsonSerializer.Deserialize<FinalStats>(lesson.StatisticsJson);
+                if (parsed != null)
+                    stats.AddRange(parsed);
+            }
+        }
+
+        var statsPerDay = stats
+        .GroupBy(s => s.Date.Date)
+        .ToDictionary(
+            g => g.Key,
+            g => (int)g.Average(x => x.Score)
+        );
+
+        Last60Days = Enumerable.Range(0, 60)
+        .Select(i => DateTime.Today.AddDays(-i))
+        .ToList();
+
+        foreach (var day in Last60Days)
+        {
+            Heatmap[day] = statsPerDay.TryGetValue(day.Date, out var score)
+                ? score
+                : (int?)null;
+            Console.WriteLine(Heatmap[day]);
+        }
+    }
+
+    private async Task GetStats()
+    {
+        if(userState.User != null)
+        {
+            var cl = await completedLessonFacade.GetAllByUserid(userState.User.Id, 1, 1000, null);
+            if (cl != null)
+            {
+                completedLessons = cl.ToList();
+                Console.WriteLine(JsonSerializer.Serialize(completedLessons));
+            }
+            
+        }
+        
+    }
+
+    private string GetColorForScore(int? score)
+    {
+        if (!score.HasValue) return "white";
+
+        int r = 255 - (score.Value * 2); 
+        int g = 55 + (score.Value * 2);  
+        return $"rgb({r},{g},0)";
+    }
+
+    public class CardResult
+    {
+        public required CardDetailModel Card { get; set; }
+        public bool IsCorrect { get; set; }
+    }
+
+    public class FinalStats
+    {
+        public DateTime Date { get; set; }
+        public int Score { get; set; }
+    }
+}

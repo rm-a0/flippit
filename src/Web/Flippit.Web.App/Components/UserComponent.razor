@@ -1,0 +1,189 @@
+﻿@using Flippit.Common.Models.AuthModels
+@using System.Text.Json
+@using Flippit.Common.Models.User
+@using System.Text.Json.Serialization
+@using Flippit.Web.BL.Facades
+@inject HttpClient Http
+@inject UserState userState
+@inject NavigationManager NavigationManager
+@inject IUserFacade userFacade
+
+<div class="fixed top-0 left-0 z-10 h-screen w-screen items-center backdrop-blur">
+    <div class="flex size-full flex-col items-center justify-center">
+        <div class="flex h-max w-80 flex-col items-center gap-3 rounded-2xl bg-white p-8 drop-shadow">
+            <div class="flex w-full flex-col items-end">
+                <button @onclick="CloseDialog" class="cursor-pointer">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M1.00366 1L12.2711 12.2674" stroke="black" stroke-width="2" stroke-linecap="round" />
+                        <path d="M1 12.2676L12.2674 1.00014" stroke="black" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+
+                </button>
+            </div>
+            <div class="my-5 h-auto w-48">
+                <img src="/icons/flippit-logo-color.svg" class="size-full object-contain"/>
+            </div>
+            @if (IsLogin)
+            {
+                <EditForm class="font-ubuntu-sans-l flex w-full flex-col items-center gap-3" Model="loginForm" OnValidSubmit="Login">
+                    <div class="w-full rounded-lg bg-gray-100 p-3">
+                        <input required placeholder="Username" class="w-full rounded-lg focus:outline-0" @bind="loginForm.UserName"/>
+                    </div>
+                    <div class="w-full rounded-lg bg-gray-100 p-3">
+                        <input required placeholder="Password" type="password" class="w-full rounded-lg focus:outline-0" @bind="loginForm.Password"/>
+                    </div>
+                    <button class="primary-blue-bg w-full cursor-pointer rounded-lg p-3 text-white">
+                        Log in
+                    </button>
+                    <p>Don't have an account?</p>
+                    <p @onclick="() => {IsLogin = false;}" class="font-monserrat-m primary-blue-text cursor-pointer underline">Register</p>
+                    <p class="text-red">@error</p>
+                    @if (error != null)
+                    {
+                        <p class="text-red">@error</p>
+                    }
+                </EditForm>
+            }
+            else
+            {
+                <EditForm class="font-ubuntu-sans-l flex w-full flex-col items-center gap-3" Model="@registerForm" OnValidSubmit="Register">
+                    <div class="w-full rounded-lg bg-gray-100 p-3">
+                        <input required placeholder="Name" class="w-full rounded-lg focus:outline-0" @bind="registerForm.userDetail.Name" />
+                    </div>
+                    <div class="w-full rounded-lg bg-gray-100 p-3">
+                        <input required placeholder="Username" class="w-full rounded-lg focus:outline-0" @bind="registerForm.registerRequest.UserName" />
+                    </div>
+                    <div class="w-full rounded-lg bg-gray-100 p-3">
+                        <input required placeholder="Password" type="password" class="w-full rounded-lg focus:outline-0" @bind="registerForm.registerRequest.Password" />
+                    </div>
+                    <div class="w-full rounded-lg bg-gray-100 p-3">
+                        <input placeholder="Email" class="w-full rounded-lg focus:outline-0" @bind="registerForm.registerRequest.Email" />
+                    </div>
+                    <div class="w-full rounded-lg bg-gray-100 p-3">
+                        <input placeholder="Photo url" class="w-full rounded-lg focus:outline-0" @bind="registerForm.userDetail.PhotoUrl" />
+                    </div>
+                    <button class="primary-blue-bg w-full cursor-pointer rounded-lg p-3 text-white">
+                        Register
+                    </button>
+                    <p>Already have an account?</p>
+                    <p @onclick="() => { IsLogin = true; }" class="font-monserrat-m primary-blue-text cursor-pointer underline">Log in</p>
+                    @if(error!=null) {<p class="text-red">@error</p>}
+                </EditForm>
+            }
+
+        </div>
+    </div>
+
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback CloseDialog { get; set; }
+    [Parameter]
+    public bool IsLogin { get; set; } = true;
+
+    private string? error;
+
+
+    private RegisterForm registerForm = new RegisterForm
+    {
+        registerRequest = new RegisterRequest(),
+        userDetail = new UserDetailModel(),
+    };
+
+    private LoginRequest loginForm = new LoginRequest();
+
+    private async Task Login()
+    {
+        error = null;
+        Console.WriteLine(JsonSerializer.Serialize(loginForm));
+        (LoginResponse? response, error) = await userFacade.LoginAsync(loginForm);
+
+        if(!string.IsNullOrEmpty(error))
+        {
+            Console.WriteLine(error);
+            return;
+        }
+
+        Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", response!.Token);
+
+        var options = new JsonSerializerOptions
+        {
+            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+        };
+
+        var getUserResponse = await userFacade.GetByIdAsync(response!.UserId);
+
+        if (getUserResponse != null)
+        {
+            userState.SetUser(getUserResponse);
+            await CloseDialog.InvokeAsync();
+            return;
+        }
+        else
+        {
+            Console.WriteLine(error);
+            error = "Error while getting user.";
+        }
+
+        error = "Login failed";
+
+    }
+
+    private async Task Register()
+    {
+        error = null;
+        Console.WriteLine(JsonSerializer.Serialize(registerForm));
+        (LoginResponse? response, error) = await userFacade.RegisterLoginAsync(registerForm.registerRequest);
+
+        if(!string.IsNullOrEmpty(error))
+        {
+            Console.WriteLine(error);
+            return;
+        }
+
+
+        var userId = response!.UserId;
+
+        var user = new UserDetailModel
+        {
+            Name = registerForm.userDetail.Name,
+            Id = userId,
+            PhotoUrl = registerForm.userDetail.PhotoUrl
+        };
+
+        if (response!.Roles.Contains("Admin"))
+        {
+            user.Role = Common.Enums.Role.Admin;
+        }
+        else
+        {
+            user.Role = Common.Enums.Role.User;
+
+        }
+
+
+
+        Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", response!.Token);
+
+        var options = new JsonSerializerOptions
+        {
+            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+        };
+
+        var createResponse = await userFacade.CreateOrUpdateAsync(user);
+
+        userState.SetUser(user);
+        Console.WriteLine("SUCCESS");
+        Console.WriteLine(JsonSerializer.Serialize(userState.User));
+        await CloseDialog.InvokeAsync();
+
+    }
+        
+    private class RegisterForm
+    {
+        public RegisterRequest registerRequest { get; set; }
+        public UserDetailModel userDetail { get; set; }
+    }
+
+}

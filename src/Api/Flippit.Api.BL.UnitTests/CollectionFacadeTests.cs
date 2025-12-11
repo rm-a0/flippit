@@ -3,6 +3,7 @@ using Moq;
 using Flippit.Api.DAL.Common.Entities;
 using Flippit.Api.DAL.Common.Repositories;
 using Flippit.Api.BL.Mappers;
+using Flippit.Api.BL.Services;
 using Flippit.Api.BL.Facades;
 using Flippit.Common.Models.Collection;
 
@@ -10,11 +11,20 @@ namespace Flippit.Api.BL.UnitTests;
 
 public class CollectionFacadeTests
 {
+    private static ICurrentUserService GetMockCurrentUserService(Guid? userId = null)
+    {
+        var mockService = new Mock<ICurrentUserService>();
+        mockService.Setup(s => s.CurrentUserId).Returns(userId ?? Guid.NewGuid());
+        mockService.Setup(s => s.IsInRole(It.IsAny<string>())).Returns(false);
+        return mockService.Object;
+    }
+
     private static CollectionFacade GetFacadeWithForbiddenDependencyCalls()
     {
         var repository = new Mock<ICollectionRepository>(MockBehavior.Strict).Object;
         var mapper = new Mock<CollectionMapper>(MockBehavior.Strict).Object;
-        return new CollectionFacade(repository, mapper);
+        var currentUserService = GetMockCurrentUserService();
+        return new CollectionFacade(repository, mapper, currentUserService);
     }
     
     [Fact]
@@ -74,7 +84,7 @@ public class CollectionFacadeTests
         
         repositoryMock.Setup(r => r.GetAll(null, null, 1, 10)).Returns(entities);
 
-        var facade = new CollectionFacade(repositoryMock.Object, mapper);
+        var facade = new CollectionFacade(repositoryMock.Object, mapper, GetMockCurrentUserService());
         var result = facade.GetAll();
 
         Assert.Equal(2, result.Count);
@@ -92,7 +102,7 @@ public class CollectionFacadeTests
 
         repositoryMock.Setup(r => r.GetAll(null, null, 1, 10)).Returns(new List<CollectionEntity>());
 
-        var facade = new CollectionFacade(repositoryMock.Object, mapper);
+        var facade = new CollectionFacade(repositoryMock.Object, mapper, GetMockCurrentUserService());
         var result = facade.GetAll();
 
         Assert.Empty(result);
@@ -117,7 +127,7 @@ public class CollectionFacadeTests
         
         repositoryMock.Setup(r => r.GetById(entity.Id)).Returns(entity);
 
-        var facade = new CollectionFacade(repositoryMock.Object, mapper);
+        var facade = new CollectionFacade(repositoryMock.Object, mapper, GetMockCurrentUserService());
         var result = facade.GetById(entity.Id);
 
         Assert.NotNull(result);
@@ -137,7 +147,7 @@ public class CollectionFacadeTests
         
         repositoryMock.Setup(r => r.GetById(nonExistentId)).Returns((CollectionEntity?)null);
         
-        var facade = new CollectionFacade(repositoryMock.Object, mapper);
+        var facade = new CollectionFacade(repositoryMock.Object, mapper, GetMockCurrentUserService());
         var result = facade.GetById(nonExistentId);
         
         Assert.Null(result);
@@ -165,7 +175,7 @@ public class CollectionFacadeTests
 
         repositoryMock.Setup(r => r.Search("Collection 1")).Returns(new List<CollectionEntity> { entities[0] });
 
-        var facade = new CollectionFacade(repositoryMock.Object, mapper);
+        var facade = new CollectionFacade(repositoryMock.Object, mapper, GetMockCurrentUserService());
         var searchResult = facade.Search("Collection 1");
 
         Assert.Single(searchResult);
@@ -204,7 +214,7 @@ public class CollectionFacadeTests
 
         repositoryMock.Setup(r => r.SearchByCreatorId(creatorId, null, null, 1, 10)).Returns(new List<CollectionEntity> { entities[0], entities[1] });
 
-        var facade = new CollectionFacade(repositoryMock.Object, mapper);
+        var facade = new CollectionFacade(repositoryMock.Object, mapper, GetMockCurrentUserService());
         var searchResult = facade.SearchByCreatorId(creatorId);
 
         Assert.Equal(2, searchResult.Count);
@@ -283,15 +293,15 @@ public class CollectionFacadeTests
         var entity = mapper.ModelToEntity(collectionModel);
         
         repositoryMock.Setup(r => r.Exists(collectionId)).Returns(false);
-        repositoryMock.Setup(r => r.Insert(entity)).Returns(collectionId);
+        repositoryMock.Setup(r => r.Insert(It.IsAny<CollectionEntity>())).Returns(collectionId);
         
-        var facade = new CollectionFacade(repositoryMock.Object, mapper);
+        var facade = new CollectionFacade(repositoryMock.Object, mapper, GetMockCurrentUserService());
         var result = facade.CreateOrUpdate(collectionModel);
         
         Assert.Equal(collectionId, result);
         repositoryMock.Verify(r => r.Exists(collectionId), Times.Once);
-        repositoryMock.Verify(r => r.Insert(entity), Times.Once);
-        repositoryMock.Verify(r => r.Update(entity), Times.Never);
+        repositoryMock.Verify(r => r.Insert(It.IsAny<CollectionEntity>()), Times.Once);
+        repositoryMock.Verify(r => r.Update(It.IsAny<CollectionEntity>()), Times.Never);
     }
 
     [Fact]
@@ -313,14 +323,14 @@ public class CollectionFacadeTests
         var updatedEntity = mapper.ModelToEntity(updatedCollectionModel);
     
         repositoryMock.Setup(r => r.Exists(collectionId)).Returns(true);
-        repositoryMock.Setup(r => r.Update(updatedEntity)).Returns(collectionId);
+        repositoryMock.Setup(r => r.Update(It.IsAny<CollectionEntity>())).Returns(collectionId);
     
-        var facade = new CollectionFacade(repositoryMock.Object, mapper);
+        var facade = new CollectionFacade(repositoryMock.Object, mapper, GetMockCurrentUserService());
         var result = facade.CreateOrUpdate(updatedCollectionModel);
     
         Assert.Equal(collectionId, result);
         repositoryMock.Verify(r => r.Exists(collectionId), Times.Once);
-        repositoryMock.Verify(r => r.Update(updatedEntity), Times.Once);
+        repositoryMock.Verify(r => r.Update(It.IsAny<CollectionEntity>()), Times.Once);
         repositoryMock.Verify(r => r.Insert(updatedEntity), Times.Never);
     }
     
@@ -372,13 +382,13 @@ public class CollectionFacadeTests
     
         var entity = mapper.ModelToEntity(collectionModel);
     
-        repositoryMock.Setup(r => r.Insert(entity)).Returns(collectionId);
+        repositoryMock.Setup(r => r.Insert(It.IsAny<CollectionEntity>())).Returns(collectionId);
     
-        var facade = new CollectionFacade(repositoryMock.Object, mapper);
+        var facade = new CollectionFacade(repositoryMock.Object, mapper, GetMockCurrentUserService());
         var result = facade.Create(collectionModel);
     
         Assert.Equal(collectionId, result);
-        repositoryMock.Verify(r => r.Insert(entity), Times.Once);
+        repositoryMock.Verify(r => r.Insert(It.IsAny<CollectionEntity>()), Times.Once);
     }
     
     [Fact]
@@ -429,15 +439,15 @@ public class CollectionFacadeTests
     
         var updatedEntity = mapper.ModelToEntity(updatedCollectionModel);
         
-        repositoryMock.Setup(r => r.Update(updatedEntity)).Returns(collectionId);
+        repositoryMock.Setup(r => r.Update(It.IsAny<CollectionEntity>())).Returns(collectionId);
     
-        var facade = new CollectionFacade(repositoryMock.Object, mapper);
+        var facade = new CollectionFacade(repositoryMock.Object, mapper, GetMockCurrentUserService());
         var result = facade.Update(updatedCollectionModel);
     
         Assert.NotNull(result);
         Assert.Equal(collectionId, result);
     
-        repositoryMock.Verify(r => r.Update(updatedEntity), Times.Once);
+        repositoryMock.Verify(r => r.Update(It.IsAny<CollectionEntity>()), Times.Once);
     }
     
     [Fact]
@@ -449,7 +459,7 @@ public class CollectionFacadeTests
     
         repositoryMock.Setup(r => r.Remove(collectionId));
     
-        var facade = new CollectionFacade(repositoryMock.Object, mapper);
+        var facade = new CollectionFacade(repositoryMock.Object, mapper, GetMockCurrentUserService());
         facade.Delete(collectionId);
     
         repositoryMock.Verify(r => r.Remove(collectionId), Times.Once);

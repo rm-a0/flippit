@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+@font-face {
+    font-family: 'monserrat-b';
+    src: url('/fonts/Montserrat-Bold.ttf') format('truetype');
+    font-weight: 900;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'monserrat-m';
+    src: url('/fonts/Montserrat-Medium.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'ubuntu-sans-l';
+    src: url('/fonts/UbuntuSans-Light.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+}
+
+.font-monserrat-b {
+    font-family: monserrat-b, sans-serif
+}
+
+.font-monserrat-m {
+    font-family: monserrat-m, sans-serif
+}
+
+.font-ubuntu-sans-l {
+    font-family: ubuntu-sans-l, sans-serif
+}
+
+.primary-blue-bg {
+    background-color: #2541B2
+}
+
+.primary-blue-text {
+    color: #2541B2
+}
+
+.dark-blue-bg {
+    background-color: #03256C
+}
+
+.red-bg {
+    background-color: #B22544;
+}
+
+.green-bg {
+    background-color: #25B281;
+}
+
+.light-blue-bg {
+    background-color: #F0F2F6;
+}
+
+.dark-blue-border {
+    border-color: #03256C;
+}
+
+.dark-blue-text {
+    color: #03256C;
+}
+
+.primary-blue-text {
+    color: #2541B2;
+}
+

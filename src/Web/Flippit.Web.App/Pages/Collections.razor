@@ -1,0 +1,102 @@
+﻿@page "/collections"
+@using Flippit.Common.Models.Collection
+@inject HttpClient Http
+@using System.Text.Json;
+@using Flippit.Web.BL.Facades
+@inject ICollectionFacade collectionFacade
+
+
+<SearchHeader ShowSearch="true"></SearchHeader>
+
+@{
+    if(!Loading)
+    {
+        if (collections != null)
+        {
+            <div class="mt-10 flex flex-col items-center gap-20">
+                <div class="w-mac flex flex-col gap-3">
+                    <h4 class="font-monserrat-b m-0 ml-2 text-2xl">All collections</h4>
+                    <div class="grid w-max grid-cols-4 gap-6">
+                        @{
+                            foreach (var col in collections)
+                            {
+                                <CollectionCard collection="col" />
+                            }
+                        }
+                    </div>
+   
+                </div>
+                <button disabled="@(LoadMoreDisabled())" @onclick="LoadMore" class="dark-blue-border mb-10 h-10 w-30 rounded-xl border-2 bg-transparent disabled:cursor-not-allowed">
+                    <p class="font-ubuntu-sans-l dark-blue-text">Load more</p>
+                </button>
+            </div>
+        }
+        else
+        {
+            <div class="mt-20 flex flex-col items-center">
+                <h3 class="font-ubuntu-sans-l">There are no collections yet. </h3>
+                 @*do smth so this link redirects to auth if user isnt logged in*@
+                <a href="/create" class="font-ubuntu-sans-l cursor-pointer text-blue-600 underline">Want to create one?</a>
+            </div>
+
+        }
+
+    }
+    else
+    {
+        <Loading></Loading>
+    }
+
+}
+
+
+@code {
+
+
+    private List<CollectionListModel>? collections;
+
+    private int skip = 1;
+    private int pageSize = 8;
+    private bool Loading = false;
+    private bool CanLoadMore = true;
+
+    private async Task GetCollections()
+    {
+        var newCols = await collectionFacade.GetAllAsync(null, null, skip, pageSize);
+        Console.WriteLine(JsonSerializer.Serialize(newCols));
+        if(newCols != null && newCols.Count() > 0)
+        {
+            if(collections == null)
+            {
+                collections = new List<CollectionListModel>();
+            }
+            collections.AddRange(newCols);
+        }
+        
+        if (newCols == null || newCols.Count() < pageSize)
+        {
+            CanLoadMore = false;
+        } else CanLoadMore = true;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Loading = true;
+        await GetCollections();
+        Loading = false;
+    }
+
+    private async Task LoadMore()
+    {
+        Loading = true;
+        skip++;
+        await GetCollections();
+        Loading = false;
+
+    }
+
+    private bool LoadMoreDisabled()
+    {
+        return Loading || !CanLoadMore;
+    }
+}

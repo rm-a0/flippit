@@ -1,0 +1,223 @@
+﻿@page "/collections/{ColId:guid}"
+@using Flippit.Common.Enums
+@using Flippit.Common.Models.Card
+@using Flippit.Common.Models.Collection
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@using Flippit.Common.Models.User
+@using Flippit.Web.BL.Facades
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IUserFacade userfacade
+@inject UserState userState
+@inject ICardFacade cardFacade
+@inject ICollectionFacade collectionFacade
+
+@{
+    if(collection!=null && creator!=null)
+    {
+        <SearchHeader Name="@collection.Name" ShowSearch="false">
+            @if(userState.User != null && (creator.Id == userState.User.Id || userState.User.Role == Role.Admin))
+            {
+                <div class="flex flex-row gap-3">
+                    <button  @onclick="Edit" class="green-bg flex size-10 cursor-pointer flex-col items-center justify-center rounded-lg">
+                         <svg  width="27" height="24" viewBox="0 0 27 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M13.8887 3.95764H2C1.44771 3.95764 1 4.40536 1 4.95764V21.2221C1 21.7744 1.44772 22.2221 2 22.2221H18.1954C18.7477 22.2221 19.1954 21.7744 19.1954 21.2221V15.8123M20.5738 1.40757L9.17835 12.803C9.01512 12.9663 8.91339 13.1809 8.89042 13.4106L8.56546 16.6602C8.50247 17.2901 9.0332 17.8193 9.6629 17.7545L12.7767 17.4339C13.0054 17.4104 13.2189 17.3088 13.3815 17.1463L25.0882 5.4395C25.4385 5.1344 25.7249 4.11003 24.0682 2.45336C21.9974 0.382518 20.9657 1.01573 20.5738 1.40757Z" stroke="white" stroke-width="1" stroke-linecap="round" />
+                        </svg>
+
+                    </button>
+                    <button  @onclick="Delete" class="red-bg flex size-10 cursor-pointer flex-col items-center justify-center rounded-lg">
+                         <svg  width="24" height="27" viewBox="0 0 24 27" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M2.75041 6.21907C2.90822 9.66751 3.29147 17.6057 3.56193 21.7709C3.77167 25.0009 7.16817 25.9632 8.97129 25.9632C10.7744 25.9632 14.7728 25.9632 16.3416 25.9632C18.3025 25.9632 19.8576 23.9347 19.9929 21.7709C20.1011 20.04 20.3986 10.6818 20.5338 6.21907M2.75041 6.21907H7.40067M2.75041 6.21907H1M20.5338 6.21907H16.0184M20.5338 6.21907H22.2069M7.40067 6.21907C7.40067 5.47194 7.40067 3.78086 7.40067 2.99355C7.40067 2.00941 8.58669 1 11.4382 1C14.2897 1 16.0184 1.78909 16.0184 2.75718C16.0184 3.53165 16.0184 5.3878 16.0184 6.21907M7.40067 6.21907H16.0184" stroke="white" stroke-width="1" stroke-linecap="round" />
+                            <line x1="8.69629" y1="11.0005" x2="8.69629" y2="21.2825" stroke="white" stroke-width="1" stroke-linecap="round" />
+                            <line x1="14.5283" y1="11.0005" x2="14.5283" y2="21.2825" stroke="white" stroke-width="1" stroke-linecap="round" />
+                        </svg>
+
+                    </button>
+                </div>
+            }
+
+
+        </SearchHeader>
+
+    }
+
+
+    if(!Loading)
+    {
+        if (cards != null)
+        {
+            <NavLink href="@($"/collections/{collection!.Id}/play")">
+                 <div class="primary-blue-bg fixed right-20 bottom-20 size-14 cursor-pointer rounded-full">
+                    <div class="flex size-14 flex-row items-center justify-center">
+                        <svg  width="14" height="19" viewBox="0 0 14 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M13.5482 8.23899L1.55822 0.172003C0.893959 -0.274922 0 0.201075 0 1.00169V17.1357C0 17.9363 0.89396 18.4123 1.55822 17.9654L13.5482 9.89837C14.1373 9.50206 14.1373 8.6353 13.5482 8.23899Z" fill="#F0F2F6" />
+                        </svg>
+                    </div>
+                </div>
+            </NavLink>
+
+
+            <div class="mt-10 flex flex-col items-center gap-20">
+                @if(creator != null)
+                {
+                    <NavLink href="@($"/users/{creator.Id}")">
+                        <div class="-mt-7 flex cursor-pointer flex-row items-center gap-5">
+                            <div class="size-7 overflow-hidden rounded-full">
+                                @if (creator.PhotoUrl != null)
+                                {
+                                    <img src="@creator.PhotoUrl" class="size-full object-contain" />
+                                }
+                                else
+                                {
+                                    <img src="/icons/user.svg" class="size-full object-contain" />
+                                }
+                            </div>
+                            <p class="font-ubuntu-sans-l justify-center text-lg overflow-ellipsis">@creator.Name</p>
+                        </div>
+                    </NavLink>
+
+                }
+
+                <div class="w-mac flex flex-col gap-3">
+                    <h4 class="font-monserrat-b m-0 ml-2 text-2xl">Flashcards (@(cards!.Count()))</h4>
+                    <div class="grid w-max grid-cols-5 gap-2">
+                        @{
+                            foreach(var card in cards)
+                            {
+                                <CardListCard DeleteCard="()=>DeleteCard(card.Id)" card="card"></CardListCard>
+                            }
+                        }
+                    </div>
+                </div>
+                <button hidden="@(cards.Count() == 0)" disabled="@(LoadMoreDisabled())" @onclick="LoadMore" class="dark-blue-border mb-10 h-10 w-30 rounded-xl border-2 bg-transparent disabled:cursor-not-allowed">
+                    <p class="font-ubuntu-sans-l dark-blue-text">Load more</p>
+                </button>
+            </div>
+        }
+
+    }
+    else
+    {
+        <Loading></Loading>
+    }
+}
+
+
+@code {
+
+
+
+    [Parameter]
+    public Guid ColId { get; set; }
+
+    private CollectionDetailModel? collection;
+    private List<CardListModel>? cards;
+    private UserDetailModel? creator;
+
+    private int skip = 1;
+    private int size = 10;
+    private bool Loading = false;
+    private bool CanLoadMore = true;
+
+
+    private async Task GetCollection()
+    {
+        var options = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+        };
+
+        var col = await collectionFacade.GetByIdAsync(ColId);
+        Console.WriteLine(JsonSerializer.Serialize(col, options));
+        collection = col;
+
+
+    }
+
+    private async Task GetCards()
+    {
+        var options = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+        };
+
+
+        if(collection != null)
+        {
+            var newCards = await cardFacade.SearchByCollectionIdAsync(collection.Id, null, null, skip, size);
+            Console.WriteLine(JsonSerializer.Serialize(newCards, options));
+            if(newCards != null && newCards.Count() > 0)
+            {
+                if(cards == null)
+                {
+                    cards = new List<CardListModel>();
+                }
+                cards.AddRange(newCards);
+            }
+
+            if (newCards == null || newCards.Count() < size)
+            {
+                CanLoadMore = false;
+            }
+
+        }
+
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Loading = true;
+        await GetCollection();
+        creator = await userfacade.GetByIdAsync(collection.CreatorId);
+        await GetCards();
+        Loading = false;
+    }
+
+
+    private async Task LoadMore()
+    {
+        Loading = true;
+        skip++;
+        await GetCards();
+        Loading = false;
+
+    }
+
+    private bool LoadMoreDisabled()
+    {
+        return Loading || !CanLoadMore;
+    }
+
+    private void Edit()
+    {
+        if(collection != null)
+        {
+            NavigationManager.NavigateTo($"/collections/{collection.Id}/edit"); 
+        }
+
+    }
+
+    private async Task DeleteCard(Guid id)
+    {
+        await cardFacade.DeleteAsync(id);
+        Loading = true;
+        skip = 1;
+        size = 10;
+        cards.Clear();
+        CanLoadMore = true;
+        await GetCards();
+        Loading = false;
+        StateHasChanged();
+
+
+    }
+
+    private async Task Delete()
+    {
+        await collectionFacade.DeleteAsync(ColId);
+        NavigationManager.NavigateTo("/collections");
+    }
+}

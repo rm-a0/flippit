@@ -1,0 +1,228 @@
+﻿@page "/"
+@using Flippit.Common.Models.Collection
+@using Flippit.Common.Models.CompletedLesson
+@using Flippit.Common.Models.User
+@using Flippit.Web.BL.Facades
+@using System.Text.Json
+@inject HttpClient Http
+@inject UserState userState
+@inject ICollectionFacade collectionFacade
+
+<PageTitle>Home</PageTitle>
+
+
+
+
+<SearchHeader ></SearchHeader>
+
+@if (showAuthMenu)
+{
+    <UserComponent CloseDialog="@CloseDialog" IsLogin="authLogin"></UserComponent>
+}
+
+@if(userState.User != null)
+{
+    <main class="mt-8 flex flex-col items-center gap-6">
+        <h2 class="font-monserrat-b text-[32px]">Welcome, @userState.User.Name</h2>
+        <div class="flex w-max flex-row">
+            <StatsComponent></StatsComponent>
+        </div>
+        
+        @if (collections != null && collections.Count() > 0)
+            {
+                <div class="mt-14 flex flex-col gap-4">
+                    <div class="mx-20 flex flex-row justify-between">
+                        <h4 class="font-monserrat-b m-0 text-2xl">My collections</h4>
+                        <NavLink href="/collections">
+                            <p class="font-ubuntu-sans-l m-0 cursor-pointer">See all</p>
+                        </NavLink>
+            
+                    </div>
+                    <div class="flex flex-row items-center gap-6">
+                        <button disabled="@(LeftButtonDisabled())" @onclick="GoPrev" class="cursor-pointer disabled:cursor-not-allowed">
+                            <svg width="51" height="51" viewBox="0 0 51 51" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="1" y="1" width="48.78" height="48.7769" rx="24.3884" stroke="#CBCBCB" stroke-width="2" />
+                                <path d="M30.4276 15.2207L18.3524 25.3884L30.4276 35.5562" stroke="#CBCBCB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </button>
+
+
+                        <div class="grid grid-cols-4 gap-6">
+                            @{
+                                foreach (var col in collections!)
+                                {
+                                    <CollectionCard collection="col"></CollectionCard>
+                                }
+                            }
+                        </div>
+
+                        <button disabled="@(RightButtonDisabled())" @onclick="GoNext" class="rotate-180 cursor-pointer disabled:cursor-not-allowed">
+                            <svg width="51" height="51" viewBox="0 0 51 51" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="1" y="1" width="48.78" height="48.7769" rx="24.3884" stroke="#CBCBCB" stroke-width="2" />
+                                <path d="M30.4276 15.2207L18.3524 25.3884L30.4276 35.5562" stroke="#CBCBCB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </button>
+                    </div>
+            </div>
+
+        }else
+        {
+            <div class="mt-10 flex flex-col items-center gap-5">
+                <p class="font-monserrat-b primary-blue-text text-[22px0]">You don't have any collections</p>
+                <NavLink class="col-span-2 row-3" href="/collections">
+                    <button class="dark-blue-border dark-blue-text font-ubuntu-sans-l cursor-pointer rounded-xl border p-4">Look at other users' collections</button>
+                </NavLink>
+            </div>
+        }
+
+    
+    </main>
+}
+else
+{
+    <div class="mt-20 flex h-full flex-col items-center gap-10">
+        <h3 class="font-monserrat-b text-[28px]">Welcome to</h3>
+        <div class="w-120">
+            <img src="/icons/flippit-logo-color.svg" class="size-full object-contain" />
+        </div>
+        <div class="grid grid-cols-2 grid-rows-3 items-center justify-center gap-x-3">
+            <button @onclick="() => {authLogin = true; showAuthMenu = true;}" class="dark-blue-border dark-blue-text font-ubuntu-sans-l col-1 row-1 cursor-pointer rounded-xl border p-4">Log in</button>
+            <button @onclick="() => { authLogin = false; showAuthMenu = true; }" class="dark-blue-border dark-blue-text font-ubuntu-sans-l col-2 row-1 cursor-pointer rounded-xl border p-4">Sign up</button>
+            <p class="font-ubuntu-sans-l col-span-2 row-2 text-center"> OR</p>
+            <NavLink class="col-span-2 row-3" href="/collections">
+                <button class="dark-blue-border dark-blue-text font-ubuntu-sans-l cursor-pointer rounded-xl border p-4">Look at other users' collections</button>
+            </NavLink>
+            
+
+        </div>
+    </div>
+}
+
+@code {
+
+    private List<CollectionListModel>? collections;
+    private List<CompletedLessonListModel>? stats;
+
+    private int skip = 1;
+    private int pageSize = 4;
+    private bool Loading = false;
+    private bool CanLoadMore = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        userState.OnChange += async () => await InvokeAsync(Rerender);
+        Loading = true;
+        if(userState.User != null)
+        {
+            await Rerender();
+        }
+
+        Loading = false;
+
+    }
+
+    private async Task Rerender()
+    {
+        if(userState.User == null)
+        {
+            collections = null;
+            stats = null;
+            StateHasChanged();
+            return;
+        }
+        await GetCollections();
+        await GetStats();
+        StateHasChanged();
+    }
+
+    // /api/collections or /api/user/{userid}/collections with skip and pagesize
+    private async Task GetCollections()
+    {
+        Console.WriteLine(JsonSerializer.Serialize(userState.User));
+        Console.WriteLine("HERE");
+        Console.WriteLine(userState.User.Id);
+        var cols = await collectionFacade.GetAllByUserId(userState.User!.Id, null, null, skip, pageSize);
+        if (cols.Count > 0)
+        {
+            if(collections == null)
+            {
+                collections = new List<CollectionListModel>();
+            }
+            
+
+            collections.Clear();
+            collections.AddRange(cols);
+            if (collections.Count() < pageSize)
+            {
+                CanLoadMore = false;
+            }
+            else
+            {
+                CanLoadMore = true;
+            }
+            Console.WriteLine(JsonSerializer.Serialize(collections));
+        }
+        else
+        {
+            CanLoadMore = false;
+        }
+        StateHasChanged();
+
+    }
+
+
+    // /api/users/{userid}/CompletedLessons
+    private async Task GetStats()
+    {
+
+    }
+
+    private async Task GoPrev()
+    {
+        Loading = true;
+        if(skip > 1)
+        {
+            skip--;
+            await GetCollections();
+        }
+
+        Console.WriteLine(skip);
+        Loading = false;
+    }
+
+    private async Task GoNext()
+    {
+        if(CanLoadMore)
+        {
+            skip++;
+            await GetCollections();
+        }
+
+        Console.WriteLine(skip);
+
+    }
+
+    private bool LeftButtonDisabled()
+    {
+        return skip == 1;
+    }
+
+    private bool RightButtonDisabled()
+    {
+        // if(collectiions!= null)
+        // {
+        //     return collectiions.Count() <= skip * pageSize;
+        // }
+        // return true;
+        Console.WriteLine(!CanLoadMore || Loading);
+        return !CanLoadMore || Loading;
+    }
+
+    private bool showAuthMenu = false;
+    private bool authLogin = true;
+    private void CloseDialog()
+    {
+        showAuthMenu = false;
+    }
+
+}
