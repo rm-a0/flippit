@@ -1,6 +1,8 @@
 using Flippit.IdentityProvider.DAL;
 using Flippit.IdentityProvider.DAL.Entities;
 using Flippit.Api.BL.Facades;
+using Flippit.Api.DAL.Common.Repositories;
+using Flippit.Api.DAL.Common.Entities;
 using Flippit.Common.Models.User;
 using Flippit.Common.Models.Collection;
 using Flippit.Common.Models.Card;
@@ -110,18 +112,18 @@ public class DataSeeder
             return;
         }
 
-        var userFacade = serviceProvider.GetRequiredService<IUserFacade>();
-        var collectionFacade = serviceProvider.GetRequiredService<ICollectionFacade>();
-        var cardFacade = serviceProvider.GetRequiredService<ICardFacade>();
+        var userRepository = serviceProvider.GetRequiredService<IUserRepository>();
+        var collectionRepository = serviceProvider.GetRequiredService<ICollectionRepository>();
+        var cardRepository = serviceProvider.GetRequiredService<ICardRepository>();
 
         var adminId = seededUsers["admin"];
         var userId = seededUsers["user"];
 
         // Seed API users
-        var existingUsers = userFacade.GetAll();
+        var existingUsers = userRepository.GetAll();
         if (!existingUsers.Any(u => u.Id == adminId))
         {
-            userFacade.Create(new UserDetailModel
+            userRepository.Insert(new UserEntity
             {
                 Id = adminId,
                 Name = "Admin User",
@@ -132,7 +134,7 @@ public class DataSeeder
 
         if (!existingUsers.Any(u => u.Id == userId))
         {
-            userFacade.Create(new UserDetailModel
+            userRepository.Insert(new UserEntity
             {
                 Id = userId,
                 Name = "Regular User",
@@ -142,13 +144,13 @@ public class DataSeeder
         }
 
         // Seed collections
-        var existingCollections = collectionFacade.GetAll();
+        var existingCollections = collectionRepository.GetAll();
         if (!existingCollections.Any())
         {
             var collection1Id = Guid.NewGuid();
             var collection2Id = Guid.NewGuid();
 
-            collectionFacade.Create(new CollectionDetailModel
+            collectionRepository.Insert(new CollectionEntity
             {
                 Id = collection1Id,
                 Name = "Geography Basics",
@@ -157,7 +159,7 @@ public class DataSeeder
                 EndTime = DateTime.UtcNow.AddDays(30)
             });
 
-            collectionFacade.Create(new CollectionDetailModel
+            collectionRepository.Insert(new CollectionEntity
             {
                 Id = collection2Id,
                 Name = "Math Fundamentals",
@@ -167,7 +169,7 @@ public class DataSeeder
             });
 
             var collection3Id = Guid.NewGuid();
-            collectionFacade.Create(new CollectionDetailModel
+            collectionRepository.Insert(new CollectionEntity
             {
                 Id = collection3Id,
                 Name = "Admin's Collection",
@@ -177,7 +179,7 @@ public class DataSeeder
             });
 
             // Seed cards for collection 1 (Geography)
-            cardFacade.Create(new CardDetailModel
+            cardRepository.Insert(new CardEntity
             {
                 Id = Guid.NewGuid(),
                 QuestionType = QAType.Text,
@@ -189,7 +191,7 @@ public class DataSeeder
                 CollectionId = collection1Id
             });
 
-            cardFacade.Create(new CardDetailModel
+            cardRepository.Insert(new CardEntity
             {
                 Id = Guid.NewGuid(),
                 QuestionType = QAType.Text,
@@ -202,7 +204,7 @@ public class DataSeeder
             });
 
             // Seed cards for collection 2 (Math)
-            cardFacade.Create(new CardDetailModel
+            cardRepository.Insert(new CardEntity
             {
                 Id = Guid.NewGuid(),
                 QuestionType = QAType.Text,
@@ -214,7 +216,7 @@ public class DataSeeder
                 CollectionId = collection2Id
             });
 
-            cardFacade.Create(new CardDetailModel
+            cardRepository.Insert(new CardEntity
             {
                 Id = Guid.NewGuid(),
                 QuestionType = QAType.Text,
@@ -227,7 +229,7 @@ public class DataSeeder
             });
 
             // Seed cards for collection 3 (Admin's)
-            cardFacade.Create(new CardDetailModel
+            cardRepository.Insert(new CardEntity
             {
                 Id = Guid.NewGuid(),
                 QuestionType = QAType.Text,
@@ -239,5 +241,7 @@ public class DataSeeder
                 CollectionId = collection3Id
             });
         }
+        
+        await Task.CompletedTask; // Keep async signature for consistency
     }
 }

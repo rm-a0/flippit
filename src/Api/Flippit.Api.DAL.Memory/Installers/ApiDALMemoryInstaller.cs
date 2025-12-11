@@ -11,7 +11,8 @@ namespace Flippit.Api.DAL.Memory.Installers
         {
             base.Install(serviceCollection);
 
-            serviceCollection.AddSingleton<Storage>();
+            // Create Storage without seed data - DataSeeder will handle seeding
+            serviceCollection.AddSingleton(sp => new Storage(seedData: false));
 
             serviceCollection.Scan(selector =>
                 selector.FromAssemblyOf<ApiDALMemoryInstaller>()
