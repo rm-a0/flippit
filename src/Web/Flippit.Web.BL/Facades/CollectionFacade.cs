@@ -12,6 +12,7 @@ namespace Flippit.Web.BL.Facades
         private readonly IApiApiClient _apiClient;
         private readonly ICollectionsApiClient _collectionsApiClient;
         private readonly ApiModelMapper _apiMapper;
+        private readonly IUsersApiClient _userClient;
 
         public CollectionFacade(
             CollectionRepository repository, 
@@ -19,6 +20,7 @@ namespace Flippit.Web.BL.Facades
             LocalDbOptions localDbOptions,
             IApiApiClient apiClient,
             ICollectionsApiClient collectionsApiClient,
+            IUsersApiClient userClient,
             ApiModelMapper apiMapper)
         {
             _repository = repository;
@@ -27,6 +29,7 @@ namespace Flippit.Web.BL.Facades
             _apiClient = apiClient;
             _collectionsApiClient = collectionsApiClient;
             _apiMapper = apiMapper;
+            _userClient = userClient;
         }
 
         public async Task<IList<Flippit.Common.Models.Collection.CollectionListModel>> GetAllAsync(string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10)
@@ -98,6 +101,30 @@ namespace Flippit.Web.BL.Facades
             else
             {
                 await _apiClient.CollectionsDeleteAsync(id, CancellationToken.None);
+            }
+        }
+
+        public async Task<IList<Common.Models.Collection.CollectionListModel>> GetAllByUserId(Guid userId, string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10)
+        {
+            if (_localDbOptions.IsLocalDbEnabled)
+            {
+                var entities = await _repository.GetAllAsync();
+                var query = entities.AsEnumerable();
+
+                query = query.Where(c => c.CreatorId == userId);
+
+                if (!string.IsNullOrWhiteSpace(filter))
+                {
+                    query = query.Where(c => c.Name.Contains(filter, StringComparison.OrdinalIgnoreCase));
+                }
+
+                var paged = query.Skip((page - 1) * pageSize).Take(pageSize);
+                return _mapper.DetailToListModels(paged);
+            }
+            else
+            {
+                var apiCollections = await _userClient.CollectionsAsync(userId, filter, page, pageSize, sortBy, CancellationToken.None);
+                return _apiMapper.ToCommonCollectionLists(apiCollections);
             }
         }
     }

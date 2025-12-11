@@ -3851,6 +3851,9 @@ namespace Flippit.Web.BL
         [System.Text.Json.Serialization.JsonPropertyName("endTime")]
         public System.DateTimeOffset EndTime { get; set; }
 
+        [System.Text.Json.Serialization.JsonPropertyName("CreatorId")]
+        public System.Guid CreatorId { get; set; }
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]

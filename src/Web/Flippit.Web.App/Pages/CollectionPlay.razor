@@ -5,8 +5,11 @@
 @using Flippit.Common.Models.Card
 @using Flippit.Common.Models.Collection
 @using System.Text.Json.Serialization
+@using Flippit.Common.Models.CompletedLesson
+@using Flippit.Web.BL.Facades
 @inject NavigationManager NavigationManager
 @inject UserState userState
+@inject ICompletedLessonFacade completedLessonFacade
 
 
 @if(Loading)
@@ -247,7 +250,7 @@ else if(collection!=null)
 
     private async Task GetStats()
     {
-        
+
     }
 
     private void NavigateToMain()
@@ -336,12 +339,22 @@ else if(collection!=null)
         } 
         else
         {
-            EndSession();
+            await EndSession();
         }
     }
 
-    private void EndSession()
+    private async Task EndSession()
     {
+        var score = (int)Math.Round((double)Results.Count(r => r.IsCorrect) / cards!.Count() * 100);
+        var stats = new FinalStats { Date = DateTime.Now, Score = (int)score };
+        Console.WriteLine(JsonSerializer.Serialize(stats));
+
+        if(userState.User != null)
+        {
+            var completedLesson = new CompletedLessonDetailModel { UserId = userState.User.Id, AnswersJson = JsonSerializer.Serialize(Results), StatisticsJson = JsonSerializer.Serialize(stats), CollectionId = collection.Id, Id = Guid.NewGuid() };
+            await completedLessonFacade.CreateOrUpdateAsync(completedLesson);
+        }
+
         showResults = true;
     }
 
@@ -349,5 +362,11 @@ else if(collection!=null)
     {
         public required CardDetailModel Card { get; set; }
         public bool IsCorrect { get; set; }
+    }
+
+    public class FinalStats
+    {
+        public DateTime Date { get; set; }
+        public int Score { get; set; }
     }
 }

@@ -1,15 +1,19 @@
 ﻿@page "/"
 @using Flippit.Common.Models.Collection
+@using Flippit.Common.Models.CompletedLesson
 @using Flippit.Common.Models.User
+@using Flippit.Web.BL.Facades
+@using System.Text.Json
 @inject HttpClient Http
 @inject UserState userState
+@inject ICollectionFacade collectionFacade
 
 <PageTitle>Home</PageTitle>
 
 
 
 
-<SearchHeader User="userState.User"></SearchHeader>
+<SearchHeader ></SearchHeader>
 
 @if (showAuthMenu)
 {
@@ -19,7 +23,7 @@
 @if(userState.User != null)
 {
     <main class="mt-8 flex flex-col items-center gap-6">
-        <h2 class="font-monserrat-b text-[32px]">Welcome, User</h2>
+        <h2 class="font-monserrat-b text-[32px]">Welcome, @userState.User.Name</h2>
         <div></div>
         <div class="grid grid-cols-26 grid-rows-7 gap-0.75">
             @for(int i = 0; i < 182; i++)
@@ -27,11 +31,11 @@
                 <div class="size-4 rounded-sm bg-black"></div>
             }
         </div>
-        @if (collections != null)
+        @if (collections != null && collections.Count() > 0)
             {
                 <div class="mt-14 flex flex-col gap-4">
                     <div class="mx-20 flex flex-row justify-between">
-                        <h4 class="font-monserrat-b m-0 text-2xl">Collections</h4>
+                        <h4 class="font-monserrat-b m-0 text-2xl">My collections</h4>
                         <NavLink href="/collections">
                             <p class="font-ubuntu-sans-l m-0 cursor-pointer">See all</p>
                         </NavLink>
@@ -46,11 +50,11 @@
                         </button>
 
 
-                        <div class="flex flex-row gap-6">
+                        <div class="grid grid-cols-4 gap-6">
                             @{
                                 foreach (var col in collections!)
                                 {
-                                    <CollectionCard Id="col.Id"></CollectionCard>
+                                    <CollectionCard collection="col"></CollectionCard>
                                 }
                             }
                         </div>
@@ -100,6 +104,7 @@ else
 @code {
 
     private List<CollectionListModel>? collections;
+    private List<CompletedLessonListModel>? stats;
 
     private int skip = 1;
     private int pageSize = 4;
@@ -108,24 +113,64 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        userState.OnChange += StateHasChanged;
+        userState.OnChange += async () => await InvokeAsync(Rerender);
         Loading = true;
-        await GetCollections();
-        await GetStats();
+        if(userState.User != null)
+        {
+            await Rerender();
+        }
+
         Loading = false;
 
+    }
+
+    private async Task Rerender()
+    {
+        if(userState.User == null)
+        {
+            collections = null;
+            stats = null;
+            StateHasChanged();
+            return;
+        }
+        await GetCollections();
+        await GetStats();
+        StateHasChanged();
     }
 
     // /api/collections or /api/user/{userid}/collections with skip and pagesize
     private async Task GetCollections()
     {
-        //var newCols = await Http.GetFromJsonAsync<Collection[]>("sample-data/Collections.json");
-        //collections.Clear();
-        //collections.AddRange(newCols);
-        // if(collections.Count() < pageSize)
-        // {
-        //     CanLoadMore = false;
-        // } else CanLoadMore = true;
+        Console.WriteLine(JsonSerializer.Serialize(userState.User));
+        Console.WriteLine("HERE");
+        Console.WriteLine(userState.User.Id);
+        var cols = await collectionFacade.GetAllByUserId(userState.User!.Id, null, null, skip, pageSize);
+        if (cols.Count > 0)
+        {
+            if(collections == null)
+            {
+                collections = new List<CollectionListModel>();
+            }
+            
+
+            collections.Clear();
+            collections.AddRange(cols);
+            if (collections.Count() < pageSize)
+            {
+                CanLoadMore = false;
+            }
+            else
+            {
+                CanLoadMore = true;
+            }
+            Console.WriteLine(JsonSerializer.Serialize(collections));
+        }
+        else
+        {
+            CanLoadMore = false;
+        }
+        StateHasChanged();
+
     }
 
 
@@ -172,7 +217,8 @@ else
         //     return collectiions.Count() <= skip * pageSize;
         // }
         // return true;
-        return CanLoadMore || Loading;
+        Console.WriteLine(!CanLoadMore || Loading);
+        return !CanLoadMore || Loading;
     }
 
     private bool showAuthMenu = false;

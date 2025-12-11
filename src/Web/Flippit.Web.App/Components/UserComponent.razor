@@ -8,7 +8,7 @@
 @inject NavigationManager NavigationManager
 @inject IUserFacade userFacade
 
-<div class="fixed top-0 left-0 h-screen w-screen items-center backdrop-blur">
+<div class="fixed top-0 left-0 z-10 h-screen w-screen items-center backdrop-blur">
     <div class="flex size-full flex-col items-center justify-center">
         <div class="flex h-max w-80 flex-col items-center gap-3 rounded-2xl bg-white p-8 drop-shadow">
             <div class="flex w-full flex-col items-end">
@@ -37,6 +37,11 @@
                     </button>
                     <p>Don't have an account?</p>
                     <p @onclick="() => {IsLogin = false;}" class="font-monserrat-m primary-blue-text cursor-pointer underline">Register</p>
+                    <p class="text-red">@error</p>
+                    @if (error != null)
+                    {
+                        <p class="text-red">@error</p>
+                    }
                 </EditForm>
             }
             else
@@ -62,6 +67,7 @@
                     </button>
                     <p>Already have an account?</p>
                     <p @onclick="() => { IsLogin = true; }" class="font-monserrat-m primary-blue-text cursor-pointer underline">Log in</p>
+                    @if(error!=null) {<p class="text-red">@error</p>}
                 </EditForm>
             }
 
@@ -95,6 +101,7 @@
 
         if(!string.IsNullOrEmpty(error))
         {
+            Console.WriteLine(error);
             return;
         }
 
@@ -111,11 +118,16 @@
         {
             userState.SetUser(getUserResponse);
             await CloseDialog.InvokeAsync();
+            return;
         }
         else
         {
+            Console.WriteLine(error);
             error = "Error while getting user.";
         }
+
+        error = "Login failed";
+
     }
 
     private async Task Register()
@@ -126,6 +138,7 @@
 
         if(!string.IsNullOrEmpty(error))
         {
+            Console.WriteLine(error);
             return;
         }
 

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -6,9 +6,10 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using Flippit.Api.App.Models;
+using Flippit.Common.Models;
 using Flippit.Common.Enums;
 using Xunit;
+using Flippit.Common.Models.AuthModels;
 
 namespace Flippit.Api.App.EndToEndTests
 {

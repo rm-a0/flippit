@@ -11,13 +11,13 @@ namespace Flippit.Common.Models.Card
     public record CardDetailModel : IWithId
     {
         public Guid Id { get; init; }
-        public required QAType QuestionType { get; set; }
-        public required QAType AnswerType { get; set; }
-        public required string Question { get; set; }
-        public required string Answer { get; set; }
+        public QAType QuestionType { get; set; }
+        public QAType AnswerType { get; set; }
+        public string Question { get; set; }
+        public string Answer { get; set; }
         public string? Description { get; set; }
-        public required Guid CreatorId { get; set; }
-        public required Guid CollectionId { get; set; }
+        public Guid CreatorId { get; set; }
+        public Guid CollectionId { get; set; }
     }
 
     public class CardDetailModelValidator : AbstractValidator<CardDetailModel>

@@ -69,7 +69,8 @@ namespace Flippit.Web.BL.Mappers
                 Id = apiModel.Id,
                 Name = apiModel.Name,
                 StartTime = apiModel.StartTime.DateTime,
-                EndTime = apiModel.EndTime.DateTime
+                EndTime = apiModel.EndTime.DateTime,
+                CreatorId = apiModel.CreatorId
             };
         }
         
