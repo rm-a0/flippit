@@ -1,0 +1,66 @@
+﻿@using Flippit.Common.Models.Collection
+@using Flippit.Common.Models.User
+@using Flippit.Web.BL.Facades
+@using System.Text.Json
+@inject ICollectionFacade collectionFacade
+@inject IUserFacade userFacade
+
+    <div class="flex h-max w-full flex-col p-5 gap-7 font-ubuntu-sans-l">
+        @foreach(var col in collections)
+    {
+        <NavLink href=@($"/collections/{col.Id}")>
+                <div class="flex p-3 rounded-md hover:bg-gray-100">
+                    <p>@col.Name</p>
+                </div>
+            </NavLink>
+
+        }
+        @foreach (var user in users)
+    {
+        <NavLink href=@($"/users/{user.Id}")>
+                <div class="flex flex-row gap-3 p-3 rounded-md hover:bg-gray-100">
+                    <div class="size-5 overflow-hidden">
+                        @if (user.PhotoUrl == null)
+                        {
+                            <img class="size-full object-contain" src="/icons/user.svg" />
+                        }
+                        else
+                        {
+                            <img class="size-full object-contain" src="@user.PhotoUrl" />
+                        }
+                        <img />
+
+                    </div>
+                    <p>@user.Name</p>
+                </div>
+            </NavLink>
+
+        }
+    </div>
+
+
+
+
+@code {
+    private List<CollectionListModel>? collections = new List<CollectionListModel>();
+    private List<UserListModel>? users = new List<UserListModel>();
+
+    private bool Loading = false;
+
+    public async Task Search(string searchText)
+    {
+        Console.WriteLine("search");
+        Console.WriteLine(searchText);
+        Loading = true;
+        var cl = await collectionFacade.GetAllAsync(searchText, null, 1, 10);
+        collections = cl.ToList();
+        Console.WriteLine(JsonSerializer.Serialize(collections));
+
+        var us = await userFacade.GetAllAsync(searchText, null, 1, 10);
+        users = us.ToList();
+        Console.WriteLine(JsonSerializer.Serialize(users));
+        Loading = false;
+        StateHasChanged();
+    }
+
+}

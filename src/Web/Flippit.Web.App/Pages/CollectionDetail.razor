@@ -61,19 +61,22 @@
             <div class="mt-10 flex flex-col items-center gap-20">
                 @if(creator != null)
                 {
-                    <div class="-mt-7 flex flex-row items-center gap-5">
-                        <div class="size-7 overflow-hidden rounded-full">
-                            @if (creator.PhotoUrl != null)
-                            {
-                                <img src="@creator.PhotoUrl" class="size-full object-contain" />
-                            }
-                            else
-                            {
-                                <img src="/icons/user.svg" class="size-full object-contain" />
-                            }
+                    <NavLink href="@($"/users/{creator.Id}")">
+                        <div class="-mt-7 flex cursor-pointer flex-row items-center gap-5">
+                            <div class="size-7 overflow-hidden rounded-full">
+                                @if (creator.PhotoUrl != null)
+                                {
+                                    <img src="@creator.PhotoUrl" class="size-full object-contain" />
+                                }
+                                else
+                                {
+                                    <img src="/icons/user.svg" class="size-full object-contain" />
+                                }
+                            </div>
+                            <p class="font-ubuntu-sans-l justify-center text-lg overflow-ellipsis">@creator.Name</p>
                         </div>
-                        <p class="font-ubuntu-sans-l justify-center text-lg overflow-ellipsis">@creator.Name</p>
-                    </div>
+                    </NavLink>
+
                 }
 
                 <div class="w-mac flex flex-col gap-3">

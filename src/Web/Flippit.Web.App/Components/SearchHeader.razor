@@ -11,11 +11,19 @@
 
     @if(ShowSearch)
     {
-            <div class="flex w-2/5 flex-row items-center gap-6">
+        <div class="flex w-2/5 flex-row items-center gap-6">
 
-            <div class="flex h-12 w-full min-w-10 flex-row items-center gap-2 rounded-full bg-white px-3 drop-shadow">
+            <div class="relative z-[6] flex h-12 w-full min-w-10 flex-row items-center gap-2 rounded-full bg-white px-3 drop-shadow">
                 <img src="/icons/search.svg" class="scale-90" />
-                <input class="h-full w-full focus:outline-0" />
+                <input type="search"  @oninput="OnInputChanged" @bind="SearchText" @onblur="OnBlur" @onfocus="() => SearchListVisible = true"  class="h-full w-full focus:outline-0" />
+
+                @if(SearchListVisible)
+                {
+                    <div class="absolute top-14 right-0 z-[5] h-max max-h-100 w-full overflow-scroll rounded-2xl bg-white">
+                        <SearchList @ref="slist"></SearchList>
+                    </div>
+                }
+
             </div>
 
             @if(userState.User!= null)
@@ -113,6 +121,11 @@
     [Parameter]
     public bool ShowSearch { get; set; } = true;
 
+    private bool SearchListVisible = false;
+
+    private SearchList slist;
+    private string SearchText;
+
     private bool showUserMenu = false;
 
     private bool showAuthMenu = false;
@@ -120,6 +133,27 @@
     private void CloseDialog()
     {
         showAuthMenu = false;
+    }
+
+    private async Task TriggerSearch()
+    {
+        if (slist != null)
+        {
+            await slist.Search(SearchText);
+        }
+    }
+
+    private async Task OnBlur()
+    {
+        await Task.Delay(100);
+        SearchListVisible = false;
+    }
+
+    private async Task OnInputChanged(ChangeEventArgs e)
+    {
+        SearchListVisible = true;
+        SearchText = e.Value?.ToString() ?? "";
+        await TriggerSearch();
     }
 
     private void Logout()

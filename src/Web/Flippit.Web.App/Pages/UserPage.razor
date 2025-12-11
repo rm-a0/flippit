@@ -1,21 +1,24 @@
-﻿@page "/collections"
+﻿@page "/users/{id:guid}"
 @using Flippit.Common.Models.Collection
 @inject HttpClient Http
 @using System.Text.Json;
+@using Flippit.Common.Models.User
 @using Flippit.Web.BL.Facades
 @inject ICollectionFacade collectionFacade
+@inject UserState userState
+@inject IUserFacade userFacade
 
 
 <SearchHeader ShowSearch="true"></SearchHeader>
 
 @{
-    if(!Loading)
+    if (!Loading && user != null)
     {
         if (collections != null)
         {
             <div class="mt-10 flex flex-col items-center gap-20">
                 <div class="w-mac flex flex-col gap-3">
-                    <h4 class="font-monserrat-b m-0 ml-2 text-2xl">All collections</h4>
+                    <h4 class="font-monserrat-b m-0 ml-2 text-2xl">@user.Name's collections</h4>
                     <div class="grid w-max grid-cols-4 gap-6">
                         @{
                             foreach (var col in collections)
@@ -24,7 +27,7 @@
                             }
                         }
                     </div>
-   
+
                 </div>
                 <button disabled="@(LoadMoreDisabled())" @onclick="LoadMore" class="dark-blue-border mb-10 h-10 w-30 rounded-xl border-2 bg-transparent disabled:cursor-not-allowed">
                     <p class="font-ubuntu-sans-l dark-blue-text">Load more</p>
@@ -35,7 +38,7 @@
         {
             <div class="mt-20 flex flex-col items-center">
                 <h3 class="font-ubuntu-sans-l">There are no collections yet. </h3>
-                 @*do smth so this link redirects to auth if user isnt logged in*@
+                @*do smth so this link redirects to auth if user isnt logged in*@
                 <a href="/create" class="font-ubuntu-sans-l cursor-pointer text-blue-600 underline">Want to create one?</a>
             </div>
 
@@ -51,9 +54,11 @@
 
 
 @code {
-
+    [Parameter]
+    public Guid id { get; set; }
 
     private List<CollectionListModel>? collections;
+    private UserDetailModel? user;
 
     private int skip = 1;
     private int pageSize = 8;
@@ -62,26 +67,28 @@
 
     private async Task GetCollections()
     {
-        var newCols = await collectionFacade.GetAllAsync(null, null, skip, pageSize);
+        var newCols = await collectionFacade.GetAllByUserId(id, null, null, skip, pageSize);
         Console.WriteLine(JsonSerializer.Serialize(newCols));
-        if(newCols != null && newCols.Count() > 0)
+        if (newCols != null && newCols.Count() > 0)
         {
-            if(collections == null)
+            if (collections == null)
             {
                 collections = new List<CollectionListModel>();
             }
             collections.AddRange(newCols);
         }
-        
+
         if (newCols == null || newCols.Count() < pageSize)
         {
             CanLoadMore = false;
-        } else CanLoadMore = true;
+        }
+        else CanLoadMore = true;
     }
 
     protected override async Task OnInitializedAsync()
     {
         Loading = true;
+        user = await userFacade.GetByIdAsync(id);
         await GetCollections();
         Loading = false;
     }

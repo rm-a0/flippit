@@ -33,7 +33,7 @@
     <div class="flex flex-row items-center justify-between">
         <h5 class="font-monserrat-m text-22 m-0">@collection.Name</h5>
 
-        @if(userState.User != null && userState.User!.Id == collection.CreatorId)
+        @if(userState.User != null && (userState.User!.Id == collection.CreatorId || userState.User.Role == Common.Enums.Role.Admin))
         {
             <div @onclick="ToogleMenu" @onclick:stopPropagation class="scale-90 cursor-pointer rounded-sm p-1 hover:bg-gray-100">
                 @{
