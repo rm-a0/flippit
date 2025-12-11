@@ -1,22 +1,20 @@
 using Flippit.Api.DAL.Common.Repositories;
 using Flippit.Api.BL.Mappers;
-using Flippit.Api.BL.Services;
 using Flippit.Common.Models.Collection;
 using Flippit.Api.BL.Validators;
+using Flippit.Api.DAL.Common.Entities;
 
 namespace Flippit.Api.BL.Facades
 {
-    public class CollectionFacade : ICollectionFacade
+    public class CollectionFacade : FacadeBase<ICollectionRepository, CollectionEntity>, ICollectionFacade
     {
         private readonly ICollectionRepository _repository;
         private readonly CollectionMapper _mapper;
-        private readonly ICurrentUserService _currentUserService;
 
-        public CollectionFacade(ICollectionRepository repository, CollectionMapper mapper, ICurrentUserService currentUserService)
+        public CollectionFacade(ICollectionRepository repository, CollectionMapper mapper) : base(repository)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-            _currentUserService = currentUserService ?? throw new ArgumentNullException(nameof(currentUserService));
         }
 
         public IList<CollectionListModel> GetAll(string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10)
@@ -38,38 +36,40 @@ namespace Flippit.Api.BL.Facades
             return _mapper.ToListModels(entities);
         }
 
-        public IList<CollectionListModel> SearchByCreatorId(Guid creatorId, string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10)
+        public IList<CollectionListModel> SearchByOwnerId(string ownerId, string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10)
         {
-            var entities = _repository.SearchByCreatorId(creatorId, filter, sortBy, page, pageSize);
+            var entities = _repository.SearchByOwnerId(ownerId, filter, sortBy, page, pageSize);
             return _mapper.ToListModels(entities);
         }
 
-        public Guid CreateOrUpdate(CollectionDetailModel collectionModel)
+        public Guid CreateOrUpdate(CollectionDetailModel collectionModel, IList<string> userRoles, string? userId)
         {
             ValidateCollectionModel(collectionModel);
             var entity = _mapper.ModelToEntity(collectionModel);
-            entity = entity with { CreatorId = EnsureAuthenticatedUserId() };
+            entity = entity with { OwnerId = userId };
             return _repository.Exists(entity.Id) ? _repository.Update(entity) ?? entity.Id : _repository.Insert(entity);
         }
 
-        public Guid Create(CollectionDetailModel collectionModel)
+        public Guid Create(CollectionDetailModel collectionModel, IList<string> userRoles, string? userId)
         {
             ValidateCollectionModel(collectionModel);
             var entity = _mapper.ModelToEntity(collectionModel);
-            entity = entity with { CreatorId = EnsureAuthenticatedUserId() };
+            entity = entity with { OwnerId = userId };
             return _repository.Insert(entity);
         }
 
-        public Guid? Update(CollectionDetailModel collectionModel)
+        public Guid? Update(CollectionDetailModel collectionModel, IList<string> userRoles, string? userId)
         {
             ValidateCollectionModel(collectionModel);
+            ThrowIfWrongOwnerAndNotAdmin(collectionModel.Id, userRoles, userId);
             var entity = _mapper.ModelToEntity(collectionModel);
-            entity = entity with { CreatorId = EnsureAuthenticatedUserId() };
+            entity = entity with { OwnerId = userId };
             return _repository.Update(entity);
         }
 
-        public void Delete(Guid id)
+        public void Delete(Guid id, IList<string> userRoles, string? userId)
         {
+            ThrowIfWrongOwnerAndNotAdmin(id, userRoles, userId);
             _repository.Remove(id);
         }
 
@@ -80,14 +80,6 @@ namespace Flippit.Api.BL.Facades
 
             if (string.IsNullOrWhiteSpace(collectionModel.Name))
                 throw new ArgumentException("Collection name cannot be empty.", nameof(collectionModel.Name));
-        }
-
-        private Guid EnsureAuthenticatedUserId()
-        {
-            var userId = _currentUserService.CurrentUserId;
-            if (!userId.HasValue)
-                throw new UnauthorizedAccessException("User must be authenticated to perform this operation.");
-            return userId.Value;
         }
     }
 }

@@ -40,10 +40,10 @@ namespace Flippit.Api.DAL.Memory.Repositories
                                     (c.Description != null && c.Description.Contains(searchText, StringComparison.OrdinalIgnoreCase)));
         }
 
-        public IEnumerable<CardEntity> SearchByCreatorId(Guid creatorId, string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10)
+        public IEnumerable<CardEntity> SearchByOwnerId(string ownerId, string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10)
         {
             return _cards
-                .Where(c => c.CreatorId == creatorId)
+                .Where(c => c.OwnerId == ownerId)
                 .AsQueryable()
                 .ApplyFilterSortAndPage(filter, sortBy, page, pageSize)
                 .ToList();

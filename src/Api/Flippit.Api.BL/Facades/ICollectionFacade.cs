@@ -10,10 +10,10 @@ namespace Flippit.Api.BL.Facades
         IList<CollectionListModel> GetAll(string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10);
         CollectionDetailModel? GetById(Guid id);
         IList<CollectionListModel> Search(string searchText);
-        IList<CollectionListModel> SearchByCreatorId(Guid creatorId, string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10);
-        Guid CreateOrUpdate(CollectionDetailModel collectionModel);
-        Guid Create(CollectionDetailModel collectionModel);
-        Guid? Update(CollectionDetailModel collectionModel);
-        void Delete(Guid id);
+        IList<CollectionListModel> SearchByOwnerId(string ownerId, string? filter = null, string? sortBy = null, int page = 1, int pageSize = 10);
+        Guid CreateOrUpdate(CollectionDetailModel collectionModel, IList<string> userRoles, string? userId);
+        Guid Create(CollectionDetailModel collectionModel, IList<string> userRoles, string? userId);
+        Guid? Update(CollectionDetailModel collectionModel, IList<string> userRoles, string? userId);
+        void Delete(Guid id, IList<string> userRoles, string? userId);
     }
 }

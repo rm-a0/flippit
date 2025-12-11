@@ -14,7 +14,6 @@ namespace Flippit.Api.DAL.Common.Entities
         public required string Question {  get; set; }
         public required string Answer { get; set; }
         public string? Description { get; set; }
-        public required Guid CreatorId { get; set; }
         public required Guid CollectionId { get; set; }
     }
 }

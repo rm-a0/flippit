@@ -1,4 +1,4 @@
-namespace Flippit.Common.Models.AppUser;
+namespace Flippit.Common.Models.User;
 
 public class AppUserListModel
 {
