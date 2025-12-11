@@ -1,6 +1,4 @@
 using Flippit.Api.DAL.Common.Entities;
-using System;
-using System.Linq;
 
 namespace Flippit.Api.DAL.Common.Extensions
 {

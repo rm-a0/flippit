@@ -1,11 +1,8 @@
-﻿using System.Globalization;
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Flippit.Api.App.Endpoints;
-using Flippit.Common.Models;
 using Flippit.Api.App.Services;
-using Flippit.Api.BL.Facades;
 using Flippit.Api.BL.Installers;
 using Flippit.Api.BL.Mappers;
 using Flippit.Api.BL.Services;
@@ -18,18 +15,12 @@ using Flippit.Common.Models.User;
 using Flippit.IdentityProvider.BL.Installers;
 using Flippit.IdentityProvider.DAL;
 using Flippit.IdentityProvider.DAL.Entities;
-using Flippit.IdentityProvider.DAL.Installers;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using static System.Net.Mime.MediaTypeNames;
 
 var builder = WebApplication.CreateBuilder(args);
 

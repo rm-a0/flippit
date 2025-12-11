@@ -1,11 +1,60 @@
 # Overview
 Flash card application with persistent identity management and role-based authorization.
 
+# Database Configuration
+
+The application supports two database providers for user data (cards, collections, completed lessons):
+
+1. **InMemory** - Recommended for development and testing. Data is stored in memory and cleared on restart.
+2. **SqlServer** - For production and when you need persistent data storage.
+
+The Identity/Auth system always uses SQL Server in production and InMemory for testing.
+
+## Configuring Database Provider
+
+Edit `appsettings.json` or `appsettings.Development.json` and set the `DatabaseProvider` value:
+
+```json
+{
+  "DatabaseProvider": "InMemory"  // or "SqlServer"
+}
+```
+
+### InMemory Provider (Default)
+- No additional setup required
+- Data is cleared on application restart
+- Ideal for development and automated testing
+
+### SQL Server Provider
+1. Set the database provider:
+```json
+{
+  "DatabaseProvider": "SqlServer"
+}
+```
+
+2. Configure the connection string:
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=FlippitData;Trusted_Connection=True;MultipleActiveResultSets=true"
+  }
+}
+```
+
+3. Apply migrations to create the database:
+```bash
+cd src/Api/Flippit.Api.DAL.EF
+dotnet ef database update --startup-project ../Flippit.Api.App
+```
+
+**Note:** A sample configuration file `appsettings.SqlServer.json` is provided as a reference.
+
 # Getting Started
 
 ## Prerequisites
 - .NET 9.0 SDK
-- SQL Server LocalDB (or SQL Server instance)
+- SQL Server LocalDB (or SQL Server instance) - only required if using SqlServer provider for identity or user data
 
 ## Initial Setup
 
@@ -19,17 +68,31 @@ git clone https://dev.azure.com/iw5-2025-team-xjanigd00/project/_git/project
 cd src/Api/Flippit.Api.App
 ```
 
-3. Update the connection string in `appsettings.json` if needed (default uses LocalDB):
-```json
-"ConnectionStrings": {
-  "IdentityConnection": "Server=(localdb)\\mssqllocaldb;Database=FlippitIdentity;Trusted_Connection=True;MultipleActiveResultSets=true"
-}
-```
+3. **For InMemory Provider (Default):** No database setup needed. Skip to step 5.
 
-4. Apply database migrations
-```bash
-dotnet ef database update --project ../../IdentityProvider/Flippit.IdentityProvider.DAL
-```
+4. **For SQL Server Provider:** 
+   
+   a. Update `appsettings.json` to use SqlServer provider:
+   ```json
+   {
+     "DatabaseProvider": "SqlServer",
+     "ConnectionStrings": {
+       "IdentityConnection": "Server=(localdb)\\mssqllocaldb;Database=FlippitIdentity;Trusted_Connection=True;MultipleActiveResultSets=true",
+       "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=FlippitData;Trusted_Connection=True;MultipleActiveResultSets=true"
+     }
+   }
+   ```
+   
+   b. Apply database migrations:
+   ```bash
+   # Apply Identity database migrations
+   dotnet ef database update --project ../../IdentityProvider/Flippit.IdentityProvider.DAL
+   
+   # Apply User data database migrations
+   cd ../Flippit.Api.DAL.EF
+   dotnet ef database update --startup-project ../Flippit.Api.App
+   cd ../../Flippit.Api.App
+   ```
 
 5. Run the application
 ```bash
@@ -115,21 +178,47 @@ Note: Tests use an in-memory database and do not require SQL Server.
 
 ## Database Migrations
 
-### Create a New Migration
+### Identity Database Migrations
+
+The Identity database stores user authentication and role information.
+
+#### Create a New Migration
 ```bash
 cd src/IdentityProvider/Flippit.IdentityProvider.DAL
 dotnet ef migrations add <MigrationName> --startup-project ../../Api/Flippit.Api.App
 ```
 
-### Apply Migrations
+#### Apply Migrations
 ```bash
 dotnet ef database update --startup-project ../../Api/Flippit.Api.App
 ```
 
-### Remove Last Migration
+#### Remove Last Migration
 ```bash
 dotnet ef migrations remove --startup-project ../../Api/Flippit.Api.App
 ```
+
+### User Data Database Migrations (SQL Server Provider Only)
+
+The User Data database stores cards, collections, and completed lessons when using the SqlServer provider.
+
+#### Create a New Migration
+```bash
+cd src/Api/Flippit.Api.DAL.EF
+dotnet ef migrations add <MigrationName> --startup-project ../Flippit.Api.App
+```
+
+#### Apply Migrations
+```bash
+dotnet ef database update --startup-project ../Flippit.Api.App
+```
+
+#### Remove Last Migration
+```bash
+dotnet ef migrations remove --startup-project ../Flippit.Api.App
+```
+
+**Note:** Migrations are not required when using the InMemory provider.
 
 # Folder structure
 ```txt

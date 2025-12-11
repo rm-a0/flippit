@@ -1,4 +1,3 @@
-using System.Linq;
 using Flippit.Api.DAL.Common.Entities;
 
 namespace Flippit.Api.DAL.Common.Extensions

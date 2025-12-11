@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Flippit.Api.DAL.Common.Entities
+﻿namespace Flippit.Api.DAL.Common.Entities
 {
     public record CollectionEntity : EntityBase
     {
