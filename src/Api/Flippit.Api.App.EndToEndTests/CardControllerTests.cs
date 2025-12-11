@@ -263,7 +263,7 @@ namespace Flippit.Api.App.EndToEndTests
         }
 
         [Fact]
-        public async Task UpdateCard_NonExistentId_Returns_Ok_With_Null()
+        public async Task UpdateCard_NonExistentId_Returns_NotFound()
         {
             var nonExistentId = Guid.NewGuid();
             var updatedCard = new CardDetailModel
@@ -280,9 +280,7 @@ namespace Flippit.Api.App.EndToEndTests
 
             var response = await client.Value.PutAsJsonAsync("/api/cards", updatedCard, jsonOptions);
 
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            var content = await response.Content.ReadAsStringAsync();
-            Assert.True(string.IsNullOrEmpty(content) || content == "null", "Expected empty or null response body");
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
     }
 }

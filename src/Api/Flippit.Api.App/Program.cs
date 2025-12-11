@@ -32,10 +32,24 @@ using static System.Net.Mime.MediaTypeNames;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var identityConnectionString = builder.Configuration.GetConnectionString("IdentityConnection") 
-    ?? throw new InvalidOperationException("Identity connection string not configured");
-builder.Services.AddDbContext<IdentityProviderDbContext>(options =>
-    options.UseSqlServer(identityConnectionString));
+var identityConnectionString = builder.Configuration.GetConnectionString("IdentityConnection");
+
+if (builder.Environment.IsEnvironment("Testing"))
+{
+    // Use InMemory database for testing
+    builder.Services.AddDbContext<IdentityProviderDbContext>(options =>
+        options.UseInMemoryDatabase("FlippitIdentityDb"));
+}
+else
+{
+    // Use SQL Server for development and production
+    if (string.IsNullOrEmpty(identityConnectionString))
+    {
+        throw new InvalidOperationException("Identity connection string not configured");
+    }
+    builder.Services.AddDbContext<IdentityProviderDbContext>(options =>
+        options.UseSqlServer(identityConnectionString));
+}
 
 builder.Services.AddTransient<Flippit.IdentityProvider.DAL.Repositories.IAppUserRepository, Flippit.IdentityProvider.DAL.Repositories.AppUserRepository>();
 

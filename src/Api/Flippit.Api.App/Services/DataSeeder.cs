@@ -14,8 +14,15 @@ public class DataSeeder
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUserEntity>>();
         var dbContext = scope.ServiceProvider.GetRequiredService<IdentityProviderDbContext>();
 
-        // Apply migrations
-        await dbContext.Database.MigrateAsync();
+        // For SQL Server, apply migrations. For InMemory, ensure database is created.
+        if (dbContext.Database.IsSqlServer())
+        {
+            await dbContext.Database.MigrateAsync();
+        }
+        else
+        {
+            await dbContext.Database.EnsureCreatedAsync();
+        }
         
         await SeedRolesAsync(roleManager);
         await SeedUsersAsync(userManager);
