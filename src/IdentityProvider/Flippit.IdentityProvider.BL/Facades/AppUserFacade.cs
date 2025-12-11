@@ -1,5 +1,5 @@
 using CookBook.IdentityProvider.BL.Mappers;
-using Flippit.Common.Models.AppUser;
+using Flippit.Common.Models.User;
 using Flippit.IdentityProvider.BL.Facades;
 using Flippit.IdentityProvider.BL.Models;
 using Flippit.IdentityProvider.DAL.Entities;

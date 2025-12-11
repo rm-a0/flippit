@@ -32,44 +32,80 @@ public static class CardEndpoints
                : TypedResults.NotFound($"Card with ID {id} was not found.")
         );
 
-        cardEndPoints.MapPost("", [Authorize] async Task<Results<Ok<Guid>, ValidationProblem>> (ICardFacade CardFacade, CardDetailModel model, IValidator<CardDetailModel> validator) =>
+        var cardModifyingEndpoints = cardEndPoints.MapGroup("")
+            .RequireAuthorization();
+
+        cardModifyingEndpoints.MapPost("", async Task<Results<Ok<Guid>, ValidationProblem>> (ICardFacade CardFacade, CardDetailModel model, IValidator<CardDetailModel> validator, IHttpContextAccessor httpContextAccessor) =>
         {
             var validationErrors = await ValidationHelper.ValidateModelAsync(model, validator);
             if (validationErrors != null)
             {
                 return TypedResults.ValidationProblem(validationErrors);
             }
-            var id = CardFacade.Create(model);
+            var userId = GetUserId(httpContextAccessor);
+            var userRoles = GetUserRoles(httpContextAccessor);
+            var id = CardFacade.Create(model, userRoles, userId);
             return TypedResults.Ok(id);
         });
 
-        cardEndPoints.MapPut("", [Authorize] async Task<Results<Ok<Guid?>, ValidationProblem>> (ICardFacade CardFacade, CardDetailModel model, IValidator<CardDetailModel> validator) =>
+        cardModifyingEndpoints.MapPut("", async Task<Results<Ok<Guid?>, ValidationProblem, ForbidHttpResult>> (ICardFacade CardFacade, CardDetailModel model, IValidator<CardDetailModel> validator, IHttpContextAccessor httpContextAccessor) =>
         {
             var validationErrors = await ValidationHelper.ValidateModelAsync(model, validator);
             if (validationErrors != null)
             {
                 return TypedResults.ValidationProblem(validationErrors);
             }
-            var id = CardFacade.Update(model);
-            return TypedResults.Ok(id);
+            var userId = GetUserId(httpContextAccessor);
+            var userRoles = GetUserRoles(httpContextAccessor);
+            try
+            {
+                var id = CardFacade.Update(model, userRoles, userId);
+                return TypedResults.Ok(id);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return TypedResults.Forbid();
+            }
         });
 
-        cardEndPoints.MapPost("upsert", [Authorize] async Task<Results<Ok<Guid>, ValidationProblem>> (ICardFacade CardFacade, CardDetailModel model, IValidator<CardDetailModel> validator) =>
+        cardModifyingEndpoints.MapPost("upsert", async Task<Results<Ok<Guid>, ValidationProblem>> (ICardFacade CardFacade, CardDetailModel model, IValidator<CardDetailModel> validator, IHttpContextAccessor httpContextAccessor) =>
         {
             var validationErrors = await ValidationHelper.ValidateModelAsync(model, validator);
             if (validationErrors != null)
             {
                 return TypedResults.ValidationProblem(validationErrors);
             }
-            var id = CardFacade.CreateOrUpdate(model);
+            var userId = GetUserId(httpContextAccessor);
+            var userRoles = GetUserRoles(httpContextAccessor);
+            var id = CardFacade.CreateOrUpdate(model, userRoles, userId);
             return TypedResults.Ok(id);
         });
 
-        cardEndPoints.MapDelete("/{id:guid}", [Authorize] (ICardFacade cardFacade, Guid id) =>
+        cardModifyingEndpoints.MapDelete("/{id:guid}", Results<Ok, ForbidHttpResult> (ICardFacade cardFacade, Guid id, IHttpContextAccessor httpContextAccessor) =>
         {
-            cardFacade.Delete(id);
+            var userId = GetUserId(httpContextAccessor);
+            var userRoles = GetUserRoles(httpContextAccessor);
+            try
+            {
+                cardFacade.Delete(id, userRoles, userId);
+                return TypedResults.Ok();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return TypedResults.Forbid();
+            }
         });
 
         return routeGroupBuilder;
     }
+
+    private static string? GetUserId(IHttpContextAccessor httpContextAccessor)
+        => httpContextAccessor.HttpContext?.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+    private static IList<string> GetUserRoles(IHttpContextAccessor httpContextAccessor)
+        => httpContextAccessor.HttpContext?.User.Claims
+            .Where(c => c.Type == System.Security.Claims.ClaimTypes.Role)
+            .Select(c => c.Value)
+            .ToList()
+        ?? [];
 }

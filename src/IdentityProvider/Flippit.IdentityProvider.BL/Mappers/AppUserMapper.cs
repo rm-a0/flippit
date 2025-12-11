@@ -1,4 +1,4 @@
-using Flippit.Common.Models.AppUser;
+using Flippit.Common.Models.User;
 using Flippit.IdentityProvider.BL.Models;
 using Flippit.IdentityProvider.DAL.Entities;
 using Riok.Mapperly.Abstractions;

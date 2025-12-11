@@ -8,12 +8,10 @@ using Flippit.Api.App.Services;
 using Flippit.Api.BL.Facades;
 using Flippit.Api.BL.Installers;
 using Flippit.Api.BL.Mappers;
-using Flippit.Api.BL.Services;
 using Flippit.Api.DAL.Memory.Installers;
 using Flippit.Common.Models.Card;
 using Flippit.Common.Models.Collection;
 using Flippit.Common.Models.CompletedLesson;
-using Flippit.Common.Models.User;
 using Flippit.IdentityProvider.BL.Installers;
 using Flippit.IdentityProvider.DAL;
 using Flippit.IdentityProvider.DAL.Entities;
@@ -54,18 +52,15 @@ identityBLInstaller.Install(builder.Services);
 var DALinstaller = new ApiDALMemoryInstaller();
 DALinstaller.Install(builder.Services);
 
-builder.Services.AddSingleton<UserMapper>();
 builder.Services.AddSingleton<CardMapper>();
 builder.Services.AddSingleton<CollectionMapper>();
 builder.Services.AddSingleton<CompletedLessonMapper>();
 
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 var BLInstaller = new ApiBLInstaller();
 BLInstaller.Install(builder.Services);
 
-builder.Services.AddScoped<IValidator<UserDetailModel>, UserDetailModelValidator>();
 builder.Services.AddScoped<IValidator<CardDetailModel>, CardDetailModelValidator>();
 builder.Services.AddScoped<IValidator<CollectionDetailModel>, CollectionDetailModelValidator>();
 
@@ -169,7 +164,6 @@ void UseEndPoints(WebApplication application)
         .WithOpenApi();
 
     endPointsBase.MapAuthEndpoints();
-    endPointsBase.MapUserEndpoints();
     endPointsBase.MapCardEndpoints();
     endPointsBase.MapCollectionEndpoints();
     endPointsBase.MapCompletedLessonEndpoints();

@@ -15,7 +15,7 @@ namespace Flippit.Common.Models.Card
         public required string Question { get; set; }
         public required string Answer { get; set; }
         public string? Description { get; set; }
-        public required Guid CreatorId { get; set; }
+        public string? OwnerId { get; set; }
         public required Guid CollectionId { get; set; }
     }
 }

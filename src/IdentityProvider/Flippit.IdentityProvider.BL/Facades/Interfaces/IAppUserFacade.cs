@@ -1,5 +1,5 @@
 using Flippit.Common.BL.Facades;
-using Flippit.Common.Models.AppUser;
+using Flippit.Common.Models.User;
 using Flippit.IdentityProvider.BL.Models;
 
 namespace Flippit.IdentityProvider.BL.Facades;

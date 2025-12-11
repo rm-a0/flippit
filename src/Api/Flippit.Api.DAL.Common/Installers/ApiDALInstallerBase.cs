@@ -12,7 +12,6 @@ namespace Flippit.Api.DAL.Common.Installers
             serviceCollection.AddScoped<CardMapper>();
             serviceCollection.AddScoped<CollectionMapper>();
             serviceCollection.AddScoped<CompletedLessonMapper>();
-            serviceCollection.AddSingleton<UserMapper>();
         }
     }
 }

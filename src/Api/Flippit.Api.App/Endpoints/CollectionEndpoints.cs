@@ -44,44 +44,80 @@ public static class CollectionEndpoints
             return TypedResults.Ok(AllCompletedLessons);
         });
 
-        collectionsEndPoints.MapPost("", [Authorize] async Task<Results<Ok<Guid>, ValidationProblem>> (ICollectionFacade collectionFacade, CollectionDetailModel model, IValidator<CollectionDetailModel> validator) =>
+        var collectionModifyingEndpoints = collectionsEndPoints.MapGroup("")
+            .RequireAuthorization();
+
+        collectionModifyingEndpoints.MapPost("", async Task<Results<Ok<Guid>, ValidationProblem>> (ICollectionFacade collectionFacade, CollectionDetailModel model, IValidator<CollectionDetailModel> validator, IHttpContextAccessor httpContextAccessor) =>
         {
             var validationErrors = await ValidationHelper.ValidateModelAsync(model, validator);
             if (validationErrors != null)
             {
                 return TypedResults.ValidationProblem(validationErrors);
             }
-            var id = collectionFacade.Create(model);
+            var userId = GetUserId(httpContextAccessor);
+            var userRoles = GetUserRoles(httpContextAccessor);
+            var id = collectionFacade.Create(model, userRoles, userId);
             return TypedResults.Ok(id);
         });
 
-        collectionsEndPoints.MapPut("", [Authorize] async Task<Results<Ok<Guid?>, ValidationProblem>> (ICollectionFacade collectionFacade, CollectionDetailModel model, IValidator<CollectionDetailModel> validator) =>
+        collectionModifyingEndpoints.MapPut("", async Task<Results<Ok<Guid?>, ValidationProblem, ForbidHttpResult>> (ICollectionFacade collectionFacade, CollectionDetailModel model, IValidator<CollectionDetailModel> validator, IHttpContextAccessor httpContextAccessor) =>
         {
             var validationErrors = await ValidationHelper.ValidateModelAsync(model, validator);
             if (validationErrors != null)
             {
                 return TypedResults.ValidationProblem(validationErrors);
             }
-            var id = collectionFacade.Update(model);
-            return TypedResults.Ok(id);
+            var userId = GetUserId(httpContextAccessor);
+            var userRoles = GetUserRoles(httpContextAccessor);
+            try
+            {
+                var id = collectionFacade.Update(model, userRoles, userId);
+                return TypedResults.Ok(id);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return TypedResults.Forbid();
+            }
         });
 
-        collectionsEndPoints.MapPost("upsert", [Authorize] async Task<Results<Ok<Guid>, ValidationProblem>> (ICollectionFacade collectionFacade, CollectionDetailModel model, IValidator<CollectionDetailModel> validator) =>
+        collectionModifyingEndpoints.MapPost("upsert", async Task<Results<Ok<Guid>, ValidationProblem>> (ICollectionFacade collectionFacade, CollectionDetailModel model, IValidator<CollectionDetailModel> validator, IHttpContextAccessor httpContextAccessor) =>
         {
             var validationErrors = await ValidationHelper.ValidateModelAsync(model, validator);
             if (validationErrors != null)
             {
                 return TypedResults.ValidationProblem(validationErrors);
             }
-            var id = collectionFacade.CreateOrUpdate(model);
+            var userId = GetUserId(httpContextAccessor);
+            var userRoles = GetUserRoles(httpContextAccessor);
+            var id = collectionFacade.CreateOrUpdate(model, userRoles, userId);
             return TypedResults.Ok(id);
         });
 
-        collectionsEndPoints.MapDelete("/{id:guid}", [Authorize] (ICollectionFacade collectionFacade, Guid id) =>
+        collectionModifyingEndpoints.MapDelete("/{id:guid}", Results<Ok, ForbidHttpResult> (ICollectionFacade collectionFacade, Guid id, IHttpContextAccessor httpContextAccessor) =>
         {
-            collectionFacade.Delete(id);
+            var userId = GetUserId(httpContextAccessor);
+            var userRoles = GetUserRoles(httpContextAccessor);
+            try
+            {
+                collectionFacade.Delete(id, userRoles, userId);
+                return TypedResults.Ok();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return TypedResults.Forbid();
+            }
         });
 
         return routeGroupBuilder;
     }
+
+    private static string? GetUserId(IHttpContextAccessor httpContextAccessor)
+        => httpContextAccessor.HttpContext?.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+    private static IList<string> GetUserRoles(IHttpContextAccessor httpContextAccessor)
+        => httpContextAccessor.HttpContext?.User.Claims
+            .Where(c => c.Type == System.Security.Claims.ClaimTypes.Role)
+            .Select(c => c.Value)
+            .ToList()
+        ?? [];
 }
